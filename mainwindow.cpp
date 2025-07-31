@@ -792,13 +792,15 @@ void MainWindow::readStdError()
         qDebug() << "PIU' DI UNA RIGA";
         QMessageBox::information (this, "", "PIU' DI UNA RIGA");
     }
+   QStringList outList;
+   QString outputProg;
     for (int iRepeat = 0; iRepeat < iLines - 1; iRepeat++)
     {
         // QString outputProg = output;
-        QString outputProg = lines[iRepeat];
+         outputProg = lines[iRepeat];
         outputProg.replace ("\n", "");
         outputProg.replace ("\r", "");
-        QStringList outList = outputProg.split(' ');
+         outList = outputProg.split(' ');
         //qDebug() << outList.size();
         outputProg = outList.at(2);
         outputProg.replace ("\"", "");
