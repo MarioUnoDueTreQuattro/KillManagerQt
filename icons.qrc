@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>1298219997_gnome-panel-force-quit.ico</file>
+        <file>img/icons8-add-48.png</file>
+        <file>img/icons8-rotate-right-48.png</file>
+        <file>img/icons8-save-48.png</file>
+        <file>img/icons8-wrench-48.png</file>
+        <file>img/icons8-run-command-48.png</file>
+        <file>img/icons8-run-48.png</file>
+        <file>img/icons8-delete-48.png</file>
+        <file>img/icons8-copy-to-clipboard-48.png</file>
+        <file>img/icons8-left-48.png</file>
+        <file>img/icons8-right-48.png</file>
+        <file>img/icons8-edit-text-file-48.png</file>
+        <file>img/qt-logo.png</file>
+        <file>img/icons8-pencil-drawing-48.png</file>
+        <file>img/KillManager.png</file>
+        <file>img/KillManager.ico</file>
+    </qresource>
+</RCC>

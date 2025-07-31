@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>547</width>
+    <height>396</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout_6">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_5">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QLabel" name="labelEnabled">
+            <property name="text">
+             <string>Enabled</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QListWidget" name="listWidgetEnabled"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QLabel" name="labelDisabled">
+              <property name="text">
+               <string>Disabled</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="listWidgetDisabled"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QLabel" name="labelKilled">
+              <property name="text">
+               <string>Killed</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="listWidgetKilled"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QPushButton" name="pushButtonAdd">
+          <property name="toolTip">
+           <string>Add applicaton to list</string>
+          </property>
+          <property name="text">
+           <string>Add...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="icons.qrc">
+            <normaloff>:/icons/img/icons8-add-48.png</normaloff>:/icons/img/icons8-add-48.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonReload">
+          <property name="toolTip">
+           <string>Reload batch file from disk</string>
+          </property>
+          <property name="text">
+           <string>Reload</string>
+          </property>
+          <property name="icon">
+           <iconset resource="icons.qrc">
+            <normaloff>:/icons/img/icons8-rotate-right-48.png</normaloff>:/icons/img/icons8-rotate-right-48.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonWrite">
+          <property name="toolTip">
+           <string>Save batch file to disk</string>
+          </property>
+          <property name="text">
+           <string>Save</string>
+          </property>
+          <property name="icon">
+           <iconset resource="icons.qrc">
+            <normaloff>:/icons/img/icons8-save-48.png</normaloff>:/icons/img/icons8-save-48.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonRun">
+          <property name="toolTip">
+           <string>Run batch file</string>
+          </property>
+          <property name="text">
+           <string>Run</string>
+          </property>
+          <property name="icon">
+           <iconset resource="icons.qrc">
+            <normaloff>:/icons/img/icons8-run-48.png</normaloff>:/icons/img/icons8-run-48.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>547</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="statusTip">
+    <string>Menu</string>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="statusTip">
+     <string>Menu</string>
+    </property>
+    <property name="title">
+     <string>Menu</string>
+    </property>
+    <addaction name="actionConfigure_app"/>
+    <addaction name="actionOpen_in_external_editor"/>
+    <addaction name="actionAbout"/>
+    <addaction name="actionAbout_Qt"/>
+   </widget>
+   <addaction name="menu"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionConfigure_app">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/img/icons8-wrench-48.png</normaloff>:/icons/img/icons8-wrench-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Configure</string>
+   </property>
+   <property name="statusTip">
+    <string>Configure application</string>
+   </property>
+  </action>
+  <action name="actionOpen_in_external_editor">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/img/icons8-pencil-drawing-48.png</normaloff>:/icons/img/icons8-pencil-drawing-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open in external editor</string>
+   </property>
+   <property name="statusTip">
+    <string>Open batch file in external editor</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/img/KillManager.png</normaloff>:/icons/img/KillManager.png</iconset>
+   </property>
+   <property name="text">
+    <string>About</string>
+   </property>
+   <property name="statusTip">
+    <string>About application</string>
+   </property>
+  </action>
+  <action name="actionAbout_Qt">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/img/qt-logo.png</normaloff>:/icons/img/qt-logo.png</iconset>
+   </property>
+   <property name="text">
+    <string>About Qt</string>
+   </property>
+   <property name="statusTip">
+    <string>About Qt C++ toolkit</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>
