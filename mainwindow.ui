@@ -6,17 +6,17 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>547</width>
-    <height>396</height>
+    <width>607</width>
+    <height>324</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_6">
+   <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_5">
+     <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
@@ -34,8 +34,11 @@
          </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
+         <widget class="QSplitter" name="splitter">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="QWidget" name="">
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
              <widget class="QLabel" name="labelDisabled">
@@ -48,8 +51,8 @@
              <widget class="QListWidget" name="listWidgetDisabled"/>
             </item>
            </layout>
-          </item>
-          <item>
+          </widget>
+          <widget class="QWidget" name="">
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
              <widget class="QLabel" name="labelKilled">
@@ -62,8 +65,8 @@
              <widget class="QListWidget" name="listWidgetKilled"/>
             </item>
            </layout>
-          </item>
-         </layout>
+          </widget>
+         </widget>
         </item>
        </layout>
       </item>
@@ -136,7 +139,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>547</width>
+     <width>607</width>
      <height>18</height>
     </rect>
    </property>

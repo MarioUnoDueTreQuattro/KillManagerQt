@@ -159,6 +159,18 @@ void MainWindow::readSettings()
     // if (settings.value("MainWindow/maximized", false).toBool()) {
     // showMaximized();
     // }
+    QByteArray savedState = settings.value("MainWindow/splitterState").toByteArray();
+    if (!savedState.isEmpty()) {
+                // La funzione restoreState() di QSplitter prende un QByteArray
+                // e ripristina la posizione dei divisori.
+                ui->splitter->restoreState(savedState);
+                qDebug() << "Splitter state loaded.";
+            } else {
+                qDebug() << "No splitter state found, using default.";
+                // Se non c'è uno stato salvato, puoi impostare le dimensioni iniziali
+                // in modo esplicito se non ti piacciono quelle predefinite di Qt.
+                // Ad esempio: splitter->setSizes(QList<int>() << 200 << 400);
+            }
 }
 
 void MainWindow::writeSettings()
@@ -167,6 +179,7 @@ void MainWindow::writeSettings()
     // Save window geometry and state
     settings.setValue("MainWindow/geometry", saveGeometry());
     settings.setValue("MainWindow/state", saveState());
+    settings.setValue("MainWindow/splitterState", ui->splitter->saveState());
     // Example for individual pos and size (if not using saveGeometry)
     // if (!isMaximized() && !isFullScreen()) { // Only save if not maximized or fullscreen
     // settings.setValue("MainWindow/pos", pos());
