@@ -789,7 +789,7 @@ void MainWindow::readStdError()
     int iLines = lines.count ();
     if (iLines > 2)
     {
-        qDebug() << "PIU' DI UNA RIGA";
+        qDebug() << "MORE THAN ONE ROW!!!!!!";
         //QMessageBox::information (this, "", "PIU' DI UNA RIGA");
     }
     QStringList outList;
