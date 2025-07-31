@@ -790,18 +790,18 @@ void MainWindow::readStdError()
     if (iLines > 2)
     {
         qDebug() << "PIU' DI UNA RIGA";
-        QMessageBox::information (this, "", "PIU' DI UNA RIGA");
+        //QMessageBox::information (this, "", "PIU' DI UNA RIGA");
     }
-   QStringList outList;
-   QString outputProg;
-   ApplicationItem *foundItem ;
+    QStringList outList;
+    QString outputProg;
+    ApplicationItem *foundItem ;
     for (int iRepeat = 0; iRepeat < iLines - 1; iRepeat++)
     {
         // QString outputProg = output;
-         outputProg = lines[iRepeat];
+        outputProg = lines[iRepeat];
         outputProg.replace ("\n", "");
         outputProg.replace ("\r", "");
-         outList = outputProg.split(' ');
+        outList = outputProg.split(' ');
         //qDebug() << outList.size();
         outputProg = outList.at(2);
         outputProg.replace ("\"", "");
@@ -813,7 +813,7 @@ void MainWindow::readStdError()
             foundItem->setFoundWhenKilling (false);
         }
         else qDebug() << "foundItem->getAppName () NOT FOUND";
-        ui->listWidgetDisabled->addItem (output);
+        //ui->listWidgetDisabled->addItem (output);
     }
 }
 void MainWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
