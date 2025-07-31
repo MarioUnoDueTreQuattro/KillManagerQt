@@ -24,12 +24,12 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     //setWindowTitle("Qt " +qtVersion + " Version"+ APP_VERSION);
     this->setWindowTitle(qApp->applicationName());       // + " Version "+ APP_VERSION);
-    QApplication* currentApp = qApp;
-    m_sAppCompany = currentApp->organizationName();
-    m_sAppName = currentApp->applicationName();
-    m_sKillFile = getKillFilePath();
-    QString universalPath1 = QDir::fromNativeSeparators(m_sKillFile);
-    loadListFromFile(universalPath1);
+//    QApplication* currentApp = qApp;
+//    m_sAppCompany = currentApp->organizationName();
+//    m_sAppName = currentApp->applicationName();
+//    m_sKillFile = getKillFilePath();
+//    QString universalPath1 = QDir::fromNativeSeparators(m_sKillFile);
+    loadListFromFile();
     ui->listWidgetEnabled->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->listWidgetDisabled->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->listWidgetEnabled, &QListWidget::customContextMenuRequested,

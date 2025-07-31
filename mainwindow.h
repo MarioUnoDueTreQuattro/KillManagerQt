@@ -32,8 +32,8 @@ private:
     Ui::MainWindow *ui;
     QString m_sKillFile;
     QString m_sInitialPath;
-    QString m_sAppName;
-    QString m_sAppCompany;
+//    QString m_sAppName;
+//    QString m_sAppCompany;
     QList<ApplicationItem> m_ApplicationItemsList;
     QStringList getRunningProcesses();
     bool deleteApplicationItem(QString);
