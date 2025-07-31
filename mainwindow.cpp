@@ -728,7 +728,7 @@ void MainWindow::debugNotFoundWhenKilling()
     int i_AppItemCount = m_ApplicationItemsList.count ();
     ApplicationItem *foundItem;
     //for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
-        for (int iCount = 0; iCount < i_AppItemCount; iCount++)
+    for (int iCount = 0; iCount < i_AppItemCount; iCount++)
     {
         foundItem = &m_ApplicationItemsList[iCount];
         if (foundItem->getFoundWhenKilling () == false) qDebug() << foundItem->getAppName ();
@@ -741,7 +741,7 @@ void MainWindow::debugFoundWhenKilling()
     int i_AppItemCount = m_ApplicationItemsList.count ();
     ApplicationItem *foundItem;
     //for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
-        for (int iCount = 0; iCount < i_AppItemCount; iCount++)
+    for (int iCount = 0; iCount < i_AppItemCount; iCount++)
     {
         foundItem = &m_ApplicationItemsList[iCount];
         if (foundItem->getFoundWhenKilling () && foundItem->getAppKillEnabled ())
@@ -785,32 +785,33 @@ void MainWindow::readStdError()
 {
     QString output = QString(process->readAllStandardError ());
     //output.replace ("\r\n", "");
-    QStringList lines=output.split ("\n");
-    int iLines=lines.count ();
-    if (iLines>2) {qDebug()<< "PIU' DI UNA RIGA";
-    QMessageBox::information (this, "","PIU' DI UNA RIGA");
-    }
-    for (int iRepeat=0; iRepeat< iLines -1; iRepeat++)
- {
-//        QString outputProg = output;
-
-        QString outputProg = lines[iRepeat];
-    outputProg.replace ("\n", "");
-    outputProg.replace ("\r", "");
-    QStringList outList = outputProg.split(' ');
-    //qDebug() << outList.size();
-    outputProg = outList.at(2);
-    outputProg.replace ("\"", "");
-    qDebug() << "err: " << outputProg;
-    ApplicationItem *foundItem = findApplicationItem (outputProg);
-    if (foundItem)
+    QStringList lines = output.split ("\n");
+    int iLines = lines.count ();
+    if (iLines > 2)
     {
-        //qDebug() << "foundItem->getAppName () " << foundItem->getAppName ();
-        foundItem->setFoundWhenKilling (false);
+        qDebug() << "PIU' DI UNA RIGA";
+        QMessageBox::information (this, "", "PIU' DI UNA RIGA");
     }
-    else qDebug() << "foundItem->getAppName () NOT FOUND";
-    ui->listWidgetDisabled->addItem (output);
-}
+    for (int iRepeat = 0; iRepeat < iLines - 1; iRepeat++)
+    {
+        // QString outputProg = output;
+        QString outputProg = lines[iRepeat];
+        outputProg.replace ("\n", "");
+        outputProg.replace ("\r", "");
+        QStringList outList = outputProg.split(' ');
+        //qDebug() << outList.size();
+        outputProg = outList.at(2);
+        outputProg.replace ("\"", "");
+        qDebug() << "err: " << outputProg;
+        ApplicationItem *foundItem = findApplicationItem (outputProg);
+        if (foundItem)
+        {
+            //qDebug() << "foundItem->getAppName () " << foundItem->getAppName ();
+            foundItem->setFoundWhenKilling (false);
+        }
+        else qDebug() << "foundItem->getAppName () NOT FOUND";
+        ui->listWidgetDisabled->addItem (output);
+    }
 }
 void MainWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
