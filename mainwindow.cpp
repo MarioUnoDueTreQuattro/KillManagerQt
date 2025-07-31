@@ -794,6 +794,7 @@ void MainWindow::readStdError()
     }
    QStringList outList;
    QString outputProg;
+   ApplicationItem *foundItem ;
     for (int iRepeat = 0; iRepeat < iLines - 1; iRepeat++)
     {
         // QString outputProg = output;
@@ -805,7 +806,7 @@ void MainWindow::readStdError()
         outputProg = outList.at(2);
         outputProg.replace ("\"", "");
         qDebug() << "err: " << outputProg;
-        ApplicationItem *foundItem = findApplicationItem (outputProg);
+        foundItem = findApplicationItem (outputProg);
         if (foundItem)
         {
             //qDebug() << "foundItem->getAppName () " << foundItem->getAppName ();
