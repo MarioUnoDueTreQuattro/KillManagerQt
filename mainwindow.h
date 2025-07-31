@@ -37,6 +37,7 @@ private:
     QList<ApplicationItem> m_ApplicationItemsList;
     QStringList getRunningProcesses();
     bool deleteApplicationItem(QString);
+    void resetAllApplicationItems();
     bool moveApplicationItem(QString, bool);
     void readSettings();
     void writeSettings();

@@ -103,6 +103,18 @@ bool MainWindow::deleteApplicationItem(QString deleteString)
     return bFound;
 }
 
+void MainWindow::resetAllApplicationItems()
+{
+    int i_AppItemCount = m_ApplicationItemsList.count ();
+    ApplicationItem *foundItem;
+    // for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
+    for (int iCount = 0; iCount < i_AppItemCount; iCount++)
+    {
+        foundItem = &m_ApplicationItemsList[iCount];
+        foundItem->setFoundWhenKilling (true);
+    }
+}
+
 bool MainWindow::moveApplicationItem(QString deleteString, bool bState)
 {
     bool bFound = false;
@@ -160,17 +172,20 @@ void MainWindow::readSettings()
     // showMaximized();
     // }
     QByteArray savedState = settings.value("MainWindow/splitterState").toByteArray();
-    if (!savedState.isEmpty()) {
-                // La funzione restoreState() di QSplitter prende un QByteArray
-                // e ripristina la posizione dei divisori.
-                ui->splitter->restoreState(savedState);
-                qDebug() << "Splitter state loaded.";
-            } else {
-                qDebug() << "No splitter state found, using default.";
-                // Se non c'è uno stato salvato, puoi impostare le dimensioni iniziali
-                // in modo esplicito se non ti piacciono quelle predefinite di Qt.
-                // Ad esempio: splitter->setSizes(QList<int>() << 200 << 400);
-            }
+    if (!savedState.isEmpty())
+    {
+        // La funzione restoreState() di QSplitter prende un QByteArray
+        // e ripristina la posizione dei divisori.
+        ui->splitter->restoreState(savedState);
+        qDebug() << "Splitter state loaded.";
+    }
+    else
+    {
+        qDebug() << "No splitter state found, using default.";
+        // Se non c'è uno stato salvato, puoi impostare le dimensioni iniziali
+        // in modo esplicito se non ti piacciono quelle predefinite di Qt.
+        // Ad esempio: splitter->setSizes(QList<int>() << 200 << 400);
+    }
 }
 
 void MainWindow::writeSettings()
@@ -682,13 +697,15 @@ void MainWindow::addItemToListwidget(QListWidget* listWidget, QString newItemTex
     QString itemString = "";
     // Iterate in reverse to safely remove items while modifying the list
     //qDebug()<< "m_ApplicationItemsList.size="<<m_ApplicationItemsList.size();
-    for (int i = m_ApplicationItemsList.size() - 1; i >= 0; --i)
-    {
-        if (m_ApplicationItemsList.at(i).getAppName() == newItemText)
-        {
-            bFound = true;
-        }
-    }
+    int iFound = findApplicationItemIndex (newItemText);
+    if (iFound != -1) bFound = true;
+    // for (int i = m_ApplicationItemsList.size() - 1; i >= 0; --i)
+    // {
+    // if (m_ApplicationItemsList.at(i).getAppName() == newItemText)
+    // {
+    // bFound = true;
+    // }
+    // }
     // bool found = false;
     // for (int i = 0; i < listWidget->count(); ++i) {
     // if (listWidget->item(i)->text() == newItemText) {
@@ -841,6 +858,7 @@ void MainWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus
 void MainWindow::on_pushButtonRun_clicked()
 {
     //QProcess *process = new QProcess(this); // 'this' sets the parent, good for memory management
+    resetAllApplicationItems();
     process = new QProcess(this);
     connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(readStdOutput()));
     connect(process, SIGNAL(readyReadStandardError()), this, SLOT(readStdError()));
