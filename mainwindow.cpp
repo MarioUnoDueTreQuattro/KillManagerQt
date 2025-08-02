@@ -24,11 +24,11 @@ MainWindow::MainWindow(QWidget* parent)
     readSettings();
     //setWindowTitle("Qt " +qtVersion + " Version"+ APP_VERSION);
     this->setWindowTitle(qApp->applicationName());       // + " Version "+ APP_VERSION);
-//    QApplication* currentApp = qApp;
-//    m_sAppCompany = currentApp->organizationName();
-//    m_sAppName = currentApp->applicationName();
-//    m_sKillFile = getKillFilePath();
-//    QString universalPath1 = QDir::fromNativeSeparators(m_sKillFile);
+    // QApplication* currentApp = qApp;
+    // m_sAppCompany = currentApp->organizationName();
+    // m_sAppName = currentApp->applicationName();
+    // m_sKillFile = getKillFilePath();
+    // QString universalPath1 = QDir::fromNativeSeparators(m_sKillFile);
     loadListFromFile();
     ui->listWidgetEnabled->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->listWidgetDisabled->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -931,11 +931,19 @@ void MainWindow::on_actionAbout_Qt_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
+    QString sIsDebug = "";
+#ifdef QT_DEBUG
+    sIsDebug = " Debug ";
+#else
+    sIsDebug = " Release ";
+#endif
+    QString sVersion = "<p><b>Version ";
+    sVersion = sVersion + APP_VERSION;
+    sVersion = sVersion + sIsDebug + "</b></p>";
     QString sApp = qApp->applicationName();
-    sApp = sApp + " Version ";
-    sApp = sApp + APP_VERSION;
     QMessageBox::about(this, "About " + qApp->applicationName(),
         "<h2>" + sApp + "</h2>"
+        + sVersion +
         "<p>This application manage a 'KILL' batch file.</p>"
         "<p>Copyright &copy; 2025 Andrea G.</p>"
         "<p>All rights reserved.</p>"
