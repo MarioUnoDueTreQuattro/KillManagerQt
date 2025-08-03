@@ -998,9 +998,12 @@ void MainWindow::on_actionOpen_in_external_editor_triggered()
 
 void MainWindow::on_actionExecute_in_terminal_window_triggered()
 {
+    ui->statusBar->showMessage(m_sKillFile + " started in terminal window...");
+    ui->statusBar->repaint ();
     const char *cstrKillFile = m_sKillFile.toUtf8().data();
     std::string command = std::string("cmd /C ") + cstrKillFile;
     system(command.c_str());
+    ui->statusBar->showMessage(m_sKillFile + " executed in terminal window.");
 }
 
 QStringList MainWindow::getRunningProcesses()

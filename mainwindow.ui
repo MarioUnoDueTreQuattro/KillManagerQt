@@ -157,6 +157,7 @@
      <string>Menu</string>
     </property>
     <addaction name="actionConfigure_app"/>
+    <addaction name="separator"/>
     <addaction name="actionOpen_in_external_editor"/>
     <addaction name="actionExecute_in_terminal_window"/>
     <addaction name="separator"/>
@@ -221,6 +222,9 @@
    </property>
    <property name="text">
     <string>Execute in terminal window</string>
+   </property>
+   <property name="statusTip">
+    <string>Execute batch file in terminal window</string>
    </property>
   </action>
  </widget>
