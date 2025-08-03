@@ -10,6 +10,7 @@
 #include <QProcess>
 #include <QFont>
 #include <QPalette>
+#include <QTimer>
 #include "runningprocesseslist.h"
 
 // Include Windows API headers
@@ -34,6 +35,7 @@ private:
     RunningProcessesList m_ProcessList;
     QFont m_Font;
     QBrush m_TextBrush;
+    QTimer *timer;
     QProcess *process;
     Ui::MainWindow *ui;
     QString m_sKillFile;
@@ -65,6 +67,7 @@ private:
 protected:
     void closeEvent(QCloseEvent* event) override;
 public slots:
+    void timerUupdate();
     void menuConfigure();
     void showAddExeDialog();
     void loadListFromFile();

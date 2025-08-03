@@ -49,11 +49,15 @@ MainWindow::MainWindow(QWidget* parent)
         this, &MainWindow::showListWidgetDisabledContextMenu);
     //connect(ui->menuConfigure, SIGNAL(triggered(QAction*)), this, SLOT(menuConfigure()));
     //connect(ui->actionConfigure_app, SIGNAL(triggered(QAction*)), this, SLOT(menuConfigure()));
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+    timer->start(5000);  // ogni secondo
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete timer;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -62,11 +66,17 @@ void MainWindow::closeEvent(QCloseEvent* event)
     QMainWindow::closeEvent(event);       // Call the base class's closeEvent
 }
 
+void MainWindow::timerUupdate()
+{
+    //qDebug() << __PRETTY_FUNCTION__;
+    loadListFromFile ();
+}
+
 QString MainWindow::getKillFilePath()
 {
     QSettings settings;
     QString sKillFile = settings.value("Path").toString();
-    qDebug() << "Read string from registry:" << sKillFile;
+    //qDebug() << "Read string from registry:" << sKillFile;
     if (sKillFile == "")
     {
         sKillFile = "C:\\Users\\Andrea\\Documents\\kill.bat";
@@ -188,7 +198,7 @@ void MainWindow::readSettings()
         // La funzione restoreState() di QSplitter prende un QByteArray
         // e ripristina la posizione dei divisori.
         ui->splitter->restoreState(savedState);
-        qDebug() << "Splitter state loaded.";
+        //qDebug() << "Splitter state loaded.";
     }
     else
     {
@@ -509,7 +519,7 @@ void MainWindow::loadListFromFile(const QString& fileName)
     ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
     ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
     file.close();       // Not strictly necessary due to RAII, but good practice
-    qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
+    //qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
 }
 
 void MainWindow::loadListFromFile()
@@ -878,10 +888,12 @@ void MainWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus
     ui->statusBar->showMessage(m_sKillFile + " executed.");
     //debugNotFoundWhenKilling ();
     debugFoundWhenKilling();
+    connect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
 }
 
 void MainWindow::on_pushButtonRun_clicked()
 {
+    disconnect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
     //QProcess *process = new QProcess(this); // 'this' sets the parent, good for memory management
     resetAllApplicationItems();
     process = new QProcess(this);
