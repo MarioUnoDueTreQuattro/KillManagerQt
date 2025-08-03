@@ -40,6 +40,8 @@ private:
     Ui::MainWindow *ui;
     QString m_sKillFile;
     QString m_sInitialPath;
+    QString m_sSelectedEnabledItem;
+    QString m_sSelectedDisabledItem;
     // QString m_sAppName;
     // QString m_sAppCompany;
     QList<ApplicationItem> m_ApplicationItemsList;
@@ -64,6 +66,10 @@ private:
     int findApplicationItemIndex (QString);
     void debugNotFoundWhenKilling();
     void debugFoundWhenKilling();
+    void disconnectTimer();
+    void connectTimer();
+    bool m_bTimerIdConnected;
+    int m_iTimerUpdatesCount;
 protected:
     void closeEvent(QCloseEvent* event) override;
 public slots:

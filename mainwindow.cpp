@@ -21,6 +21,8 @@ MainWindow::MainWindow(QWidget* parent)
     this->setWindowIcon(QIcon(":/icons/img/KillManager.ico"));       // Use the path defined in .qrc
     m_ApplicationItemsList.clear();
     ui->setupUi(this);
+    m_iTimerUpdatesCount = 0;
+    m_bTimerIdConnected = false;
     m_Font = ui->labelEnabled->font ();
     m_Font.setBold(true);
     QColor myColor(0, 0, 128);
@@ -50,7 +52,7 @@ MainWindow::MainWindow(QWidget* parent)
     //connect(ui->menuConfigure, SIGNAL(triggered(QAction*)), this, SLOT(menuConfigure()));
     //connect(ui->actionConfigure_app, SIGNAL(triggered(QAction*)), this, SLOT(menuConfigure()));
     timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+    connectTimer ();
     timer->start(5000);  // ogni secondo
 }
 
@@ -68,7 +70,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::timerUupdate()
 {
-    //qDebug() << __FUNCTION__;
+    m_iTimerUpdatesCount += 1;
+    qDebug() << __FUNCTION__ << m_iTimerUpdatesCount;
     loadListFromFile ();
 }
 
@@ -254,7 +257,9 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
     copyAction->setEnabled(itemClicked);
     // Show the menu at the global position of the mouse click
     // mapToGlobal converts the local widget coordinate (pos) to a global screen coordinate
+    disconnectTimer ();
     contextMenu.exec(ui->listWidgetEnabled->mapToGlobal(pos));
+    connectTimer ();
 }
 
 void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
@@ -287,7 +292,9 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
     copyAction->setEnabled(itemClicked);
     // Show the menu at the global position of the mouse click
     // mapToGlobal converts the local widget coordinate (pos) to a global screen coordinate
+    disconnectTimer ();
     contextMenu.exec(ui->listWidgetDisabled->mapToGlobal(pos));
+    connectTimer ();
 }
 
 void MainWindow::copySelectedDisabledItem()
@@ -323,6 +330,7 @@ void MainWindow::deleteSelectedEnabledItem()
     QListWidgetItem* currentItem = ui->listWidgetEnabled->currentItem();
     if (currentItem)
     {
+        disconnectTimer ();
         ui->listWidgetEnabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Removed: " + currentItem->text());
         deleteApplicationItem(currentItem->text());
@@ -331,6 +339,8 @@ void MainWindow::deleteSelectedEnabledItem()
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
         qDebug() << "deleteSelectedEnabledItem";
+        writeListToFile ();
+        connectTimer ();
     }
     else
     {
@@ -343,6 +353,7 @@ void MainWindow::deleteSelectedDisabledItem()
     QListWidgetItem* currentItem = ui->listWidgetDisabled->currentItem();
     if (currentItem)
     {
+        disconnectTimer ();
         ui->listWidgetDisabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Removed: " + currentItem->text());
         deleteApplicationItem(currentItem->text());
@@ -351,6 +362,8 @@ void MainWindow::deleteSelectedDisabledItem()
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
         qDebug() << "deleteSelectedDisabledItem";
+        writeListToFile ();
+        connectTimer ();
     }
     else
     {
@@ -363,6 +376,7 @@ void MainWindow::enableSelectedDisabledItem()
     QListWidgetItem* currentItem = ui->listWidgetDisabled->currentItem();
     if (currentItem)
     {
+        disconnectTimer ();
         QListWidgetItem* temp = new QListWidgetItem(*currentItem);
         ui->listWidgetEnabled->addItem(temp);
         ui->listWidgetDisabled->removeItemWidget(currentItem);
@@ -372,6 +386,8 @@ void MainWindow::enableSelectedDisabledItem()
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
         qDebug() << "disableSelectedEnabledItem";
+        writeListToFile ();
+        connectTimer ();
     }
     else
     {
@@ -384,6 +400,7 @@ void MainWindow::disableSelectedEnabledItem()
     QListWidgetItem* currentItem = ui->listWidgetEnabled->currentItem();
     if (currentItem)
     {
+        disconnectTimer ();
         QListWidgetItem* temp = new QListWidgetItem(*currentItem);
         ui->listWidgetDisabled->addItem(temp);
         ui->listWidgetEnabled->removeItemWidget(currentItem);
@@ -393,6 +410,8 @@ void MainWindow::disableSelectedEnabledItem()
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
         qDebug() << "disableSelectedEnabledItem";
+        writeListToFile ();
+        connectTimer ();
     }
     else
     {
@@ -430,6 +449,7 @@ void MainWindow::showAddExeDialog()
         QString receivedText = addExe.getText();           // Retrieve the text
         if (receivedText != "")
         {
+            disconnectTimer ();
             addItemToListwidget(ui->listWidgetEnabled, receivedText);
             bool bFound = false;
             int iFoundItem = findApplicationItemIndex (receivedText);
@@ -458,6 +478,8 @@ void MainWindow::showAddExeDialog()
             //QListWidgetItem* newitem = new QListWidgetItem(receivedText, ui->listWidgetEnabled);
             //ui->listWidgetEnabled->addItem(newitem);
             qDebug() << "Dialog accepted. Received: " << receivedText;
+            writeListToFile ();
+            connectTimer ();
         }
         else
             qDebug() << "Dialog accepted but EMPTY";
@@ -466,13 +488,31 @@ void MainWindow::showAddExeDialog()
     {
         qDebug() << "Dialog rejected.";
     }
+    connectTimer ();
 }
 
 void MainWindow::loadListFromFile(const QString& fileName)
 {
     m_ApplicationItemsList.clear();
     m_ProcessList.populateProcessList ();
+    m_sSelectedEnabledItem = "";
+    m_sSelectedDisabledItem = "";
     // Clear existing items before loading new ones
+    QListWidgetItem* selectedEnabledItem = ui->listWidgetEnabled->selectedItems ().first ();
+    QListWidgetItem* selectedDisabledItem = ui->listWidgetDisabled->selectedItems ().first ();
+    if (selectedEnabledItem != NULL)
+        if ( ui->listWidgetEnabled->selectedItems ().isEmpty () == false)
+        {
+            m_sSelectedEnabledItem = selectedEnabledItem->text ();
+            //qDebug() << "Selected: " << sSelectedEnabledItem;
+        }
+    if (selectedDisabledItem != NULL)
+        if ( ui->listWidgetDisabled->selectedItems ().isEmpty () == false)
+        {
+            m_sSelectedDisabledItem = selectedDisabledItem->text ();
+            //qDebug() << "Disabled Selected: " << sSelectedDisabledItem;
+        }
+    //if (selectedDisabledItem!=NULL) selectedDisabledItem->setSelected (true);
     ui->listWidgetEnabled->clear();
     ui->listWidgetDisabled->clear();
     QFile file(fileName);
@@ -514,7 +554,7 @@ void MainWindow::loadListFromFile(const QString& fileName)
         // QListWidgetItem *item = new QListWidgetItem(line);
         // ui->listWidget->addItem(item);
     }
-    ui->statusBar->showMessage("File " + m_sKillFile + " read");
+    //ui->statusBar->showMessage("File " + m_sKillFile + " read");
     //qDebug() << "ItemCount= " << m_ApplicationItemsList.count();
     ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
     ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
@@ -534,7 +574,7 @@ void MainWindow::loadListFromFile()
 
 bool MainWindow::writeListToFile()
 {
-    disconnect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+    disconnectTimer ();
     bool bBackuped = backupBatchFile();
     if (bBackuped == false)
     {
@@ -593,7 +633,7 @@ bool MainWindow::writeListToFile()
     universalPath1 = QDir::toNativeSeparators(universalPath1);
     qDebug() << "Batch file successfully written to:" << universalPath1;
     ui->statusBar->showMessage("Batch file successfully written to: " + universalPath1);
-    connect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+    connectTimer ();
     return true;
 }
 
@@ -637,9 +677,9 @@ void MainWindow::on_pushButtonWrite_clicked()
 
 void MainWindow::on_pushButtonReload_clicked()
 {
-    disconnect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+    disconnectTimer ();
     loadListFromFile();
-    connect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+    connectTimer ();
 }
 
 void MainWindow::on_pushButtonAdd_clicked()
@@ -753,11 +793,34 @@ void MainWindow::addItemToListwidget(QListWidget* listWidget, QString newItemTex
             item->setFont(m_Font);
             item->setForeground (m_TextBrush);
             //item->setBackground (QColor(247,209,209));
-            item->setBackground (QColor(209, 209, 247));
+            item->setBackground (QColor(191, 191, 239));
             listWidget->addItem(item);
+            if (newItemText == m_sSelectedEnabledItem)
+            {
+                item->setSelected (true); qDebug() << "selected" << newItemText;
+                listWidget->setCurrentItem(item);
+            }
+            if (newItemText == m_sSelectedDisabledItem)
+            {
+                item->setSelected (true); qDebug() << "selectedDis" << newItemText;
+                listWidget->setCurrentItem(item);
+            }
         }
         else
-            listWidget->addItem(newItemText);
+        {
+            QListWidgetItem* item = new QListWidgetItem(newItemText);
+            listWidget->addItem(item);
+            if (newItemText == m_sSelectedEnabledItem)
+            {
+                item->setSelected (true); qDebug() << "selected" << newItemText;
+                listWidget->setCurrentItem(item);
+            }
+            if (newItemText == m_sSelectedDisabledItem)
+            {
+                item->setSelected (true); qDebug() << "selectedDis" << newItemText;
+                listWidget->setCurrentItem(item);
+            }
+        }
         // ApplicationItem newAppItem(newItemText,true);
         // m_ApplicationItemsList.append(newAppItem);
         //QListWidgetItem* newitem = new QListWidgetItem(receivedText, ui->listWidgetEnabled);
@@ -820,6 +883,27 @@ void MainWindow::debugFoundWhenKilling()
         }
     }
     ui->labelKilled->setText("Killed: " + QString::number(ui->listWidgetKilled->count()));
+}
+
+void MainWindow::disconnectTimer()
+{
+    if (m_bTimerIdConnected == true)
+    {
+        qDebug() << "Disconnecting timer";
+        disconnect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+        m_bTimerIdConnected = false;
+    }
+}
+
+void MainWindow::connectTimer()
+{
+    if (m_bTimerIdConnected == false)
+    {
+        qDebug() << "Reconnecting timer";
+        m_iTimerUpdatesCount = 0;
+        connect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+        m_bTimerIdConnected = true;
+    }
 }
 
 void MainWindow::readStdOutput()
@@ -892,12 +976,12 @@ void MainWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus
     ui->statusBar->showMessage(m_sKillFile + " executed.");
     //debugNotFoundWhenKilling ();
     debugFoundWhenKilling();
-    connect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+    connectTimer ();
 }
 
 void MainWindow::on_pushButtonRun_clicked()
 {
-    disconnect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+    disconnectTimer ();
     //QProcess *process = new QProcess(this); // 'this' sets the parent, good for memory management
     resetAllApplicationItems();
     process = new QProcess(this);
