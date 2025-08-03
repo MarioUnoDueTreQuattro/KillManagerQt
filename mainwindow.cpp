@@ -738,7 +738,7 @@ void MainWindow::addItemToListwidget(QListWidget* listWidget, QString newItemTex
             item->setFont(m_Font);
             item->setForeground (m_TextBrush);
             //item->setBackground (QColor(247,209,209));
-            item->setBackground (QColor(209,209,247));
+            item->setBackground (QColor(209, 209, 247));
             listWidget->addItem(item);
         }
         else
@@ -966,11 +966,15 @@ void MainWindow::on_actionAbout_triggered()
     sVersion = sVersion + sIsDebug + "</p></h3>";
     QString sApp = qApp->applicationName();
     QMessageBox::about(this, "About " + qApp->applicationName(),
-        "<h1><p style=\"font-weight: bold; color: rgb(0, 0, 128);\">" + sApp + "</p></h1>"
+        "<h1><p style=\"font-weight: bold; color: rgb(0, 0, 128);\">"
+        + sApp + "</p></h1>"
         + sVersion +
-        "<p>This application manage a 'KILL' batch file.</p>"
-        "<p>Copyright &copy; 2025 Andrea G.</p>"
-        "<p>All rights reserved.</p>"
+    "<p>Build date and time: " + __DATE__ + " at " + __TIME__ + "</p>"
+    "<br>"
+    "<p>This application manages a 'KILL' batch file.</p>"
+    "<br>"
+    "<p>Copyright &copy; 2025 Andrea G.</p>"
+    "<p>All rights reserved.</p>"
         /* "<p>Visit our website: <a href='https://www.example.com'>www.example.com</a></p>"*/);
 }
 
