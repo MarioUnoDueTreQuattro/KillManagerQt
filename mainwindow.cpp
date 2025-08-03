@@ -68,7 +68,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::timerUupdate()
 {
-    //qDebug() << __PRETTY_FUNCTION__;
+    //qDebug() << __FUNCTION__;
     loadListFromFile ();
 }
 
@@ -534,6 +534,7 @@ void MainWindow::loadListFromFile()
 
 bool MainWindow::writeListToFile()
 {
+    disconnect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
     bool bBackuped = backupBatchFile();
     if (bBackuped == false)
     {
@@ -592,6 +593,7 @@ bool MainWindow::writeListToFile()
     universalPath1 = QDir::toNativeSeparators(universalPath1);
     qDebug() << "Batch file successfully written to:" << universalPath1;
     ui->statusBar->showMessage("Batch file successfully written to: " + universalPath1);
+    connect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
     return true;
 }
 
@@ -635,7 +637,9 @@ void MainWindow::on_pushButtonWrite_clicked()
 
 void MainWindow::on_pushButtonReload_clicked()
 {
+    disconnect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
     loadListFromFile();
+    connect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
 }
 
 void MainWindow::on_pushButtonAdd_clicked()
