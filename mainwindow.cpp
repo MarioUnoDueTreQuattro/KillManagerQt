@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget* parent)
     m_Font = ui->labelEnabled->font ();
     m_Font.setBold(true);
     QColor myColor(0, 0, 128);
+    //QColor myColor(128, 0, 0);
     //QColor customColor(100, 200, 50);
     //myColor.setHsl(240,100,25,64);
     m_TextBrush = QBrush (myColor);
@@ -736,6 +737,8 @@ void MainWindow::addItemToListwidget(QListWidget* listWidget, QString newItemTex
             QListWidgetItem* item = new QListWidgetItem(newItemText);
             item->setFont(m_Font);
             item->setForeground (m_TextBrush);
+            //item->setBackground (QColor(247,209,209));
+            item->setBackground (QColor(209,209,247));
             listWidget->addItem(item);
         }
         else
@@ -856,7 +859,7 @@ void MainWindow::readStdError()
         //qDebug() << outList.size();
         outputProg = outList.at(2);
         outputProg.replace ("\"", "");
-        qDebug() << "err: " << outputProg;
+        //qDebug() << __FUNCTION__ << "err: " << outputProg;
         foundItem = findApplicationItem (outputProg);
         if (foundItem)
         {
@@ -958,12 +961,12 @@ void MainWindow::on_actionAbout_triggered()
 #else
     sIsDebug = " Release ";
 #endif
-    QString sVersion = "<p><b>Version ";
+    QString sVersion = "<h3><p style=\"font-weight: bold; color: rgb(0, 0, 128);\">Version ";
     sVersion = sVersion + APP_VERSION;
-    sVersion = sVersion + sIsDebug + "</b></p>";
+    sVersion = sVersion + sIsDebug + "</p></h3>";
     QString sApp = qApp->applicationName();
     QMessageBox::about(this, "About " + qApp->applicationName(),
-        "<h2>" + sApp + "</h2>"
+        "<h1><p style=\"font-weight: bold; color: rgb(0, 0, 128);\">" + sApp + "</p></h1>"
         + sVersion +
         "<p>This application manage a 'KILL' batch file.</p>"
         "<p>Copyright &copy; 2025 Andrea G.</p>"
