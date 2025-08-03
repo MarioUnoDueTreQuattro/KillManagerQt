@@ -38,7 +38,7 @@
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
              <widget class="QLabel" name="labelDisabled">
@@ -52,7 +52,7 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
              <widget class="QLabel" name="labelKilled">
@@ -158,6 +158,8 @@
     </property>
     <addaction name="actionConfigure_app"/>
     <addaction name="actionOpen_in_external_editor"/>
+    <addaction name="actionExecute_in_terminal_window"/>
+    <addaction name="separator"/>
     <addaction name="actionAbout"/>
     <addaction name="actionAbout_Qt"/>
    </widget>
@@ -210,6 +212,15 @@
    </property>
    <property name="statusTip">
     <string>About Qt C++ toolkit</string>
+   </property>
+  </action>
+  <action name="actionExecute_in_terminal_window">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/img/icons8-terminal-48.png</normaloff>:/icons/img/icons8-terminal-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Execute in terminal window</string>
    </property>
   </action>
  </widget>

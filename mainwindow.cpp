@@ -12,6 +12,7 @@
 #include <QSettings>
 #include <QString>
 #include <QTextStream>
+#include <cstdlib>  // for system()
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -993,6 +994,13 @@ void MainWindow::on_actionOpen_in_external_editor_triggered()
     // process.waitForStarted(-1);
     // process.waitForFinished(-1); // -1 means wait indefinitely
     // ui->statusBar->showMessage(m_sKillFile + " executed.");
+}
+
+void MainWindow::on_actionExecute_in_terminal_window_triggered()
+{
+    const char *cstrKillFile = m_sKillFile.toUtf8().data();
+    std::string command = std::string("cmd /C ") + cstrKillFile;
+    system(command.c_str());
 }
 
 QStringList MainWindow::getRunningProcesses()

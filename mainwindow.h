@@ -83,6 +83,8 @@ private slots:
     void on_actionAbout_Qt_triggered();
     void on_actionAbout_triggered();
     void on_actionOpen_in_external_editor_triggered();
+    void on_actionExecute_in_terminal_window_triggered();
+
 };
 
 #endif // MAINWINDOW_H
