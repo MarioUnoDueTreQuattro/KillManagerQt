@@ -32,14 +32,14 @@ public:
     static QString getKillFilePath();
 private:
     RunningProcessesList m_ProcessList;
-  QFont m_Font;
- QBrush redTextBrush;
- QProcess *process;
+    QFont m_Font;
+    QBrush m_TextBrush;
+    QProcess *process;
     Ui::MainWindow *ui;
     QString m_sKillFile;
     QString m_sInitialPath;
-//    QString m_sAppName;
-//    QString m_sAppCompany;
+    // QString m_sAppName;
+    // QString m_sAppCompany;
     QList<ApplicationItem> m_ApplicationItemsList;
     QStringList getRunningProcesses();
     bool deleteApplicationItem(QString);
@@ -58,7 +58,7 @@ private:
     void enableSelectedDisabledItem();
     bool backupBatchFile();
     void addItemToListwidget(QListWidget*, QString);
-    ApplicationItem* findApplicationItem (QString);
+    ApplicationItem *findApplicationItem (QString);
     int findApplicationItemIndex (QString);
     void debugNotFoundWhenKilling();
     void debugFoundWhenKilling();
@@ -72,7 +72,7 @@ public slots:
 private slots:
     void readStdOutput();
     void readStdError();
-    void onProcessFinished(int , QProcess::ExitStatus );
+    void onProcessFinished(int, QProcess::ExitStatus );
     void on_listWidgetEnabled_itemClicked(QListWidgetItem* item);
     void on_listWidgetDisabled_itemClicked(QListWidgetItem* item);
     void on_pushButtonWrite_clicked();

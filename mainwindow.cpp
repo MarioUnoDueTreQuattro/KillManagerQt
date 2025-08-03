@@ -20,16 +20,15 @@ MainWindow::MainWindow(QWidget* parent)
     this->setWindowIcon(QIcon(":/icons/img/KillManager.ico"));       // Use the path defined in .qrc
     m_ApplicationItemsList.clear();
     ui->setupUi(this);
- m_Font =ui->labelEnabled->font ();
-  m_Font.setBold(true);
-  // Get the item's current text color
-redTextBrush = QBrush (Qt::red);
-      // Set the new color
-     // textBrush.setColor(QColor(Qt::red));
-
-      // Apply the updated brush to the item
-      //this->setForeground(textBrush);
-
+    m_Font = ui->labelEnabled->font ();
+    m_Font.setBold(true);
+    QColor myColor(0, 0, 128);
+    //QColor customColor(100, 200, 50);
+    //myColor.setHsl(240,100,25,64);
+    m_TextBrush = QBrush (myColor);
+    m_TextBrush.setColor (myColor);
+    // m_TextBrush = QBrush (myColor,Qt::SolidPattern);
+    // m_TextBrush.setColor (myColor);
     ui->labelKilled->setText("Killed: 0" );
     readSettings();
     //setWindowTitle("Qt " +qtVersion + " Version"+ APP_VERSION);
@@ -735,11 +734,9 @@ void MainWindow::addItemToListwidget(QListWidget* listWidget, QString newItemTex
         if (bFound)
         {
             QListWidgetItem* item = new QListWidgetItem(newItemText);
-              item->setFont(m_Font);
-item->setForeground (redTextBrush);
-              //              newItemText.prepend ("<b>")  ;
-//         newItemText.append ("</b>")  ;
-         listWidget->addItem(item);
+            item->setFont(m_Font);
+            item->setForeground (m_TextBrush);
+            listWidget->addItem(item);
         }
         else
             listWidget->addItem(newItemText);
@@ -749,7 +746,6 @@ item->setForeground (redTextBrush);
         //ui->listWidgetEnabled->addItem(newitem);
     }
     //qDebug() << __FUNCTION__ << "found= " << bFound;
-
 }
 
 ApplicationItem *MainWindow::findApplicationItem(QString sFound)

@@ -25,7 +25,7 @@ void RunningProcessesList::populateProcessList()
             // Convert the wide-character string (wchar_t*) to QString
             QString processName = QString::fromWCharArray(pe32.szExeFile);
             // Add the process name to the QListWidget
-            qDebug()<< processName;
+            //qDebug() << __FUNCTION__ << processName;
             processList.append (processName);
         }
         while (Process32Next(hProcessSnap, &pe32));
