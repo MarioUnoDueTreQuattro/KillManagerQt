@@ -15,12 +15,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     dialog.cpp \
     applicationitem.cpp \
-    addexedialog.cpp
+    addexedialog.cpp \
+    runningprocesseslist.cpp
 
 HEADERS  += mainwindow.h \
     dialog.h \
     applicationitem.h \
-    addexedialog.h
+    addexedialog.h \
+    runningprocesseslist.h
 
 FORMS    += mainwindow.ui \
     dialog.ui \

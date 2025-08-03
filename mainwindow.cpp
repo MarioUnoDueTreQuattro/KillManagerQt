@@ -20,6 +20,16 @@ MainWindow::MainWindow(QWidget* parent)
     this->setWindowIcon(QIcon(":/icons/img/KillManager.ico"));       // Use the path defined in .qrc
     m_ApplicationItemsList.clear();
     ui->setupUi(this);
+ m_Font =ui->labelEnabled->font ();
+  m_Font.setBold(true);
+  // Get the item's current text color
+redTextBrush = QBrush (Qt::red);
+      // Set the new color
+     // textBrush.setColor(QColor(Qt::red));
+
+      // Apply the updated brush to the item
+      //this->setForeground(textBrush);
+
     ui->labelKilled->setText("Killed: 0" );
     readSettings();
     //setWindowTitle("Qt " +qtVersion + " Version"+ APP_VERSION);
@@ -450,6 +460,7 @@ void MainWindow::showAddExeDialog()
 void MainWindow::loadListFromFile(const QString& fileName)
 {
     m_ApplicationItemsList.clear();
+    m_ProcessList.populateProcessList ();
     // Clear existing items before loading new ones
     ui->listWidgetEnabled->clear();
     ui->listWidgetDisabled->clear();
@@ -719,12 +730,26 @@ void MainWindow::addItemToListwidget(QListWidget* listWidget, QString newItemTex
     }
     else
     {
-        listWidget->addItem(newItemText);
+        bFound = m_ProcessList.isRunning (newItemText);
+        //qDebug() << __FUNCTION__ << newItemText;
+        if (bFound)
+        {
+            QListWidgetItem* item = new QListWidgetItem(newItemText);
+              item->setFont(m_Font);
+item->setForeground (redTextBrush);
+              //              newItemText.prepend ("<b>")  ;
+//         newItemText.append ("</b>")  ;
+         listWidget->addItem(item);
+        }
+        else
+            listWidget->addItem(newItemText);
         // ApplicationItem newAppItem(newItemText,true);
         // m_ApplicationItemsList.append(newAppItem);
         //QListWidgetItem* newitem = new QListWidgetItem(receivedText, ui->listWidgetEnabled);
         //ui->listWidgetEnabled->addItem(newitem);
     }
+    //qDebug() << __FUNCTION__ << "found= " << bFound;
+
 }
 
 ApplicationItem *MainWindow::findApplicationItem(QString sFound)

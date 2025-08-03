@@ -8,6 +8,9 @@
 #include <QListWidgetItem>
 #include <QMainWindow>
 #include <QProcess>
+#include <QFont>
+#include <QPalette>
+#include "runningprocesseslist.h"
 
 // Include Windows API headers
 #ifdef Q_OS_WIN
@@ -28,7 +31,10 @@ public:
     ~MainWindow();
     static QString getKillFilePath();
 private:
-    QProcess *process;
+    RunningProcessesList m_ProcessList;
+  QFont m_Font;
+ QBrush redTextBrush;
+ QProcess *process;
     Ui::MainWindow *ui;
     QString m_sKillFile;
     QString m_sInitialPath;
