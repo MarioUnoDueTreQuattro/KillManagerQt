@@ -54,6 +54,8 @@ void Dialog::readSettings()
     m_sInitialPath = settings.value("Dialog/InitialPath", QDir::homePath()).toString();
     m_sExternalEditorInitialPath = settings.value("Dialog/External editor", "notepad.exe").toString();
     m_sBackupInitialPath = settings.value("Dialog/Backup path", QDir::homePath()).toString();
+    int iRefreshRate = settings.value("Dialog/RefreshRate", 5).toInt(); // default to 5
+    ui->spinBoxUpdateRate->setValue(iRefreshRate);
 }
 
 void Dialog::writeSettings()
@@ -62,6 +64,8 @@ void Dialog::writeSettings()
     settings.setValue("Dialog/InitialPath", m_sInitialPath);
     settings.setValue("Dialog/External editor", m_sExternalEditorInitialPath);
     settings.setValue("Dialog/Backup path", m_sBackupInitialPath);
+    int iRefreshRate = ui->spinBoxUpdateRate->value ();
+    settings.setValue("Dialog/RefreshRate", iRefreshRate);
 }
 
 void Dialog::on_pushButtonChoose_clicked()
@@ -117,6 +121,7 @@ void Dialog::on_Dialog_accepted()
     settings.setValue("Dialog/InitialPath", m_sInitialPath);
     settings.setValue("Dialog/External editor", m_sExternalEditorInitialPath);
     settings.setValue("Dialog/Backup path", ui->lineEditBackupPath->text ());
+    settings.setValue("Dialog/RefreshRate", ui->spinBoxUpdateRate->value ());
     qDebug() << "Wrote string to registry (or equivalent):" << mySettingValue;
     // create folder if does not exists
     QString folderPath = ui->lineEditBackupPath->text ();
@@ -232,6 +237,5 @@ void Dialog::on_pushButtonChooseBackupPath_clicked()
 
 void Dialog::on_pushButtonOpenBackup_clicked()
 {
-   QDesktopServices::openUrl(QUrl::fromLocalFile(ui->lineEditBackupPath->text()));
-
+    QDesktopServices::openUrl(QUrl::fromLocalFile(ui->lineEditBackupPath->text()));
 }

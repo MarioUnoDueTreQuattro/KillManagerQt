@@ -72,6 +72,7 @@ private:
     void connectTimer();
     bool m_bTimerIsConnected;
     int m_iTimerUpdatesCount;
+    int m_iRefreshRate;
 protected:
     void closeEvent(QCloseEvent* event) override;
 public slots:

@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget* parent)
     //connect(ui->actionConfigure_app, SIGNAL(triggered(QAction*)), this, SLOT(menuConfigure()));
     timer = new QTimer(this);
     connectTimer ();
-    timer->start(5000);  // ogni secondo
+    timer->start(m_iRefreshRate);  // ogni secondo
 }
 
 MainWindow::~MainWindow()
@@ -73,9 +73,18 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::timerUupdate()
 {
+    QString repeatedChar;
     m_iTimerUpdatesCount += 1;
-    qDebug() << __FUNCTION__ << m_iTimerUpdatesCount;
+    repeatedChar = QString(".").repeated(m_iTimerUpdatesCount % 10 );
+    // repeatedChar.prepend ("<html><head/><body><span style=\" font-weight:600; color:#ff0000;\">");
+    // repeatedChar.append ("</span></body></html>");
+    //qDebug() << __FUNCTION__ << m_iTimerUpdatesCount;
     loadListFromFile ();
+    QString sRefreshed = ui->statusBar->currentMessage ();
+    if (sRefreshed == "" | sRefreshed.left (9) == "Refreshed")
+    {
+        ui->statusBar->showMessage ("Refreshed" + repeatedChar);
+    }
 }
 
 void MainWindow::updatePaths()
@@ -215,6 +224,8 @@ void MainWindow::readSettings()
         // in modo esplicito se non ti piacciono quelle predefinite di Qt.
         // Ad esempio: splitter->setSizes(QList<int>() << 200 << 400);
     }
+    int iRefreshRate = settings.value("Dialog/RefreshRate", 5).toInt(); // default to 5
+    m_iRefreshRate = iRefreshRate * 1000;
 }
 
 void MainWindow::writeSettings()
@@ -308,7 +319,7 @@ void MainWindow::copySelectedDisabledItem()
     if (currentItem)
     {
         QApplication::clipboard()->setText(currentItem->text());
-        ui->statusBar->showMessage("Copied text: " + currentItem->text());
+        ui->statusBar->showMessage("Copied text: " + currentItem->text(),10000);
     }
     else
     {
@@ -322,7 +333,7 @@ void MainWindow::copySelectedEnabledItem()
     if (currentItem)
     {
         QApplication::clipboard()->setText(currentItem->text());
-        ui->statusBar->showMessage("Copied text: " + currentItem->text());
+        ui->statusBar->showMessage("Copied text: " + currentItem->text(),10000);
     }
     else
     {
@@ -337,7 +348,7 @@ void MainWindow::deleteSelectedEnabledItem()
     {
         disconnectTimer ();
         ui->listWidgetEnabled->removeItemWidget(currentItem);
-        ui->statusBar->showMessage("Removed: " + currentItem->text());
+        ui->statusBar->showMessage("Removed: " + currentItem->text(),10000);
         deleteApplicationItem(currentItem->text());
         qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
         delete currentItem;
@@ -360,7 +371,7 @@ void MainWindow::deleteSelectedDisabledItem()
     {
         disconnectTimer ();
         ui->listWidgetDisabled->removeItemWidget(currentItem);
-        ui->statusBar->showMessage("Removed: " + currentItem->text());
+        ui->statusBar->showMessage("Removed: " + currentItem->text(),10000);
         deleteApplicationItem(currentItem->text());
         qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
         delete currentItem;
@@ -385,7 +396,7 @@ void MainWindow::enableSelectedDisabledItem()
         QListWidgetItem* temp = new QListWidgetItem(*currentItem);
         ui->listWidgetEnabled->addItem(temp);
         ui->listWidgetDisabled->removeItemWidget(currentItem);
-        ui->statusBar->showMessage("Enabled: " + currentItem->text());
+        ui->statusBar->showMessage("Enabled: " + currentItem->text(),10000);
         moveApplicationItem(currentItem->text(), true);
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
@@ -409,7 +420,7 @@ void MainWindow::disableSelectedEnabledItem()
         QListWidgetItem* temp = new QListWidgetItem(*currentItem);
         ui->listWidgetDisabled->addItem(temp);
         ui->listWidgetEnabled->removeItemWidget(currentItem);
-        ui->statusBar->showMessage("Disabled: " + currentItem->text());
+        ui->statusBar->showMessage("Disabled: " + currentItem->text(),10000);
         moveApplicationItem(currentItem->text(), false);
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
@@ -432,6 +443,11 @@ void MainWindow::menuConfigure()
     // cd.setParent (this);
     cd.setWindowTitle("Configure");
     cd.exec();
+    qDebug() << __FUNCTION__ << "Reading m_iRefreshRate";
+    QSettings settings;
+    int iRefreshRate = settings.value("Dialog/RefreshRate", 5).toInt(); // default to 5
+    m_iRefreshRate = iRefreshRate * 1000;
+    timer->setInterval (m_iRefreshRate);
     // cd.open ();
     // cd.update ();
     //cd.setVisible (true);
@@ -526,11 +542,11 @@ void MainWindow::loadListFromFile(const QString& fileName)
     ui->listWidgetEnabled->clear();
     ui->listWidgetDisabled->clear();
     QFile file(fileName);
-//    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-//    {
-//        qWarning() << "Could not open file:" << fileName;
-//        //return;
-//    }
+    // if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    // {
+    // qWarning() << "Could not open file:" << fileName;
+    //        //return;
+    // }
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         qDebug() << "File not found or unreadable. Creating it...";
@@ -553,633 +569,634 @@ void MainWindow::loadListFromFile(const QString& fileName)
             return;
         }
     }
-        QString file_line;
-        QString firstThreeChars;
-        QStringList line_parts;
-        QString line_parts_last;
-        QTextStream in(&file);
-        while (!in.atEnd())
-        {
-            file_line = in.readLine();
-            // String with more than 3 characters
-            firstThreeChars = file_line.left(3);           // Get the first 3 characters
-            if (firstThreeChars.toUpper() == "REM")
-            {
-                //qDebug() << "REM:" << file_line;
-                line_parts = file_line.split(' ');
-                line_parts_last = line_parts.last();
-                addItemToListwidget(ui->listWidgetDisabled, line_parts_last);
-                //ui->listWidgetDisabled->addItem(line_parts_last);
-                ApplicationItem appItem(line_parts_last, false);
-                m_ApplicationItemsList.append(appItem);
-            }
-            else
-            {
-                line_parts = file_line.split(' ');
-                line_parts_last = line_parts.last();
-                addItemToListwidget(ui->listWidgetEnabled, line_parts_last);
-                //ui->listWidgetEnabled->addItem(line_parts_last);
-                ApplicationItem appItem(line_parts_last, true);
-                m_ApplicationItemsList.append(appItem);
-            }
-            // You can also create a QListWidgetItem and add it
-            // QListWidgetItem *item = new QListWidgetItem(line);
-            // ui->listWidget->addItem(item);
-        }
-        //ui->statusBar->showMessage("File " + m_sKillFile + " read");
-        //qDebug() << "ItemCount= " << m_ApplicationItemsList.count();
-        ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
-        ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
-        file.close();       // Not strictly necessary due to RAII, but good practice
-        //qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
-    }
-    void MainWindow::loadListFromFile()
+    QString file_line;
+    QString firstThreeChars;
+    QStringList line_parts;
+    QString line_parts_last;
+    QTextStream in(&file);
+    while (!in.atEnd())
     {
-        updatePaths();
-        // m_sKillFile.replace("\\", "\\\\");
-        // qDebug() << m_sKillFile;
-        QString universalPath1 = QDir::fromNativeSeparators(m_sKillFile);
-        loadListFromFile(universalPath1);
-        //qDebug() << "loadListFromFile() finished.";
-    }
-    bool MainWindow::writeListToFile()
-    {
-        disconnectTimer ();
-        bool bBackuped = backupBatchFile();
-        if (bBackuped == false)
+        file_line = in.readLine();
+        // String with more than 3 characters
+        firstThreeChars = file_line.left(3);           // Get the first 3 characters
+        if (firstThreeChars.toUpper() == "REM")
         {
-            qDebug() << "NOT BACKUPED";
-            return false;
+            //qDebug() << "REM:" << file_line;
+            line_parts = file_line.split(' ');
+            line_parts_last = line_parts.last();
+            addItemToListwidget(ui->listWidgetDisabled, line_parts_last);
+            //ui->listWidgetDisabled->addItem(line_parts_last);
+            ApplicationItem appItem(line_parts_last, false);
+            m_ApplicationItemsList.append(appItem);
         }
         else
-            qDebug() << "BACKUP OK";
-        //updatePaths();
-        // m_sKillFile.replace("\\", "\\\\");
-        // qDebug() << m_sKillFile;
-        QString universalPath1 = QDir::fromNativeSeparators(m_sKillFile);
-        // 1. Define the file path
-        // It's good practice to use QDir for platform-independent paths.
-        // Here, we'll save the file in the user's desktop directory.
-        // QString filePath = QDir::homePath() + QDir::separator() + "MyTestFile.bat";
-        //QString filePath = universalPath1;
-        // Or a fixed path for testing (adjust for your OS):
-        // QString filePath = "C:/Temp/MyTestFile.txt"; // Windows
-        // QString filePath = "/tmp/MyTestFile.txt";   // Linux/macOS
-        // 2. Create a QFile object
-        QFile file(universalPath1);
-        // 3. Open the file in WriteOnly mode (and optionally Text mode for QTextStream)
-        // QFile::WriteOnly: The file is opened for writing. If it exists, its content is truncated.
-        // QFile::Append: If you want to add to an existing file instead of overwriting it.
-        // QFile::Text: (Optional but recommended for text files) Automatically handles end-of-line conversions (\n to \r\n on Windows).
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
-            qCritical() << "Could not open file for writing:" << file.errorString();
-            return false;           // Indicate error
+            line_parts = file_line.split(' ');
+            line_parts_last = line_parts.last();
+            addItemToListwidget(ui->listWidgetEnabled, line_parts_last);
+            //ui->listWidgetEnabled->addItem(line_parts_last);
+            ApplicationItem appItem(line_parts_last, true);
+            m_ApplicationItemsList.append(appItem);
         }
-        // 4. Create a QTextStream object for writing text
-        QTextStream out(&file);
-        // Optional: Set encoding for QTextStream (defaults to system locale encoding)
-        // out.setCodec("UTF-8"); // Explicitly set UTF-8 encoding
-        // 5. Write content to the file
-        QString s_TaskKill = "taskkill /F /T /IM ";
-        QString s_NoTaskKill = "REM taskkill /F /T /IM ";
-        int iCount;
-        iCount = ui->listWidgetEnabled->count();
-        for (int i = 0; i < iCount; i++)
+        // You can also create a QListWidgetItem and add it
+        // QListWidgetItem *item = new QListWidgetItem(line);
+        // ui->listWidget->addItem(item);
+    }
+    //ui->statusBar->showMessage("File " + m_sKillFile + " read");
+    //qDebug() << "ItemCount= " << m_ApplicationItemsList.count();
+    ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
+    ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
+    file.close();       // Not strictly necessary due to RAII, but good practice
+    //qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
+}
+void MainWindow::loadListFromFile()
+{
+    updatePaths();
+    // m_sKillFile.replace("\\", "\\\\");
+    // qDebug() << m_sKillFile;
+    QString universalPath1 = QDir::fromNativeSeparators(m_sKillFile);
+    loadListFromFile(universalPath1);
+    //qDebug() << "loadListFromFile() finished.";
+}
+bool MainWindow::writeListToFile()
+{
+    disconnectTimer ();
+    bool bBackuped = backupBatchFile();
+    if (bBackuped == false)
+    {
+        qDebug() << "NOT BACKUPED";
+        return false;
+    }
+    else
+        qDebug() << "BACKUP OK";
+    //updatePaths();
+    // m_sKillFile.replace("\\", "\\\\");
+    // qDebug() << m_sKillFile;
+    QString universalPath1 = QDir::fromNativeSeparators(m_sKillFile);
+    // 1. Define the file path
+    // It's good practice to use QDir for platform-independent paths.
+    // Here, we'll save the file in the user's desktop directory.
+    // QString filePath = QDir::homePath() + QDir::separator() + "MyTestFile.bat";
+    //QString filePath = universalPath1;
+    // Or a fixed path for testing (adjust for your OS):
+    // QString filePath = "C:/Temp/MyTestFile.txt"; // Windows
+    // QString filePath = "/tmp/MyTestFile.txt";   // Linux/macOS
+    // 2. Create a QFile object
+    QFile file(universalPath1);
+    // 3. Open the file in WriteOnly mode (and optionally Text mode for QTextStream)
+    // QFile::WriteOnly: The file is opened for writing. If it exists, its content is truncated.
+    // QFile::Append: If you want to add to an existing file instead of overwriting it.
+    // QFile::Text: (Optional but recommended for text files) Automatically handles end-of-line conversions (\n to \r\n on Windows).
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qCritical() << "Could not open file for writing:" << file.errorString();
+        return false;           // Indicate error
+    }
+    // 4. Create a QTextStream object for writing text
+    QTextStream out(&file);
+    // Optional: Set encoding for QTextStream (defaults to system locale encoding)
+    // out.setCodec("UTF-8"); // Explicitly set UTF-8 encoding
+    // 5. Write content to the file
+    QString s_TaskKill = "taskkill /F /T /IM ";
+    QString s_NoTaskKill = "REM taskkill /F /T /IM ";
+    int iCount;
+    iCount = ui->listWidgetEnabled->count();
+    for (int i = 0; i < iCount; i++)
+    {
+        out << s_TaskKill << ui->listWidgetEnabled->item(i)->text() << "\n";
+    }
+    iCount = ui->listWidgetDisabled->count();
+    for (int i = 0; i < iCount; i++)
+    {
+        out << s_NoTaskKill << ui->listWidgetDisabled->item(i)->text() << "\n";
+    }
+    // out << QString("The current application path is: %1\n").arg(QCoreApplication::applicationDirPath());
+    // 6. Close the file
+    // The QTemporaryFile will be automatically removed when it goes out of scope or QApplication exits.
+    // For regular QFile, it's good practice to close it explicitly, although it will be
+    // automatically closed when the QFile object is destroyed.
+    file.close();
+    universalPath1 = QDir::toNativeSeparators(universalPath1);
+    qDebug() << "Batch file successfully written to:" << universalPath1;
+    ui->statusBar->showMessage("Batch file successfully written to: " + universalPath1,10000);
+    connectTimer ();
+    return true;
+}
+void MainWindow::on_listWidgetEnabled_itemClicked(QListWidgetItem * item)
+{
+    if (item)         // Always check if the item pointer is valid
+    {
+        ui->listWidgetEnabled->setCurrentItem(item);
+        // QString clickedText = item->text();
+        // ui->statusBar->showMessage(clickedText);
+    }
+}
+void MainWindow::on_listWidgetDisabled_itemClicked(QListWidgetItem * item)
+{
+    if (item)         // Always check if the item pointer is valid
+    {
+        ui->listWidgetDisabled->setCurrentItem(item);
+        // QString clickedText = item->text();
+        // ui->statusBar->showMessage(clickedText);
+    }
+}
+void MainWindow::on_pushButtonWrite_clicked()
+{
+    writeListToFile ();
+    return;
+    QMessageBox::StandardButton reply;
+    // Use the static question() method for a confirmation dialog
+    reply = QMessageBox::question(this,
+            "Confirm",       // Dialog title
+            "Are you sure you want to proceed writing the file to disk?",       // Main text
+            QMessageBox::Yes | QMessageBox::Cancel);       // Buttons
+    if (reply == QMessageBox::Yes)
+    {
+        qDebug() << "User clicked Yes";
+        writeListToFile();
+    }
+    else         // QMessageBox::Cancel or closing the dialog
+    {
+        qDebug() << "User clicked Cancel or closed the dialog";
+        // Do nothing or abort
+    }
+}
+void MainWindow::on_pushButtonReload_clicked()
+{
+    disconnectTimer ();
+    loadListFromFile();
+    connectTimer ();
+}
+void MainWindow::on_pushButtonAdd_clicked()
+{
+    showAddExeDialog();
+    // QApplication* currentApp = qApp;
+    // QString orgName = currentApp->organizationName();
+    // QString appName = currentApp->applicationName();
+    // qDebug() << orgName;
+    // qDebug() << appName;
+    // QSettings settings;
+    // QString readValue = settings.value("Path").toString();
+    // qDebug() << "Read string from registry:" << readValue;
+    // if (readValue == "") {
+    // qDebug() << "Read value is empty.";
+    // } else {
+    //        // ui->lineEditPath->setText (readValue);
+    // qDebug() << "Read value OK";
+    // }
+    // QString initialPath = ui->lineEditPath->text();
+    // if (initialPath.isEmpty())
+    /*
+       QString initialPath = QDir::homePath();
+       QString filePath = QFileDialog::getOpenFileName(
+        this,
+        tr("Choose executable application"),
+        initialPath, // Start in user's home directory
+        tr("*.exe"), 0, 0);
+       if (!filePath.isEmpty()) {
+        filePath = QDir::toNativeSeparators(filePath);
+        QStringList line_parts = filePath.split('\\');
+        QString line_parts_last = line_parts.last();
+        QListWidgetItem* newitem = new QListWidgetItem(line_parts_last, ui->listWidgetEnabled);
+        ui->listWidgetEnabled->addItem(newitem);
+        qDebug() << "User selected file:" << filePath;
+        // You can now use filePath to open and read the file
+       } else {
+        //                fileNameLabel->setText("No file selected.");
+        qDebug() << "File dialog cancelled or no file selected.";
+       }*/
+}
+bool MainWindow::backupBatchFile()
+{
+    updatePaths();
+    // m_sKillFile.replace("\\", "\\\\");
+    // qDebug() << m_sKillFile;
+    QString universalPath1 = QDir::fromNativeSeparators(m_sKillFile);
+    QString sourcePath = universalPath1;
+    QFileInfo fileInfo(sourcePath);
+    universalPath1 = fileInfo.absolutePath();
+    QString destinationPath = fileInfo.baseName();
+    QDateTime current = QDateTime::currentDateTime();
+    qDebug() << "Current Date and Time:" << current.toString();
+    // format it
+    QString formatted = current.toString("yyyyMMdd_hhmmss");
+    destinationPath = destinationPath + "_" + formatted;
+    qDebug() << "Formatted:" << destinationPath;
+    destinationPath = m_sBackupPath + "\\" + destinationPath + ".bat";
+    qDebug() << "destinationPath:" << destinationPath;
+    // 2. Check if the destination file exists and remove it if it does (to allow overwriting)
+    if (QFile::exists(destinationPath))
+    {
+        qDebug() << "Destination file already exists. Removing...";
+        if (!QFile::remove(destinationPath))
         {
-            out << s_TaskKill << ui->listWidgetEnabled->item(i)->text() << "\n";
+            qDebug() << "Failed to remove existing destination file:" << destinationPath;
+            return false;
         }
-        iCount = ui->listWidgetDisabled->count();
-        for (int i = 0; i < iCount; i++)
-        {
-            out << s_NoTaskKill << ui->listWidgetDisabled->item(i)->text() << "\n";
-        }
-        // out << QString("The current application path is: %1\n").arg(QCoreApplication::applicationDirPath());
-        // 6. Close the file
-        // The QTemporaryFile will be automatically removed when it goes out of scope or QApplication exits.
-        // For regular QFile, it's good practice to close it explicitly, although it will be
-        // automatically closed when the QFile object is destroyed.
-        file.close();
-        universalPath1 = QDir::toNativeSeparators(universalPath1);
-        qDebug() << "Batch file successfully written to:" << universalPath1;
-        ui->statusBar->showMessage("Batch file successfully written to: " + universalPath1);
-        connectTimer ();
+    }
+    // 3. Perform the copy
+    if (QFile::copy(sourcePath, destinationPath))
+    {
+        qDebug() << "File copied successfully from" << sourcePath << "to" << destinationPath;
         return true;
     }
-    void MainWindow::on_listWidgetEnabled_itemClicked(QListWidgetItem * item)
+    else
     {
-        if (item)         // Always check if the item pointer is valid
-        {
-            ui->listWidgetEnabled->setCurrentItem(item);
-            // QString clickedText = item->text();
-            // ui->statusBar->showMessage(clickedText);
-        }
+        qDebug() << "Failed to copy file from" << sourcePath << "to" << destinationPath;
+        // You can get more specific error information if needed
+        // For example:
+        // QFile destFile(destinationPath);
+        // qDebug() << "Error:" << destFile.errorString();
+        return false;
     }
-    void MainWindow::on_listWidgetDisabled_itemClicked(QListWidgetItem * item)
+}
+void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemText)
+{
+    bool bFound = false;
+    QString itemString = "";
+    // Iterate in reverse to safely remove items while modifying the list
+    //qDebug()<< "m_ApplicationItemsList.size="<<m_ApplicationItemsList.size();
+    int iFound = findApplicationItemIndex (newItemText);
+    if (iFound != -1) bFound = true;
+    // for (int i = m_ApplicationItemsList.size() - 1; i >= 0; --i)
+    // {
+    // if (m_ApplicationItemsList.at(i).getAppName() == newItemText)
+    // {
+    // bFound = true;
+    // }
+    // }
+    // bool found = false;
+    // for (int i = 0; i < listWidget->count(); ++i) {
+    // if (listWidget->item(i)->text() == newItemText) {
+    // found = true;
+    // break;
+    // }
+    // }
+    if (bFound)
     {
-        if (item)         // Always check if the item pointer is valid
-        {
-            ui->listWidgetDisabled->setCurrentItem(item);
-            // QString clickedText = item->text();
-            // ui->statusBar->showMessage(clickedText);
-        }
+        QMessageBox::information(this, "Duplicate", QString("'%1' already exists in the list.").arg(newItemText));
     }
-    void MainWindow::on_pushButtonWrite_clicked()
+    else
     {
-        writeListToFile ();
-        return;
-        QMessageBox::StandardButton reply;
-        // Use the static question() method for a confirmation dialog
-        reply = QMessageBox::question(this,
-                "Confirm",       // Dialog title
-                "Are you sure you want to proceed writing the file to disk?",       // Main text
-                QMessageBox::Yes | QMessageBox::Cancel);       // Buttons
-        if (reply == QMessageBox::Yes)
-        {
-            qDebug() << "User clicked Yes";
-            writeListToFile();
-        }
-        else         // QMessageBox::Cancel or closing the dialog
-        {
-            qDebug() << "User clicked Cancel or closed the dialog";
-            // Do nothing or abort
-        }
-    }
-    void MainWindow::on_pushButtonReload_clicked()
-    {
-        disconnectTimer ();
-        loadListFromFile();
-        connectTimer ();
-    }
-    void MainWindow::on_pushButtonAdd_clicked()
-    {
-        showAddExeDialog();
-        // QApplication* currentApp = qApp;
-        // QString orgName = currentApp->organizationName();
-        // QString appName = currentApp->applicationName();
-        // qDebug() << orgName;
-        // qDebug() << appName;
-        // QSettings settings;
-        // QString readValue = settings.value("Path").toString();
-        // qDebug() << "Read string from registry:" << readValue;
-        // if (readValue == "") {
-        // qDebug() << "Read value is empty.";
-        // } else {
-        //        // ui->lineEditPath->setText (readValue);
-        // qDebug() << "Read value OK";
-        // }
-        // QString initialPath = ui->lineEditPath->text();
-        // if (initialPath.isEmpty())
-        /*
-           QString initialPath = QDir::homePath();
-           QString filePath = QFileDialog::getOpenFileName(
-            this,
-            tr("Choose executable application"),
-            initialPath, // Start in user's home directory
-            tr("*.exe"), 0, 0);
-           if (!filePath.isEmpty()) {
-            filePath = QDir::toNativeSeparators(filePath);
-            QStringList line_parts = filePath.split('\\');
-            QString line_parts_last = line_parts.last();
-            QListWidgetItem* newitem = new QListWidgetItem(line_parts_last, ui->listWidgetEnabled);
-            ui->listWidgetEnabled->addItem(newitem);
-            qDebug() << "User selected file:" << filePath;
-            // You can now use filePath to open and read the file
-           } else {
-            //                fileNameLabel->setText("No file selected.");
-            qDebug() << "File dialog cancelled or no file selected.";
-           }*/
-    }
-    bool MainWindow::backupBatchFile()
-    {
-        updatePaths();
-        // m_sKillFile.replace("\\", "\\\\");
-        // qDebug() << m_sKillFile;
-        QString universalPath1 = QDir::fromNativeSeparators(m_sKillFile);
-        QString sourcePath = universalPath1;
-        QFileInfo fileInfo(sourcePath);
-        universalPath1 = fileInfo.absolutePath();
-        QString destinationPath = fileInfo.baseName();
-        QDateTime current = QDateTime::currentDateTime();
-        qDebug() << "Current Date and Time:" << current.toString();
-        // format it
-        QString formatted = current.toString("yyyyMMdd_hhmmss");
-        destinationPath = destinationPath + "_" + formatted;
-        qDebug() << "Formatted:" << destinationPath;
-        destinationPath = m_sBackupPath + "\\" + destinationPath + ".bat";
-        qDebug() << "destinationPath:" << destinationPath;
-        // 2. Check if the destination file exists and remove it if it does (to allow overwriting)
-        if (QFile::exists(destinationPath))
-        {
-            qDebug() << "Destination file already exists. Removing...";
-            if (!QFile::remove(destinationPath))
-            {
-                qDebug() << "Failed to remove existing destination file:" << destinationPath;
-                return false;
-            }
-        }
-        // 3. Perform the copy
-        if (QFile::copy(sourcePath, destinationPath))
-        {
-            qDebug() << "File copied successfully from" << sourcePath << "to" << destinationPath;
-            return true;
-        }
-        else
-        {
-            qDebug() << "Failed to copy file from" << sourcePath << "to" << destinationPath;
-            // You can get more specific error information if needed
-            // For example:
-            // QFile destFile(destinationPath);
-            // qDebug() << "Error:" << destFile.errorString();
-            return false;
-        }
-    }
-    void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemText)
-    {
-        bool bFound = false;
-        QString itemString = "";
-        // Iterate in reverse to safely remove items while modifying the list
-        //qDebug()<< "m_ApplicationItemsList.size="<<m_ApplicationItemsList.size();
-        int iFound = findApplicationItemIndex (newItemText);
-        if (iFound != -1) bFound = true;
-        // for (int i = m_ApplicationItemsList.size() - 1; i >= 0; --i)
-        // {
-        // if (m_ApplicationItemsList.at(i).getAppName() == newItemText)
-        // {
-        // bFound = true;
-        // }
-        // }
-        // bool found = false;
-        // for (int i = 0; i < listWidget->count(); ++i) {
-        // if (listWidget->item(i)->text() == newItemText) {
-        // found = true;
-        // break;
-        // }
-        // }
+        bFound = m_ProcessList.isRunning (newItemText);
+        //qDebug() << __FUNCTION__ << newItemText;
         if (bFound)
         {
-            QMessageBox::information(this, "Duplicate", QString("'%1' already exists in the list.").arg(newItemText));
+            QListWidgetItem* item = new QListWidgetItem(newItemText);
+            item->setFont(m_Font);
+            item->setForeground (m_TextBrush);
+            //item->setBackground (QColor(247,209,209));
+            item->setBackground (QColor(191, 191, 239));
+            listWidget->addItem(item);
+            if (newItemText == m_sSelectedEnabledItem)
+            {
+                item->setSelected (true);
+                //qDebug() << "selected" << newItemText;
+                listWidget->setCurrentItem(item);
+            }
+            if (newItemText == m_sSelectedDisabledItem)
+            {
+                item->setSelected (true);
+                //qDebug() << "selectedDis" << newItemText;
+                listWidget->setCurrentItem(item);
+            }
         }
         else
         {
-            bFound = m_ProcessList.isRunning (newItemText);
-            //qDebug() << __FUNCTION__ << newItemText;
-            if (bFound)
+            QListWidgetItem* item = new QListWidgetItem(newItemText);
+            listWidget->addItem(item);
+            if (newItemText == m_sSelectedEnabledItem)
             {
-                QListWidgetItem* item = new QListWidgetItem(newItemText);
-                item->setFont(m_Font);
-                item->setForeground (m_TextBrush);
-                //item->setBackground (QColor(247,209,209));
-                item->setBackground (QColor(191, 191, 239));
-                listWidget->addItem(item);
-                if (newItemText == m_sSelectedEnabledItem)
-                {
-                    item->setSelected (true);
-                    //qDebug() << "selected" << newItemText;
-                    listWidget->setCurrentItem(item);
-                }
-                if (newItemText == m_sSelectedDisabledItem)
-                {
-                    item->setSelected (true);
-                    //qDebug() << "selectedDis" << newItemText;
-                    listWidget->setCurrentItem(item);
-                }
+                item->setSelected (true);
+                //qDebug() << "selected" << newItemText;
+                listWidget->setCurrentItem(item);
             }
-            else
+            if (newItemText == m_sSelectedDisabledItem)
             {
-                QListWidgetItem* item = new QListWidgetItem(newItemText);
-                listWidget->addItem(item);
-                if (newItemText == m_sSelectedEnabledItem)
-                {
-                    item->setSelected (true);
-                    //qDebug() << "selected" << newItemText;
-                    listWidget->setCurrentItem(item);
-                }
-                if (newItemText == m_sSelectedDisabledItem)
-                {
-                    item->setSelected (true);
-                    //qDebug() << "selectedDis" << newItemText;
-                    listWidget->setCurrentItem(item);
-                }
-            }
-            // ApplicationItem newAppItem(newItemText,true);
-            // m_ApplicationItemsList.append(newAppItem);
-            //QListWidgetItem* newitem = new QListWidgetItem(receivedText, ui->listWidgetEnabled);
-            //ui->listWidgetEnabled->addItem(newitem);
-        }
-        //qDebug() << __FUNCTION__ << "found= " << bFound;
-    }
-    ApplicationItem *MainWindow::findApplicationItem(QString sFound)
-    {
-        int i_AppItemCount = m_ApplicationItemsList.count ();
-        ApplicationItem *foundItem;
-        // for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
-        for (int iCount = 0; iCount < i_AppItemCount; iCount++)
-        {
-            foundItem = &m_ApplicationItemsList[iCount];
-            if (foundItem->getAppName () == sFound) return foundItem;
-        }
-        return NULL;
-    }
-    int MainWindow::findApplicationItemIndex(QString sFound)
-    {
-        int i_AppItemCount = m_ApplicationItemsList.count ();
-        ApplicationItem *foundItem;
-        // for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
-        for (int iCount = 0; iCount < i_AppItemCount; iCount++)
-        {
-            foundItem = &m_ApplicationItemsList[iCount];
-            if (foundItem->getAppName () == sFound) return iCount;
-        }
-        return -1;
-    }
-    void MainWindow::debugNotFoundWhenKilling()
-    {
-        int i_AppItemCount = m_ApplicationItemsList.count ();
-        ApplicationItem *foundItem;
-        //for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
-        for (int iCount = 0; iCount < i_AppItemCount; iCount++)
-        {
-            foundItem = &m_ApplicationItemsList[iCount];
-            if (foundItem->getFoundWhenKilling () == false) qDebug() << foundItem->getAppName ();
-        }
-    }
-    void MainWindow::debugFoundWhenKilling()
-    {
-        ui->listWidgetKilled->clear ();
-        int i_AppItemCount = m_ApplicationItemsList.count ();
-        ApplicationItem *foundItem;
-        //for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
-        for (int iCount = 0; iCount < i_AppItemCount; iCount++)
-        {
-            foundItem = &m_ApplicationItemsList[iCount];
-            if (foundItem->getFoundWhenKilling () && foundItem->getAppKillEnabled ())
-            {
-                ui->listWidgetKilled->addItem (foundItem->getAppName ());
-                qDebug() << foundItem->getAppName ();
+                item->setSelected (true);
+                //qDebug() << "selectedDis" << newItemText;
+                listWidget->setCurrentItem(item);
             }
         }
-        ui->labelKilled->setText("Killed: " + QString::number(ui->listWidgetKilled->count()));
+        // ApplicationItem newAppItem(newItemText,true);
+        // m_ApplicationItemsList.append(newAppItem);
+        //QListWidgetItem* newitem = new QListWidgetItem(receivedText, ui->listWidgetEnabled);
+        //ui->listWidgetEnabled->addItem(newitem);
     }
-    void MainWindow::disconnectTimer()
+    //qDebug() << __FUNCTION__ << "found= " << bFound;
+}
+ApplicationItem *MainWindow::findApplicationItem(QString sFound)
+{
+    int i_AppItemCount = m_ApplicationItemsList.count ();
+    ApplicationItem *foundItem;
+    // for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
+    for (int iCount = 0; iCount < i_AppItemCount; iCount++)
     {
-        if (m_bTimerIsConnected == true)
+        foundItem = &m_ApplicationItemsList[iCount];
+        if (foundItem->getAppName () == sFound) return foundItem;
+    }
+    return NULL;
+}
+int MainWindow::findApplicationItemIndex(QString sFound)
+{
+    int i_AppItemCount = m_ApplicationItemsList.count ();
+    ApplicationItem *foundItem;
+    // for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
+    for (int iCount = 0; iCount < i_AppItemCount; iCount++)
+    {
+        foundItem = &m_ApplicationItemsList[iCount];
+        if (foundItem->getAppName () == sFound) return iCount;
+    }
+    return -1;
+}
+void MainWindow::debugNotFoundWhenKilling()
+{
+    int i_AppItemCount = m_ApplicationItemsList.count ();
+    ApplicationItem *foundItem;
+    //for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
+    for (int iCount = 0; iCount < i_AppItemCount; iCount++)
+    {
+        foundItem = &m_ApplicationItemsList[iCount];
+        if (foundItem->getFoundWhenKilling () == false) qDebug() << foundItem->getAppName ();
+    }
+}
+void MainWindow::debugFoundWhenKilling()
+{
+    ui->listWidgetKilled->clear ();
+    int i_AppItemCount = m_ApplicationItemsList.count ();
+    ApplicationItem *foundItem;
+    //for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
+    for (int iCount = 0; iCount < i_AppItemCount; iCount++)
+    {
+        foundItem = &m_ApplicationItemsList[iCount];
+        if (foundItem->getFoundWhenKilling () && foundItem->getAppKillEnabled ())
         {
-            qDebug() << "Disconnecting timer";
-            disconnect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
-            m_bTimerIsConnected = false;
+            ui->listWidgetKilled->addItem (foundItem->getAppName ());
+            qDebug() << foundItem->getAppName ();
         }
     }
-    void MainWindow::connectTimer()
+    ui->labelKilled->setText("Killed: " + QString::number(ui->listWidgetKilled->count()));
+}
+void MainWindow::disconnectTimer()
+{
+    if (m_bTimerIsConnected == true)
     {
-        if (m_bTimerIsConnected == false)
+        qDebug() << "Disconnecting timer";
+        disconnect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+        m_bTimerIsConnected = false;
+    }
+}
+void MainWindow::connectTimer()
+{
+    if (m_bTimerIsConnected == false)
+    {
+        qDebug() << "Reconnecting timer";
+        m_iTimerUpdatesCount = 0;
+        //timer->setInterval (m_iRefreshRate);
+        connect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+        m_bTimerIsConnected = true;
+    }
+}
+void MainWindow::readStdOutput()
+{
+    // QString standardOut = process->readAllStandardOutput ();
+    // QString output = standardOut;
+    //    //output.replace ("\r\n", "");
+    // output.replace ("\n", "");
+    // output.replace ("\r", "");
+    // QStringList outList = output.split(' ');
+    // if (outList.isEmpty ()) qDebug() << "EMPTY";
+    //    // qDebug() << "QStringList: " << outList;
+    // qDebug() << "size: " << outList.size();
+    // for (int iCount = 0; iCount < outList.size (); iCount++)
+    // {
+    // QString sLine = outList.at (iCount);
+    //        //qDebug() << sLine;         //qDebug() << sLine;
+    // if (sLine.contains (".exe") )
+    // {
+    // output = sLine;
+    // qDebug() << sLine;
+    // }
+    // }
+    // if (output != "")
+    // {
+    //        //qDebug() << "std: " << standardOut;
+    //        //ui->listWidgetEnabled->addItem (output);
+    // }
+}
+void MainWindow::readStdError()
+{
+    QString output = QString(process->readAllStandardError ());
+    //output.replace ("\r\n", "");
+    QStringList lines = output.split ("\n");
+    int iLines = lines.count ();
+    if (iLines > 2)
+    {
+        qDebug() << "MORE THAN ONE ROW!!!!!!";
+        //QMessageBox::information (this, "", "PIU' DI UNA RIGA");
+    }
+    QStringList outList;
+    QString outputProg;
+    ApplicationItem *foundItem ;
+    for (int iRepeat = 0; iRepeat < iLines - 1; iRepeat++)
+    {
+        // QString outputProg = output;
+        outputProg = lines[iRepeat];
+        outputProg.replace ("\n", "");
+        outputProg.replace ("\r", "");
+        outList = outputProg.split(' ');
+        //qDebug() << outList.size();
+        outputProg = outList.at(2);
+        outputProg.replace ("\"", "");
+        //qDebug() << __FUNCTION__ << "err: " << outputProg;
+        foundItem = findApplicationItem (outputProg);
+        if (foundItem)
         {
-            qDebug() << "Reconnecting timer";
-            m_iTimerUpdatesCount = 0;
-            connect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
-            m_bTimerIsConnected = true;
+            //qDebug() << "foundItem->getAppName () " << foundItem->getAppName ();
+            foundItem->setFoundWhenKilling (false);
         }
+        else qDebug() << "foundItem->getAppName () NOT FOUND";
+        //ui->listWidgetDisabled->addItem (output);
     }
-    void MainWindow::readStdOutput()
-    {
-        // QString standardOut = process->readAllStandardOutput ();
-        // QString output = standardOut;
-        //    //output.replace ("\r\n", "");
-        // output.replace ("\n", "");
-        // output.replace ("\r", "");
-        // QStringList outList = output.split(' ');
-        // if (outList.isEmpty ()) qDebug() << "EMPTY";
-        //    // qDebug() << "QStringList: " << outList;
-        // qDebug() << "size: " << outList.size();
-        // for (int iCount = 0; iCount < outList.size (); iCount++)
-        // {
-        // QString sLine = outList.at (iCount);
-        //        //qDebug() << sLine;         //qDebug() << sLine;
-        // if (sLine.contains (".exe") )
-        // {
-        // output = sLine;
-        // qDebug() << sLine;
-        // }
-        // }
-        // if (output != "")
-        // {
-        //        //qDebug() << "std: " << standardOut;
-        //        //ui->listWidgetEnabled->addItem (output);
-        // }
-    }
-    void MainWindow::readStdError()
-    {
-        QString output = QString(process->readAllStandardError ());
-        //output.replace ("\r\n", "");
-        QStringList lines = output.split ("\n");
-        int iLines = lines.count ();
-        if (iLines > 2)
-        {
-            qDebug() << "MORE THAN ONE ROW!!!!!!";
-            //QMessageBox::information (this, "", "PIU' DI UNA RIGA");
-        }
-        QStringList outList;
-        QString outputProg;
-        ApplicationItem *foundItem ;
-        for (int iRepeat = 0; iRepeat < iLines - 1; iRepeat++)
-        {
-            // QString outputProg = output;
-            outputProg = lines[iRepeat];
-            outputProg.replace ("\n", "");
-            outputProg.replace ("\r", "");
-            outList = outputProg.split(' ');
-            //qDebug() << outList.size();
-            outputProg = outList.at(2);
-            outputProg.replace ("\"", "");
-            //qDebug() << __FUNCTION__ << "err: " << outputProg;
-            foundItem = findApplicationItem (outputProg);
-            if (foundItem)
-            {
-                //qDebug() << "foundItem->getAppName () " << foundItem->getAppName ();
-                foundItem->setFoundWhenKilling (false);
-            }
-            else qDebug() << "foundItem->getAppName () NOT FOUND";
-            //ui->listWidgetDisabled->addItem (output);
-        }
-    }
-    void MainWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
-    {
-        qDebug() << "Batch CMD Process finished with code:" << exitCode
-            << "and status:" << exitStatus;
-        ui->statusBar->showMessage(m_sKillFile + " executed.");
-        //debugNotFoundWhenKilling ();
-        debugFoundWhenKilling();
-        connectTimer ();
-    }
-    void MainWindow::on_pushButtonRun_clicked()
-    {
-        disconnectTimer ();
-        //QProcess *process = new QProcess(this); // 'this' sets the parent, good for memory management
-        resetAllApplicationItems();
-        process = new QProcess(this);
-        connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(readStdOutput()));
-        connect(process, SIGNAL(readyReadStandardError()), this, SLOT(readStdError()));
-        connect(process, SIGNAL(finished(int, QProcess::ExitStatus)),
-            this, SLOT(onProcessFinished(int, QProcess::ExitStatus)));
-        QString program = "cmd.exe";
-        QStringList arguments;
-        arguments << "/c" << m_sKillFile;       // Use forward slashes for paths in Qt
-        // process.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments * args)
-        // {
-        //        // Questa flag dice a Windows di creare una NUOVA finestra console.
-        // args->flags |= CREATE_NEW_CONSOLE;
-        // });
-        ui->statusBar->showMessage(m_sKillFile + " started...");
-        ui->statusBar->repaint ();
-        qDebug() << "Process started " << arguments;
-        process->start (program, arguments);
-        //QProcess *process = new QProcess();
-        // Connect signals to slots to capture output and handle process finish
-        // QObject::connect(process, &QProcess::readyReadStandardOutput, [process]() {
-        // qDebug() << "Standard Output:" << process->readAllStandardOutput();
-        // });
-        // QObject::connect(process, &QProcess::readyReadStandardError, [process]() {
-        // qWarning() << "Standard Error:" << process->readAllStandardError();
-        // });
-        // QObject::connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-        // [process](int exitCode, QProcess::ExitStatus exitStatus) {
-        // qDebug() << "Batch file finished with exit code:" << exitCode
-        // << "and exit status:" << exitStatus;
-        // process->deleteLater(); // Clean up the process object
-        //          //QCoreApplication::quit(); // Quit the application after the batch file finishes
-        // });
-        // process->start("cmd.exe", QStringList() << "/c" << m_sKillFile);   //process.startDetached (program, QStringList() << "/C" << m_sKillFile);
-        // Optional: Wait for the process to finish
-        process->waitForStarted(-1);
-        process->waitForFinished(-1);       // -1 means wait indefinitely
-        process->deleteLater ();
-        delete process;
-        //ui->statusBar->showMessage(m_sKillFile + " executed.");
-        // Optional: Read standard output/error
-        // qDebug() << "Standard Output:" << process->readAllStandardOutput();
-        // qDebug() << "Standard Error:" << process->readAllStandardError();
-        // Connect to signals for asynchronous handling
-        // connect(process, &QProcess::finished, this, [=](int exitCode, QProcess::ExitStatus exitStatus) {
-        // qDebug() << "Batch file finished with exit code:" << exitCode << "and status:" << exitStatus;
-        // qDebug() << "Standard Output:\n" << process->readAllStandardOutput();
-        // qDebug() << "Standard Error:\n" << process->readAllStandardError();
-        // process->deleteLater(); // Clean up the QProcess object
-        // });
-        // connect(process, &QProcess::errorOccurred, this, [=](QProcess::ProcessError error) {
-        // qDebug() << "Error starting batch file:" << error;
-        // qDebug() << "Error string:" << process->errorString();
-        // process->deleteLater();
-        // });
-    }
-    void MainWindow::on_actionConfigure_app_triggered()
-    {
-        menuConfigure();
-    }
-    void MainWindow::on_actionAbout_Qt_triggered()
-    {
-        QMessageBox::aboutQt(this);
-        // QStringList processes = getRunningProcesses();
-        //   // ui->listWidgetDisabled->clear(); // Assuming you have a QListWidget named 'listWidget'
-        // ui->listWidgetDisabled->addItems(processes);
-        // qDebug() << "Refreshed process list. Total processes:" << processes.count();
-    }
-    void MainWindow::on_actionAbout_triggered()
-    {
-        QString sIsDebug = "";
+}
+void MainWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    qDebug() << "Batch CMD Process finished with code:" << exitCode
+        << "and status:" << exitStatus;
+    ui->statusBar->showMessage(m_sKillFile + " executed.",10000);
+    //debugNotFoundWhenKilling ();
+    debugFoundWhenKilling();
+    connectTimer ();
+}
+void MainWindow::on_pushButtonRun_clicked()
+{
+    disconnectTimer ();
+    //QProcess *process = new QProcess(this); // 'this' sets the parent, good for memory management
+    resetAllApplicationItems();
+    process = new QProcess(this);
+    connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(readStdOutput()));
+    connect(process, SIGNAL(readyReadStandardError()), this, SLOT(readStdError()));
+    connect(process, SIGNAL(finished(int, QProcess::ExitStatus)),
+        this, SLOT(onProcessFinished(int, QProcess::ExitStatus)));
+    QString program = "cmd.exe";
+    QStringList arguments;
+    arguments << "/c" << m_sKillFile;       // Use forward slashes for paths in Qt
+    // process.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments * args)
+    // {
+    //        // Questa flag dice a Windows di creare una NUOVA finestra console.
+    // args->flags |= CREATE_NEW_CONSOLE;
+    // });
+    ui->statusBar->showMessage(m_sKillFile + " started...",10000);
+    ui->statusBar->repaint ();
+    qDebug() << "Process started " << arguments;
+    process->start (program, arguments);
+    //QProcess *process = new QProcess();
+    // Connect signals to slots to capture output and handle process finish
+    // QObject::connect(process, &QProcess::readyReadStandardOutput, [process]() {
+    // qDebug() << "Standard Output:" << process->readAllStandardOutput();
+    // });
+    // QObject::connect(process, &QProcess::readyReadStandardError, [process]() {
+    // qWarning() << "Standard Error:" << process->readAllStandardError();
+    // });
+    // QObject::connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+    // [process](int exitCode, QProcess::ExitStatus exitStatus) {
+    // qDebug() << "Batch file finished with exit code:" << exitCode
+    // << "and exit status:" << exitStatus;
+    // process->deleteLater(); // Clean up the process object
+    //          //QCoreApplication::quit(); // Quit the application after the batch file finishes
+    // });
+    // process->start("cmd.exe", QStringList() << "/c" << m_sKillFile);   //process.startDetached (program, QStringList() << "/C" << m_sKillFile);
+    // Optional: Wait for the process to finish
+    process->waitForStarted(-1);
+    process->waitForFinished(-1);       // -1 means wait indefinitely
+    process->deleteLater ();
+    delete process;
+    //ui->statusBar->showMessage(m_sKillFile + " executed.");
+    // Optional: Read standard output/error
+    // qDebug() << "Standard Output:" << process->readAllStandardOutput();
+    // qDebug() << "Standard Error:" << process->readAllStandardError();
+    // Connect to signals for asynchronous handling
+    // connect(process, &QProcess::finished, this, [=](int exitCode, QProcess::ExitStatus exitStatus) {
+    // qDebug() << "Batch file finished with exit code:" << exitCode << "and status:" << exitStatus;
+    // qDebug() << "Standard Output:\n" << process->readAllStandardOutput();
+    // qDebug() << "Standard Error:\n" << process->readAllStandardError();
+    // process->deleteLater(); // Clean up the QProcess object
+    // });
+    // connect(process, &QProcess::errorOccurred, this, [=](QProcess::ProcessError error) {
+    // qDebug() << "Error starting batch file:" << error;
+    // qDebug() << "Error string:" << process->errorString();
+    // process->deleteLater();
+    // });
+}
+void MainWindow::on_actionConfigure_app_triggered()
+{
+    menuConfigure();
+}
+void MainWindow::on_actionAbout_Qt_triggered()
+{
+    QMessageBox::aboutQt(this);
+    // QStringList processes = getRunningProcesses();
+    //   // ui->listWidgetDisabled->clear(); // Assuming you have a QListWidget named 'listWidget'
+    // ui->listWidgetDisabled->addItems(processes);
+    // qDebug() << "Refreshed process list. Total processes:" << processes.count();
+}
+void MainWindow::on_actionAbout_triggered()
+{
+    QString sIsDebug = "";
 #ifdef QT_DEBUG
-        sIsDebug = " Debug ";
+    sIsDebug = " Debug ";
 #else
-        sIsDebug = " Release ";
+    sIsDebug = " Release ";
 #endif
-        QString sVersion = "<h3><p style=\"font-weight: bold; color: rgb(0, 0, 128);\">Version ";
-        sVersion = sVersion + APP_VERSION;
-        sVersion = sVersion + sIsDebug + "</p></h3>";
-        QString sApp = qApp->applicationName();
-        QMessageBox::about(this, "About " + qApp->applicationName(),
-            "<h1><p style=\"font-weight: bold; color: rgb(0, 0, 128);\">"
-            + sApp + "</p></h1>"
-            + sVersion +
-        "<p>Build date and time: " + __DATE__ + " at " + __TIME__ + "</p>"
-        "<br>"
-        "<p>This application manages a 'KILL' batch file.</p>"
-        "<br>"
-        "<p>Copyright &copy; 2025 Andrea G.</p>"
-        "<p>All rights reserved.</p>"
-            /* "<p>Visit our website: <a href='https://www.example.com'>www.example.com</a></p>"*/);
-    }
-    void MainWindow::on_actionOpen_in_external_editor_triggered()
-    {
-        QSettings settings;
-        QProcess process;
-        QString program = "notepad.exe";
-        program = settings.value("Dialog/External editor", "notepad").toString();
-        QStringList arguments;
-        arguments << m_sKillFile;       // Use forward slashes for paths in Qt
-        process.startDetached(program, arguments);
-        ui->statusBar->showMessage(m_sKillFile + " opened in external editor.");
-        qDebug() << "Process started " << arguments;
-        // Optional: Wait for the process to finish
-        // process.waitForStarted(-1);
-        // process.waitForFinished(-1); // -1 means wait indefinitely
-        // ui->statusBar->showMessage(m_sKillFile + " executed.");
-    }
-    void MainWindow::on_actionExecute_in_terminal_window_triggered()
-    {
-        ui->statusBar->showMessage(m_sKillFile + " started in terminal window...");
-        ui->statusBar->repaint ();
-        const char *cstrKillFile = m_sKillFile.toUtf8().data();
-        std::string command = std::string("cmd /C ") + cstrKillFile;
-        system(command.c_str());
-        ui->statusBar->showMessage(m_sKillFile + " executed in terminal window.");
-    }
-    QStringList MainWindow::getRunningProcesses()
-    {
-        QStringList processList;
+    QString sVersion = "<h3><p style=\"font-weight: bold; color: rgb(0, 0, 128);\">Version ";
+    sVersion = sVersion + APP_VERSION;
+    sVersion = sVersion + sIsDebug + "</p></h3>";
+    QString sApp = qApp->applicationName();
+    QMessageBox::about(this, "About " + qApp->applicationName(),
+        "<h1><p style=\"font-weight: bold; color: rgb(0, 0, 128);\">"
+        + sApp + "</p></h1>"
+        + sVersion +
+    "<p>Build date and time: " + __DATE__ + " at " + __TIME__ + "</p>"
+    "<br>"
+    "<p>This application manages a 'KILL' batch file.</p>"
+    "<br>"
+    "<p>Copyright &copy; 2025 Andrea G.</p>"
+    "<p>All rights reserved.</p>"
+        /* "<p>Visit our website: <a href='https://www.example.com'>www.example.com</a></p>"*/);
+}
+void MainWindow::on_actionOpen_in_external_editor_triggered()
+{
+    QSettings settings;
+    QProcess process;
+    QString program = "notepad.exe";
+    program = settings.value("Dialog/External editor", "notepad").toString();
+    QStringList arguments;
+    arguments << m_sKillFile;       // Use forward slashes for paths in Qt
+    process.startDetached(program, arguments);
+    ui->statusBar->showMessage(m_sKillFile + " opened in external editor.",10000);
+    qDebug() << "Process started " << arguments;
+    // Optional: Wait for the process to finish
+    // process.waitForStarted(-1);
+    // process.waitForFinished(-1); // -1 means wait indefinitely
+    // ui->statusBar->showMessage(m_sKillFile + " executed.");
+}
+void MainWindow::on_actionExecute_in_terminal_window_triggered()
+{
+    ui->statusBar->showMessage(m_sKillFile + " started in terminal window...",10000);
+    ui->statusBar->repaint ();
+    const char *cstrKillFile = m_sKillFile.toUtf8().data();
+    std::string command = std::string("cmd /C ") + cstrKillFile;
+    system(command.c_str());
+    ui->statusBar->showMessage(m_sKillFile + " executed in terminal window.",10000);
+}
+QStringList MainWindow::getRunningProcesses()
+{
+    QStringList processList;
 #ifdef Q_OS_WIN
-        DWORD aProcesses[1024], cbNeeded, cProcesses;
-        unsigned int i;
-        // Get the list of process identifiers.
-        if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded))
-        {
-            qWarning() << "EnumProcesses failed!";
-            return processList;
-        }
-        // Calculate how many process identifiers were returned.
-        cProcesses = cbNeeded / sizeof(DWORD);
-        // Iterate through each process to get its name.
-        for (i = 0; i < cProcesses; i++)
-        {
-            if (aProcesses[i] == 0)
-                continue;
-            // Open process with necessary access rights
-            HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, aProcesses[i]);
-            if (NULL != hProcess)
-            {
-                HMODULE hMod;
-                DWORD cbNeededModule;
-                char szProcessName[MAX_PATH] = { 0 };
-                // Get a list of all modules in the process.
-                if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeededModule))
-                {
-                    // Get the base name of the first module (usually the executable).
-                    GetModuleBaseNameA(hProcess, hMod, szProcessName, sizeof(szProcessName) / sizeof(char));
-                }
-                // If we got a name, add it to our list
-                if (szProcessName[0] != '\0')
-                {
-                    processList << QString::fromLocal8Bit(szProcessName);
-                }
-                // Release the handle to the process.
-                CloseHandle(hProcess);
-            }
-        }
-#else
-        // For non-Windows platforms, you would use different methods.
-        // For example, on Linux, you might read from /proc/<pid>/comm or use 'ps' command.
-        qDebug() << "This function is designed for Windows. Other OS not implemented.";
-        processList << "Not available on this OS.";
-#endif
-        // Sort the list for better readability
-        processList.sort();
+    DWORD aProcesses[1024], cbNeeded, cProcesses;
+    unsigned int i;
+    // Get the list of process identifiers.
+    if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded))
+    {
+        qWarning() << "EnumProcesses failed!";
         return processList;
     }
+    // Calculate how many process identifiers were returned.
+    cProcesses = cbNeeded / sizeof(DWORD);
+    // Iterate through each process to get its name.
+    for (i = 0; i < cProcesses; i++)
+    {
+        if (aProcesses[i] == 0)
+            continue;
+        // Open process with necessary access rights
+        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, aProcesses[i]);
+        if (NULL != hProcess)
+        {
+            HMODULE hMod;
+            DWORD cbNeededModule;
+            char szProcessName[MAX_PATH] = { 0 };
+            // Get a list of all modules in the process.
+            if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeededModule))
+            {
+                // Get the base name of the first module (usually the executable).
+                GetModuleBaseNameA(hProcess, hMod, szProcessName, sizeof(szProcessName) / sizeof(char));
+            }
+            // If we got a name, add it to our list
+            if (szProcessName[0] != '\0')
+            {
+                processList << QString::fromLocal8Bit(szProcessName);
+            }
+            // Release the handle to the process.
+            CloseHandle(hProcess);
+        }
+    }
+#else
+    // For non-Windows platforms, you would use different methods.
+    // For example, on Linux, you might read from /proc/<pid>/comm or use 'ps' command.
+    qDebug() << "This function is designed for Windows. Other OS not implemented.";
+    processList << "Not available on this OS.";
+#endif
+    // Sort the list for better readability
+    processList.sort();
+    return processList;
+}
