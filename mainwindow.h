@@ -30,8 +30,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget* parent = 0);
     ~MainWindow();
-    static QString getKillFilePath();
+
 private:
+    void updatePaths();
     RunningProcessesList m_ProcessList;
     QFont m_Font;
     QBrush m_TextBrush;
@@ -40,6 +41,7 @@ private:
     Ui::MainWindow *ui;
     QString m_sKillFile;
     QString m_sInitialPath;
+    QString m_sBackupPath;
     QString m_sSelectedEnabledItem;
     QString m_sSelectedDisabledItem;
     // QString m_sAppName;

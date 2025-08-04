@@ -21,10 +21,16 @@ private slots:
     void on_Dialog_accepted();
     void on_pushButtonChooseExternaEditor_clicked();
 
+    void on_pushButtonChooseBackupPath_clicked();
+
+    void on_pushButtonOpenBackup_clicked();
+
 private:
     Ui::Dialog *ui;
+    QString m_sKillFile;
     QString m_sInitialPath;
     QString m_sExternalEditorInitialPath;
+    QString m_sBackupInitialPath;
     void readSettings();
     void writeSettings();
 

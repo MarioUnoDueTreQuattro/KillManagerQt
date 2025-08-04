@@ -17,5 +17,6 @@
         <file>img/KillManager.png</file>
         <file>img/KillManager.ico</file>
         <file>img/icons8-terminal-48.png</file>
+        <file>img/icons8-history-folder-48.png</file>
     </qresource>
 </RCC>
