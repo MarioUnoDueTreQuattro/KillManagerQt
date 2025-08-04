@@ -25,6 +25,8 @@ private slots:
 
     void on_pushButtonOpenBackup_clicked();
 
+    void on_pushButtonCreateNew_clicked();
+
 private:
     Ui::Dialog *ui;
     QString m_sKillFile;

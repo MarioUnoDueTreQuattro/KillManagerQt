@@ -75,9 +75,11 @@ private:
     int m_iRefreshRate;
 protected:
     void closeEvent(QCloseEvent* event) override;
+    void showEvent(QShowEvent *event);
 public slots:
     void timerUupdate();
     void menuConfigure();
+    void firstTimeConfiguration();
     void showAddExeDialog();
     void loadListFromFile();
     bool writeListToFile();

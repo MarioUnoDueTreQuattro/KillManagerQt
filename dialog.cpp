@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QStandardPaths>
 
 Dialog::Dialog(QWidget* parent)
     : QDialog(parent)
@@ -43,17 +44,20 @@ Dialog::~Dialog()
 
 void Dialog::readSettings()
 {
+    QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    documentsPath=QDir::toNativeSeparators (documentsPath);
     QSettings settings; // QSettings will use the organization and application names set in main()
     QString sKillFile = settings.value("Path").toString();
     if (sKillFile == "")
     {
-        sKillFile = "C:\\Users\\Andrea\\Documents\\kill.bat";
+        // sKillFile = "C:\\Users\\Andrea\\Documents\\kill.bat";
+        sKillFile = "";
         qDebug() << "Read value is empty.";
     }
     m_sKillFile = sKillFile;
-    m_sInitialPath = settings.value("Dialog/InitialPath", QDir::homePath()).toString();
+    m_sInitialPath = settings.value("Dialog/InitialPath",documentsPath).toString();
     m_sExternalEditorInitialPath = settings.value("Dialog/External editor", "notepad.exe").toString();
-    m_sBackupInitialPath = settings.value("Dialog/Backup path", QDir::homePath()).toString();
+    m_sBackupInitialPath = settings.value("Dialog/Backup path", documentsPath).toString ();
     int iRefreshRate = settings.value("Dialog/RefreshRate", 5).toInt(); // default to 5
     ui->spinBoxUpdateRate->setValue(iRefreshRate);
 }
@@ -66,6 +70,7 @@ void Dialog::writeSettings()
     settings.setValue("Dialog/Backup path", m_sBackupInitialPath);
     int iRefreshRate = ui->spinBoxUpdateRate->value ();
     settings.setValue("Dialog/RefreshRate", iRefreshRate);
+    settings.sync();
 }
 
 void Dialog::on_pushButtonChoose_clicked()
@@ -90,9 +95,9 @@ void Dialog::on_pushButtonChoose_clicked()
         initialPath = m_sInitialPath;
     QString filePath = QFileDialog::getOpenFileName(
             this,
-            tr("Choose kill.bat file"),
+            "Choose batch file",
             initialPath, // Start in user's home directory
-            tr("kill.bat ;; *.bat"), 0, 0);
+             "Batch Files (*.bat)", 0, 0);
     if (!filePath.isEmpty())
     {
         filePath = QDir::toNativeSeparators(filePath);
@@ -117,7 +122,7 @@ void Dialog::on_Dialog_accepted()
     QString mySettingValue = ui->lineEditPath->text();
     settings.setValue("Path", mySettingValue); // Key path: "Group/KeyName"
     QFileInfo myFile(mySettingValue);
-    m_sInitialPath = myFile.absolutePath();
+    m_sInitialPath = QDir::toNativeSeparators(myFile.absolutePath());
     settings.setValue("Dialog/InitialPath", m_sInitialPath);
     settings.setValue("Dialog/External editor", m_sExternalEditorInitialPath);
     settings.setValue("Dialog/Backup path", ui->lineEditBackupPath->text ());
@@ -163,9 +168,9 @@ void Dialog::on_pushButtonChooseExternaEditor_clicked()
         initialPath = m_sExternalEditorInitialPath;
     QString filePath = QFileDialog::getOpenFileName(
             this,
-            tr("Choose external editor"),
+            "Choose external editor",
             initialPath, // Start in user's home directory
-            tr("*.exe ;; *.exe"), 0, 0);
+            "*.exe ;; *.exe", 0, 0);
     if (!filePath.isEmpty())
     {
         filePath = QDir::toNativeSeparators(filePath);
@@ -238,4 +243,64 @@ void Dialog::on_pushButtonChooseBackupPath_clicked()
 void Dialog::on_pushButtonOpenBackup_clicked()
 {
     QDesktopServices::openUrl(QUrl::fromLocalFile(ui->lineEditBackupPath->text()));
+}
+
+void Dialog::on_pushButtonCreateNew_clicked()
+{
+    QString defaultName = m_sInitialPath + "\\" + "kill.bat" ;
+    QString fileName = QFileDialog::getSaveFileName(this,
+            "Create new batch file",
+            defaultName,
+            "Batch Files (*.bat)");
+    if (!fileName.isEmpty())
+    {
+        fileName = QDir::toNativeSeparators(fileName);
+        QFile file(fileName);
+        if (file.open(QIODevice::WriteOnly))
+        {
+            QTextStream out(&file);
+            out << "";  // Write nothing to create an empty file
+            file.close();
+            QMessageBox::information(this, "New batch file created", "The New batch file was successfully created:\n" + fileName);
+        }
+        else
+        {
+            QMessageBox::critical(this, "New batch file error", "Failed to create the new batch file:\n" + fileName);
+        }
+        ui->lineEditPath->setText (fileName);
+        QFileInfo myFile(fileName);
+        m_sInitialPath = QDir::toNativeSeparators(myFile.absolutePath());
+        QSettings settings;
+        settings.setValue("Dialog/InitialPath", m_sInitialPath);
+        settings.setValue("Path", fileName);
+        settings.sync();
+    }
+    // QFile file(m_sKillFile);
+    //    // if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    //    // {
+    //    // qWarning() << "Could not open file:" << fileName;
+    //    //        //return;
+    //    // }
+    // if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    // {
+    // qDebug() << "File not found or unreadable. Creating it...";
+    //        // Try opening for writing to create the file
+    // if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+    // {
+    // QTextStream out(&file);
+    // out << "";  // Write empty content or initial data
+    // file.close();
+    // }
+    // else
+    // {
+    // qWarning() << "Failed to create file:" << file.errorString();
+    // return;
+    // }
+    //        // Reopen for reading
+    // if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    // {
+    // qWarning() << "Failed to reopen file for reading.";
+    // return;
+    // }
+    // }
 }

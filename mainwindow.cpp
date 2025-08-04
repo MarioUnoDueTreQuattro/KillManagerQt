@@ -13,6 +13,7 @@
 #include <QString>
 #include <QTextStream>
 #include <QDateTime>
+#include <QStandardPaths>
 #include <cstdlib>  // for system()
 
 MainWindow::MainWindow(QWidget* parent)
@@ -71,11 +72,26 @@ void MainWindow::closeEvent(QCloseEvent* event)
     QMainWindow::closeEvent(event);       // Call the base class's closeEvent
 }
 
+void MainWindow::showEvent(QShowEvent *event)
+{
+    if (m_sKillFile == "")
+    {
+        QTimer::singleShot(200, this, SLOT(firstTimeConfiguration()) );
+    }
+}
+
+void MainWindow::firstTimeConfiguration()
+{
+    QMessageBox::information(this, "", "The application is not configured.\n\nPlease create or select a batch file in the configuration dialog.");
+    menuConfigure ();
+}
+
 void MainWindow::timerUupdate()
 {
     QString repeatedChar;
     m_iTimerUpdatesCount += 1;
-    repeatedChar = QString(".").repeated(m_iTimerUpdatesCount % 10 );
+    int iModulus = m_iTimerUpdatesCount % 10 ;
+    repeatedChar = QString(".").repeated(iModulus );
     // repeatedChar.prepend ("<html><head/><body><span style=\" font-weight:600; color:#ff0000;\">");
     // repeatedChar.append ("</span></body></html>");
     //qDebug() << __FUNCTION__ << m_iTimerUpdatesCount;
@@ -83,22 +99,24 @@ void MainWindow::timerUupdate()
     QString sRefreshed = ui->statusBar->currentMessage ();
     if (sRefreshed == "" | sRefreshed.left (9) == "Refreshed")
     {
-        ui->statusBar->showMessage ("Refreshed" + repeatedChar);
+        ui->statusBar->showMessage ("Refreshed every " + QString::number (m_iRefreshRate / 1000) + " seconds" + repeatedChar);
     }
 }
 
 void MainWindow::updatePaths()
 {
+    QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    documentsPath = QDir::toNativeSeparators (documentsPath);
     QSettings settings;
     QString sKillFile = settings.value("Path").toString();
     //qDebug() << "Read string from registry:" << sKillFile;
     if (sKillFile == "")
     {
-        sKillFile = "C:\\Users\\Andrea\\Documents\\kill.bat";
-        qDebug() << "Read value is empty.";
+        //sKillFile = "C:\\Users\\Andrea\\Documents\\kill.bat";
+        //qDebug() << "Read value is empty.";
     }
     m_sKillFile = sKillFile;
-    m_sBackupPath = settings.value("Dialog/Backup path", QDir::homePath()).toString();
+    m_sBackupPath = settings.value("Dialog/Backup path", documentsPath).toString();
     // else {
     //        //m_sKillFile = "C:\\Users\\Andrea\\Documents\\kill.bat";
     // qDebug() << "Read value OK";
@@ -319,7 +337,7 @@ void MainWindow::copySelectedDisabledItem()
     if (currentItem)
     {
         QApplication::clipboard()->setText(currentItem->text());
-        ui->statusBar->showMessage("Copied text: " + currentItem->text(),10000);
+        ui->statusBar->showMessage("Copied text: " + currentItem->text(), 10000);
     }
     else
     {
@@ -333,7 +351,7 @@ void MainWindow::copySelectedEnabledItem()
     if (currentItem)
     {
         QApplication::clipboard()->setText(currentItem->text());
-        ui->statusBar->showMessage("Copied text: " + currentItem->text(),10000);
+        ui->statusBar->showMessage("Copied text: " + currentItem->text(), 10000);
     }
     else
     {
@@ -348,7 +366,7 @@ void MainWindow::deleteSelectedEnabledItem()
     {
         disconnectTimer ();
         ui->listWidgetEnabled->removeItemWidget(currentItem);
-        ui->statusBar->showMessage("Removed: " + currentItem->text(),10000);
+        ui->statusBar->showMessage("Removed: " + currentItem->text(), 10000);
         deleteApplicationItem(currentItem->text());
         qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
         delete currentItem;
@@ -371,7 +389,7 @@ void MainWindow::deleteSelectedDisabledItem()
     {
         disconnectTimer ();
         ui->listWidgetDisabled->removeItemWidget(currentItem);
-        ui->statusBar->showMessage("Removed: " + currentItem->text(),10000);
+        ui->statusBar->showMessage("Removed: " + currentItem->text(), 10000);
         deleteApplicationItem(currentItem->text());
         qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
         delete currentItem;
@@ -396,7 +414,7 @@ void MainWindow::enableSelectedDisabledItem()
         QListWidgetItem* temp = new QListWidgetItem(*currentItem);
         ui->listWidgetEnabled->addItem(temp);
         ui->listWidgetDisabled->removeItemWidget(currentItem);
-        ui->statusBar->showMessage("Enabled: " + currentItem->text(),10000);
+        ui->statusBar->showMessage("Enabled: " + currentItem->text(), 10000);
         moveApplicationItem(currentItem->text(), true);
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
@@ -420,7 +438,7 @@ void MainWindow::disableSelectedEnabledItem()
         QListWidgetItem* temp = new QListWidgetItem(*currentItem);
         ui->listWidgetDisabled->addItem(temp);
         ui->listWidgetEnabled->removeItemWidget(currentItem);
-        ui->statusBar->showMessage("Disabled: " + currentItem->text(),10000);
+        ui->statusBar->showMessage("Disabled: " + currentItem->text(), 10000);
         moveApplicationItem(currentItem->text(), false);
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
@@ -514,6 +532,11 @@ void MainWindow::showAddExeDialog()
 
 void MainWindow::loadListFromFile(const QString& fileName)
 {
+    if (fileName == "")
+    {
+        qDebug() << __PRETTY_FUNCTION__ << "fileName==\"\"";
+        return;
+    }
     m_ApplicationItemsList.clear();
     m_ProcessList.populateProcessList ();
     QListWidgetItem* selectedEnabledItem;
@@ -678,7 +701,7 @@ bool MainWindow::writeListToFile()
     file.close();
     universalPath1 = QDir::toNativeSeparators(universalPath1);
     qDebug() << "Batch file successfully written to:" << universalPath1;
-    ui->statusBar->showMessage("Batch file successfully written to: " + universalPath1,10000);
+    ui->statusBar->showMessage("Batch file successfully written to: " + universalPath1, 10000);
     connectTimer ();
     return true;
 }
@@ -1023,7 +1046,7 @@ void MainWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus
 {
     qDebug() << "Batch CMD Process finished with code:" << exitCode
         << "and status:" << exitStatus;
-    ui->statusBar->showMessage(m_sKillFile + " executed.",10000);
+    ui->statusBar->showMessage(m_sKillFile + " executed.", 10000);
     //debugNotFoundWhenKilling ();
     debugFoundWhenKilling();
     connectTimer ();
@@ -1046,7 +1069,7 @@ void MainWindow::on_pushButtonRun_clicked()
     //        // Questa flag dice a Windows di creare una NUOVA finestra console.
     // args->flags |= CREATE_NEW_CONSOLE;
     // });
-    ui->statusBar->showMessage(m_sKillFile + " started...",10000);
+    ui->statusBar->showMessage(m_sKillFile + " started...", 10000);
     ui->statusBar->repaint ();
     qDebug() << "Process started " << arguments;
     process->start (program, arguments);
@@ -1133,7 +1156,7 @@ void MainWindow::on_actionOpen_in_external_editor_triggered()
     QStringList arguments;
     arguments << m_sKillFile;       // Use forward slashes for paths in Qt
     process.startDetached(program, arguments);
-    ui->statusBar->showMessage(m_sKillFile + " opened in external editor.",10000);
+    ui->statusBar->showMessage(m_sKillFile + " opened in external editor.", 10000);
     qDebug() << "Process started " << arguments;
     // Optional: Wait for the process to finish
     // process.waitForStarted(-1);
@@ -1142,12 +1165,12 @@ void MainWindow::on_actionOpen_in_external_editor_triggered()
 }
 void MainWindow::on_actionExecute_in_terminal_window_triggered()
 {
-    ui->statusBar->showMessage(m_sKillFile + " started in terminal window...",10000);
+    ui->statusBar->showMessage(m_sKillFile + " started in terminal window...", 10000);
     ui->statusBar->repaint ();
     const char *cstrKillFile = m_sKillFile.toUtf8().data();
     std::string command = std::string("cmd /C ") + cstrKillFile;
     system(command.c_str());
-    ui->statusBar->showMessage(m_sKillFile + " executed in terminal window.",10000);
+    ui->statusBar->showMessage(m_sKillFile + " executed in terminal window.", 10000);
 }
 QStringList MainWindow::getRunningProcesses()
 {
