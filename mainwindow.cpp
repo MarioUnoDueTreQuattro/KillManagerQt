@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget* parent)
     m_ApplicationItemsList.clear();
     ui->setupUi(this);
     m_iTimerUpdatesCount = 0;
-    m_bTimerIdConnected = false;
+    m_bTimerIsConnected = false;
     m_Font = ui->labelEnabled->font ();
     m_Font.setBold(true);
     QColor myColor(0, 0, 128);
@@ -495,11 +495,16 @@ void MainWindow::loadListFromFile(const QString& fileName)
 {
     m_ApplicationItemsList.clear();
     m_ProcessList.populateProcessList ();
+    QListWidgetItem* selectedEnabledItem;
+    QListWidgetItem* selectedDisabledItem;
     m_sSelectedEnabledItem = "";
     m_sSelectedDisabledItem = "";
-    // Clear existing items before loading new ones
-    QListWidgetItem* selectedEnabledItem = ui->listWidgetEnabled->selectedItems ().first ();
-    QListWidgetItem* selectedDisabledItem = ui->listWidgetDisabled->selectedItems ().first ();
+    bool bSelectedEnabledIsEmpty = ui->listWidgetEnabled->selectedItems ().isEmpty ();
+    bool bSelectedDisabledIsEmpty = ui->listWidgetDisabled->selectedItems ().isEmpty ();
+    // if (bSelectedEnabledIsEmpty) qDebug() << "bSelectedEnabledIsEmpty isEmpty";
+    // if (bSelectedDisabledIsEmpty) qDebug() << "bSelectedDisabledIsEmpty isEmpty";
+    if (bSelectedEnabledIsEmpty == false) selectedEnabledItem = ui->listWidgetEnabled->selectedItems ().first ();
+    if (bSelectedDisabledIsEmpty == false) selectedDisabledItem = ui->listWidgetDisabled->selectedItems ().first ();
     if (selectedEnabledItem != NULL)
         if ( ui->listWidgetEnabled->selectedItems ().isEmpty () == false)
         {
@@ -797,12 +802,14 @@ void MainWindow::addItemToListwidget(QListWidget* listWidget, QString newItemTex
             listWidget->addItem(item);
             if (newItemText == m_sSelectedEnabledItem)
             {
-                item->setSelected (true); qDebug() << "selected" << newItemText;
+                item->setSelected (true);
+                //qDebug() << "selected" << newItemText;
                 listWidget->setCurrentItem(item);
             }
             if (newItemText == m_sSelectedDisabledItem)
             {
-                item->setSelected (true); qDebug() << "selectedDis" << newItemText;
+                item->setSelected (true);
+                //qDebug() << "selectedDis" << newItemText;
                 listWidget->setCurrentItem(item);
             }
         }
@@ -812,12 +819,14 @@ void MainWindow::addItemToListwidget(QListWidget* listWidget, QString newItemTex
             listWidget->addItem(item);
             if (newItemText == m_sSelectedEnabledItem)
             {
-                item->setSelected (true); qDebug() << "selected" << newItemText;
+                item->setSelected (true);
+                //qDebug() << "selected" << newItemText;
                 listWidget->setCurrentItem(item);
             }
             if (newItemText == m_sSelectedDisabledItem)
             {
-                item->setSelected (true); qDebug() << "selectedDis" << newItemText;
+                item->setSelected (true);
+                //qDebug() << "selectedDis" << newItemText;
                 listWidget->setCurrentItem(item);
             }
         }
@@ -887,22 +896,22 @@ void MainWindow::debugFoundWhenKilling()
 
 void MainWindow::disconnectTimer()
 {
-    if (m_bTimerIdConnected == true)
+    if (m_bTimerIsConnected == true)
     {
         qDebug() << "Disconnecting timer";
         disconnect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
-        m_bTimerIdConnected = false;
+        m_bTimerIsConnected = false;
     }
 }
 
 void MainWindow::connectTimer()
 {
-    if (m_bTimerIdConnected == false)
+    if (m_bTimerIsConnected == false)
     {
         qDebug() << "Reconnecting timer";
         m_iTimerUpdatesCount = 0;
         connect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
-        m_bTimerIdConnected = true;
+        m_bTimerIsConnected = true;
     }
 }
 

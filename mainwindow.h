@@ -68,7 +68,7 @@ private:
     void debugFoundWhenKilling();
     void disconnectTimer();
     void connectTimer();
-    bool m_bTimerIdConnected;
+    bool m_bTimerIsConnected;
     int m_iTimerUpdatesCount;
 protected:
     void closeEvent(QCloseEvent* event) override;
