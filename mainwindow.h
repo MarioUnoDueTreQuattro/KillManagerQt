@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "log_macros.h"
 #include "addexedialog.h"
 #include "applicationitem.h"
 #include "dialog.h"
@@ -33,6 +34,7 @@ public:
 
 private:
     void updatePaths();
+    void deleteOldBackups();
     RunningProcessesList m_ProcessList;
     QFont m_Font;
     QBrush m_TextBrush;

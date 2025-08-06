@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>394</width>
-    <height>582</height>
+    <width>392</width>
+    <height>590</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -26,7 +26,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_10">
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
     <widget class="QGroupBox" name="groupBox_5">
      <property name="sizePolicy">
@@ -45,9 +45,9 @@
      <property name="title">
       <string>New batch file</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_9">
+     <layout class="QVBoxLayout" name="verticalLayout_8">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_8">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <widget class="QLabel" name="labelPath_2">
           <property name="sizePolicy">
@@ -63,7 +63,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Create a new batch file pressing the &quot;Create new...&quot; button.</string>
+           <string>Create a new empty batch file.</string>
           </property>
          </widget>
         </item>
@@ -92,12 +92,14 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>38</height>
+            <height>19</height>
            </size>
           </property>
           <property name="text">
-           <string>Select an existing batch file pressing the &quot;Choose...&quot; button 
-or type (or paste) the long path to the file in the text box.</string>
+           <string>Select an existing batch file or type (or paste) the long path to the file.</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::PlainText</enum>
           </property>
          </widget>
         </item>
@@ -123,7 +125,7 @@ or type (or paste) the long path to the file in the text box.</string>
    <item>
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
-      <string>External editor</string>
+      <string>External text editor</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
@@ -158,72 +160,119 @@ or type (or paste) the long path to the file in the text box.</string>
      <property name="title">
       <string>Backup folder</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <widget class="QLabel" name="labelBackupPath">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>38</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>A new backup file is created whenever changes occur.
+Select the backup folder or type (or paste) the long path to the folder.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QLabel" name="labelBackupPath">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>38</height>
-           </size>
-          </property>
+         <widget class="QLineEdit" name="lineEditBackupPath">
           <property name="text">
-           <string>A new backup file is created whenever changes occur.
-Select the folder for backup files pressing the &quot;Choose...&quot; button 
-or type (or paste) the long path to the folder path in the text box.</string>
+           <string/>
+          </property>
+          <property name="placeholderText">
+           <string>Backups folder</string>
           </property>
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QLineEdit" name="lineEditBackupPath">
-            <property name="text">
-             <string/>
-            </property>
-            <property name="placeholderText">
-             <string>Folder for backups of KILL.BAT</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButtonChooseBackupPath">
-            <property name="text">
-             <string>Choose...</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QPushButton" name="pushButtonChooseBackupPath">
+          <property name="text">
+           <string>Choose...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Open backup folder to delete old backup files.</string>
+          </property>
+         </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Open backup folder to delete old backup files.</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButtonOpenBackup">
-            <property name="text">
-             <string>Open backup folder</string>
-            </property>
-            <property name="icon">
-             <iconset resource="icons.qrc">
-              <normaloff>:/icons/img/icons8-history-folder-48.png</normaloff>:/icons/img/icons8-history-folder-48.png</iconset>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QPushButton" name="pushButtonOpenBackup">
+          <property name="text">
+           <string>Open backup folder</string>
+          </property>
+          <property name="icon">
+           <iconset resource="icons.qrc">
+            <normaloff>:/icons/img/icons8-history-folder-48.png</normaloff>:/icons/img/icons8-history-folder-48.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxDeleteBackups">
+        <property name="text">
+         <string>Delete old backups</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>If there are more than</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spinBoxBackupsCount">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>1000</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>and older than</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spinBoxBackupsDays">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>1000</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>days</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>

@@ -45,7 +45,7 @@ Dialog::~Dialog()
 void Dialog::readSettings()
 {
     QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    documentsPath=QDir::toNativeSeparators (documentsPath);
+    documentsPath = QDir::toNativeSeparators (documentsPath);
     QSettings settings; // QSettings will use the organization and application names set in main()
     QString sKillFile = settings.value("Path").toString();
     if (sKillFile == "")
@@ -55,11 +55,18 @@ void Dialog::readSettings()
         qDebug() << "Read value is empty.";
     }
     m_sKillFile = sKillFile;
-    m_sInitialPath = settings.value("Dialog/InitialPath",documentsPath).toString();
+    m_sInitialPath = settings.value("Dialog/InitialPath", documentsPath).toString();
     m_sExternalEditorInitialPath = settings.value("Dialog/External editor", "notepad.exe").toString();
     m_sBackupInitialPath = settings.value("Dialog/Backup path", documentsPath).toString ();
     int iRefreshRate = settings.value("Dialog/RefreshRate", 5).toInt(); // default to 5
     ui->spinBoxUpdateRate->setValue(iRefreshRate);
+    bool bDeleteOldBackups = settings.value("Dialog/DeleteOldBackups", true).toBool ();
+    int iBackupsCount = settings.value("Dialog/BackupsCount", 100).toInt();
+    int iBackupsDays = settings.value("Dialog/BackupsDays", 30).toInt();
+    if (bDeleteOldBackups) ui->checkBoxDeleteBackups->setChecked (true);
+    else ui->checkBoxDeleteBackups->setChecked (false);
+    ui->spinBoxBackupsCount->setValue (iBackupsCount);
+    ui->spinBoxBackupsDays->setValue (iBackupsDays);
 }
 
 void Dialog::writeSettings()
@@ -97,7 +104,7 @@ void Dialog::on_pushButtonChoose_clicked()
             this,
             "Choose batch file",
             initialPath, // Start in user's home directory
-             "Batch Files (*.bat)", 0, 0);
+            "Batch Files (*.bat)", 0, 0);
     if (!filePath.isEmpty())
     {
         filePath = QDir::toNativeSeparators(filePath);
@@ -127,6 +134,9 @@ void Dialog::on_Dialog_accepted()
     settings.setValue("Dialog/External editor", m_sExternalEditorInitialPath);
     settings.setValue("Dialog/Backup path", ui->lineEditBackupPath->text ());
     settings.setValue("Dialog/RefreshRate", ui->spinBoxUpdateRate->value ());
+    settings.setValue("Dialog/DeleteOldBackups", ui->checkBoxDeleteBackups->isChecked ());
+    settings.setValue("Dialog/BackupsCount", ui->spinBoxBackupsCount->value ());
+    settings.setValue("Dialog/BackupsDays", ui->spinBoxBackupsDays->value ());
     qDebug() << "Wrote string to registry (or equivalent):" << mySettingValue;
     // create folder if does not exists
     QString folderPath = ui->lineEditBackupPath->text ();

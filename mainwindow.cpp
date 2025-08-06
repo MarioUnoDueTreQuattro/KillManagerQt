@@ -124,6 +124,45 @@ void MainWindow::updatePaths()
     //return sKillFile;
 }
 
+bool compareByLastModified(const QFileInfo &a, const QFileInfo &b) {
+    return a.lastModified() > b.lastModified(); // Newest first
+}
+
+void MainWindow::deleteOldBackups()
+{
+    QSettings settings;
+    bool bDeleteOldBackups = settings.value("Dialog/DeleteOldBackups", true).toBool ();
+    int iBackupsCount = settings.value("Dialog/BackupsCount", 100).toInt();
+    int iBackupsDays = settings.value("Dialog/BackupsDays", 30).toInt();
+    if (bDeleteOldBackups == false) return;
+    QDir dir(m_sBackupPath);
+    QFileInfoList files = dir.entryInfoList(QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+    int iFilesCount = files.count();
+    if (iFilesCount < iBackupsCount)
+    {
+        LOG_MSG("iFilesCount<iBackupsCount = " + QString::number (iFilesCount));
+        return;
+    }
+    files = dir.entryInfoList(QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot); //, QDir::Time);
+    std::sort(files.begin(), files.end(), compareByLastModified);
+    iFilesCount = files.size();
+    int filesToDelete = iFilesCount - iBackupsCount;
+    LOG_MSG("filesToDelete = " +QString::number (filesToDelete));
+    // Delete the oldest files (those after the first files to retain)
+    for (int i = iBackupsCount; i < iFilesCount; ++i)
+    {
+        QString filePath = files[i].absoluteFilePath();
+        if (QFile::remove(filePath))
+        {
+            qDebug() << "Deleted:" << filePath;
+        }
+        else
+        {
+            qDebug() << "Failed to delete:" << filePath;
+        }
+    }
+}
+
 bool MainWindow::deleteApplicationItem(QString deleteString)
 {
     bool bFound = false;
@@ -466,6 +505,7 @@ void MainWindow::menuConfigure()
     int iRefreshRate = settings.value("Dialog/RefreshRate", 5).toInt(); // default to 5
     m_iRefreshRate = iRefreshRate * 1000;
     timer->setInterval (m_iRefreshRate);
+    deleteOldBackups ();
     // cd.open ();
     // cd.update ();
     //cd.setVisible (true);
@@ -792,6 +832,7 @@ void MainWindow::on_pushButtonAdd_clicked()
 bool MainWindow::backupBatchFile()
 {
     updatePaths();
+    deleteOldBackups ();
     // m_sKillFile.replace("\\", "\\\\");
     // qDebug() << m_sKillFile;
     QString universalPath1 = QDir::fromNativeSeparators(m_sKillFile);

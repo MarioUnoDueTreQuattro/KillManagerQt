@@ -4,6 +4,8 @@
 #
 #-------------------------------------------------
 
+CONFIG += c++11
+
 QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -22,7 +24,8 @@ HEADERS  += mainwindow.h \
     dialog.h \
     applicationitem.h \
     addexedialog.h \
-    runningprocesseslist.h
+    runningprocesseslist.h \
+    log_macros.h
 
 FORMS    += mainwindow.ui \
     dialog.ui \
@@ -31,7 +34,7 @@ FORMS    += mainwindow.ui \
 RESOURCES += \
     icons.qrc
 
-RC_ICONS = KillManager.ico
+win32:RC_ICONS = KillManager.ico
 
 VERSION = 1.0.0.3
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
