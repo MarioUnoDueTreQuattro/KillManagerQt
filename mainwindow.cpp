@@ -124,7 +124,8 @@ void MainWindow::updatePaths()
     //return sKillFile;
 }
 
-bool compareByLastModified(const QFileInfo &a, const QFileInfo &b) {
+bool compareByLastModified(const QFileInfo &a, const QFileInfo &b)
+{
     return a.lastModified() > b.lastModified(); // Newest first
 }
 
@@ -140,26 +141,35 @@ void MainWindow::deleteOldBackups()
     int iFilesCount = files.count();
     if (iFilesCount < iBackupsCount)
     {
-        LOG_MSG("iFilesCount<iBackupsCount = " + QString::number (iFilesCount));
+        LOG_MSG("iFilesCount < iBackupsCount = " + QString::number (iFilesCount));
         return;
     }
     files = dir.entryInfoList(QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot); //, QDir::Time);
     std::sort(files.begin(), files.end(), compareByLastModified);
     iFilesCount = files.size();
     int filesToDelete = iFilesCount - iBackupsCount;
-    LOG_MSG("filesToDelete = " +QString::number (filesToDelete));
+    LOG_MSG("filesToDelete (if older than iBackupsDays) = " + QString::number (filesToDelete));
     // Delete the oldest files (those after the first files to retain)
+    QDateTime backupDaysAgo = QDateTime::currentDateTime().addDays(-iBackupsDays);
+    QDateTime lastModified;
+    QString filePath;
     for (int i = iBackupsCount; i < iFilesCount; ++i)
     {
-        QString filePath = files[i].absoluteFilePath();
-        if (QFile::remove(filePath))
+        filePath = files[i].absoluteFilePath();
+        lastModified = files[i].lastModified ();
+        if (lastModified < backupDaysAgo)
         {
-            qDebug() << "Deleted:" << filePath;
+            if (QFile::remove(filePath))
+            {
+                qDebug() << "Deleted:" << filePath;
+            }
+            else
+            {
+                qDebug() << "Failed to delete:" << filePath;
+            }
         }
         else
-        {
-            qDebug() << "Failed to delete:" << filePath;
-        }
+            LOG_MSG(filePath + " is newer than " + QString::number(iBackupsDays) + " days" );
     }
 }
 

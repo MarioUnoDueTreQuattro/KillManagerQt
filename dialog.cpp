@@ -63,8 +63,18 @@ void Dialog::readSettings()
     bool bDeleteOldBackups = settings.value("Dialog/DeleteOldBackups", true).toBool ();
     int iBackupsCount = settings.value("Dialog/BackupsCount", 100).toInt();
     int iBackupsDays = settings.value("Dialog/BackupsDays", 30).toInt();
-    if (bDeleteOldBackups) ui->checkBoxDeleteBackups->setChecked (true);
-    else ui->checkBoxDeleteBackups->setChecked (false);
+    if (bDeleteOldBackups)
+    {
+        ui->checkBoxDeleteBackups->setChecked (true);
+        ui->spinBoxBackupsCount->setEnabled (true);
+        ui->spinBoxBackupsDays->setEnabled (true);
+    }
+    else
+    {
+        ui->checkBoxDeleteBackups->setChecked (false);
+        ui->spinBoxBackupsCount->setEnabled (false);
+        ui->spinBoxBackupsDays->setEnabled (false);
+    }
     ui->spinBoxBackupsCount->setValue (iBackupsCount);
     ui->spinBoxBackupsDays->setValue (iBackupsDays);
 }
@@ -313,4 +323,18 @@ void Dialog::on_pushButtonCreateNew_clicked()
     // return;
     // }
     // }
+}
+
+void Dialog::on_checkBoxDeleteBackups_toggled(bool checked)
+{
+    if (checked)
+    {
+        ui->spinBoxBackupsCount->setEnabled (true);
+        ui->spinBoxBackupsDays->setEnabled (true);
+    }
+    else
+    {
+        ui->spinBoxBackupsCount->setEnabled (false);
+        ui->spinBoxBackupsDays->setEnabled (false);
+    }
 }
