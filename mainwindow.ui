@@ -29,7 +29,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QListWidget" name="listWidgetEnabled"/>
+           <widget class="MyQListWidget" name="listWidgetEnabled"/>
           </item>
          </layout>
         </item>
@@ -54,7 +54,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QListWidget" name="listWidgetDisabled"/>
+             <widget class="MyQListWidget" name="listWidgetDisabled"/>
             </item>
            </layout>
           </widget>
@@ -235,6 +235,13 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>MyQListWidget</class>
+   <extends>QListWidget</extends>
+   <header>myqlistwidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="icons.qrc"/>
  </resources>
