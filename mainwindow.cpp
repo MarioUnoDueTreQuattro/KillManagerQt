@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui->listWidgetEnabled->setDragEnabled(true);
     ui->listWidgetEnabled->setAcceptDrops(true);
     ui->listWidgetEnabled->setDropIndicatorShown(true);
+    //ui->listWidgetEnabled->setSelectionMode(QAbstractItemView::SingleSelection);
     connect(ui->listWidgetEnabled, &MyQListWidget::reordering, this, &MainWindow::disconnectTimer);
     connect(ui->listWidgetEnabled, &MyQListWidget::itemsReordered, this, &MainWindow::writeListToFile);
     ui->listWidgetDisabled->setDragDropMode(QAbstractItemView::InternalMove);
@@ -59,6 +60,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui->listWidgetDisabled->setDragEnabled(true);
     ui->listWidgetDisabled->setAcceptDrops(true);
     ui->listWidgetDisabled->setDropIndicatorShown(true);
+    //ui->listWidgetDisabled->setSelectionMode(QAbstractItemView::SingleSelection);
     connect(ui->listWidgetDisabled, &MyQListWidget::reordering, this, &MainWindow::disconnectTimer);
     connect(ui->listWidgetDisabled, &MyQListWidget::itemsReordered, this, &MainWindow::writeListToFile);
     loadListFromFile();
@@ -186,91 +188,6 @@ void MainWindow::deleteOldBackups()
         else
             LOG_MSG(filePath + " is newer than " + QString::number(iBackupsDays) + " days" );
     }
-}
-
-bool MainWindow::deleteApplicationItem(QString deleteString)
-{
-    bool bFound = false;
-    QString itemString = "";
-    // Iterate in reverse to safely remove items while modifying the list
-    //qDebug()<< "m_ApplicationItemsList.size="<<m_ApplicationItemsList.size();
-    int iFoundItem = findApplicationItemIndex (deleteString);
-    if (iFoundItem != -1)
-    {
-        bFound = true;
-        m_ApplicationItemsList.removeAt (iFoundItem);
-        qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
-    }
-    // for (int i = m_ApplicationItemsList.size() - 1; i >= 0; --i)
-    // {
-    //        //qDebug()<< "m_ApplicationItemsList.at="<<i;
-    //        //qDebug()<< m_ApplicationItemsList.at(i).getAppName();
-    // if (m_ApplicationItemsList.at(i).getAppName() == deleteString)
-    // {
-    // m_ApplicationItemsList.removeAt(i);
-    // qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
-    // bFound = true;
-    // }
-    // for (int i = m_ApplicationItemsList.count() - 1; i >= 0; --i) {
-    // itemString = m_ApplicationItemsList.at(i).getAppName();
-    // if (itemString == deleteString) {
-    // bFound = true;
-    // m_ApplicationItemsList.takeAt(i);
-    // }
-    // }
-    if (!bFound)
-        QMessageBox::information(this, "NOT Removed", QString("NOT Removed all items with text '%1'.").arg(deleteString));
-    return bFound;
-}
-
-void MainWindow::resetAllApplicationItems()
-{
-    int i_AppItemCount = m_ApplicationItemsList.count ();
-    ApplicationItem *foundItem;
-    // for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
-    for (int iCount = 0; iCount < i_AppItemCount; iCount++)
-    {
-        foundItem = &m_ApplicationItemsList[iCount];
-        foundItem->setFoundWhenKilling (true);
-    }
-}
-
-bool MainWindow::moveApplicationItem(QString deleteString, bool bState)
-{
-    bool bFound = false;
-    QString itemString = "";
-    // Iterate in reverse to safely remove items while modifying the list
-    qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
-    int iFoundItem = findApplicationItemIndex (deleteString);
-    if (iFoundItem != -1)
-    {
-        bFound = true;
-        m_ApplicationItemsList[iFoundItem].setAppKillEnabled(bState);
-        qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
-    }
-    // for (int i = m_ApplicationItemsList.size() - 1; i >= 0; --i)
-    // {
-    //        //qDebug()<< "m_ApplicationItemsList.at="<<i;
-    //        //qDebug()<< m_ApplicationItemsList.at(i).getAppName();
-    // if (m_ApplicationItemsList.at(i).getAppName() == deleteString)
-    // {
-    //            //qDebug()<< "m_ApplicationItemsList.at(i)="<<m_ApplicationItemsList.at(i).getAppKillEnabled ();
-    //            // ApplicationItem foundItem=m_ApplicationItemsList.at(i);
-    // m_ApplicationItemsList[i].setAppKillEnabled(bState);
-    // bFound = true;
-    //            //qDebug()<< "m_ApplicationItemsList.at(i)="<<m_ApplicationItemsList.at(i).getAppKillEnabled ();
-    //            // qDebug()<< "foundItem="<<foundItem.getAppKillEnabled ();
-    // }
-    //        // for (int i = m_ApplicationItemsList.count() - 1; i >= 0; --i) {
-    //        // itemString = m_ApplicationItemsList.at(i).getAppName();
-    //        // if (itemString == deleteString) {
-    //        // bFound = true;
-    //        // m_ApplicationItemsList.takeAt(i);
-    //        // }
-    // }
-    if (!bFound)
-        QMessageBox::information(this, "NOT moved", QString("NOT moved all items with text '%1'.").arg(deleteString));
-    return bFound;
 }
 
 void MainWindow::readSettings()
@@ -431,7 +348,7 @@ void MainWindow::deleteSelectedEnabledItem()
         disconnectTimer ();
         ui->listWidgetEnabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Removed: " + currentItem->text(), 10000);
-        deleteApplicationItem(currentItem->text());
+        m_ApplicationItemsList.deleteApplicationItem(currentItem->text());
         qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
@@ -454,7 +371,7 @@ void MainWindow::deleteSelectedDisabledItem()
         disconnectTimer ();
         ui->listWidgetDisabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Removed: " + currentItem->text(), 10000);
-        deleteApplicationItem(currentItem->text());
+        m_ApplicationItemsList.deleteApplicationItem(currentItem->text());
         qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
@@ -479,7 +396,7 @@ void MainWindow::enableSelectedDisabledItem()
         ui->listWidgetEnabled->addItem(temp);
         ui->listWidgetDisabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Enabled: " + currentItem->text(), 10000);
-        moveApplicationItem(currentItem->text(), true);
+        m_ApplicationItemsList.moveApplicationItem(currentItem->text(), true);
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
@@ -503,7 +420,7 @@ void MainWindow::disableSelectedEnabledItem()
         ui->listWidgetDisabled->addItem(temp);
         ui->listWidgetEnabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Disabled: " + currentItem->text(), 10000);
-        moveApplicationItem(currentItem->text(), false);
+        m_ApplicationItemsList.moveApplicationItem(currentItem->text(), false);
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
@@ -556,7 +473,7 @@ void MainWindow::showAddExeDialog()
             disconnectTimer ();
             addItemToListwidget(ui->listWidgetEnabled, receivedText);
             bool bFound = false;
-            int iFoundItem = findApplicationItemIndex (receivedText);
+            int iFoundItem = m_ApplicationItemsList.findApplicationItemIndex (receivedText);
             if (iFoundItem != -1)
             {
                 bFound = true;
@@ -706,6 +623,20 @@ void MainWindow::loadListFromFile()
     loadListFromFile(universalPath1);
     //qDebug() << "loadListFromFile() finished.";
 }
+
+bool MainWindow::listContainsItemText(MyQListWidget* listWidget, const QString& text)
+{
+    for (int i = 0; i < listWidget->count(); ++i)
+    {
+        QListWidgetItem* item = listWidget->item(i);
+        if (item && item->text() == text)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool MainWindow::writeListToFile()
 {
     disconnectTimer ();
@@ -749,14 +680,17 @@ bool MainWindow::writeListToFile()
     QString s_NoTaskKill = "REM taskkill /F /T /IM ";
     int iCount;
     iCount = ui->listWidgetEnabled->count();
+    QString  sItemText;
     for (int i = 0; i < iCount; i++)
     {
-        out << s_TaskKill << ui->listWidgetEnabled->item(i)->text() << "\n";
+        sItemText=ui->listWidgetEnabled->item(i)->text();
+        out << s_TaskKill << sItemText << "\n";
     }
     iCount = ui->listWidgetDisabled->count();
     for (int i = 0; i < iCount; i++)
     {
-        out << s_NoTaskKill << ui->listWidgetDisabled->item(i)->text() << "\n";
+        sItemText=ui->listWidgetDisabled->item(i)->text();
+        out << s_NoTaskKill << sItemText << "\n";
     }
     // out << QString("The current application path is: %1\n").arg(QCoreApplication::applicationDirPath());
     // 6. Close the file
@@ -905,7 +839,7 @@ void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemTe
     QString itemString = "";
     // Iterate in reverse to safely remove items while modifying the list
     //qDebug()<< "m_ApplicationItemsList.size="<<m_ApplicationItemsList.size();
-    int iFound = findApplicationItemIndex (newItemText);
+    int iFound = m_ApplicationItemsList.findApplicationItemIndex (newItemText);
     if (iFound != -1) bFound = true;
     // for (int i = m_ApplicationItemsList.size() - 1; i >= 0; --i)
     // {
@@ -974,30 +908,7 @@ void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemTe
     }
     //qDebug() << __FUNCTION__ << "found= " << bFound;
 }
-ApplicationItem *MainWindow::findApplicationItem(QString sFound)
-{
-    int i_AppItemCount = m_ApplicationItemsList.count ();
-    ApplicationItem *foundItem;
-    // for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
-    for (int iCount = 0; iCount < i_AppItemCount; iCount++)
-    {
-        foundItem = &m_ApplicationItemsList[iCount];
-        if (foundItem->getAppName () == sFound) return foundItem;
-    }
-    return NULL;
-}
-int MainWindow::findApplicationItemIndex(QString sFound)
-{
-    int i_AppItemCount = m_ApplicationItemsList.count ();
-    ApplicationItem *foundItem;
-    // for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
-    for (int iCount = 0; iCount < i_AppItemCount; iCount++)
-    {
-        foundItem = &m_ApplicationItemsList[iCount];
-        if (foundItem->getAppName () == sFound) return iCount;
-    }
-    return -1;
-}
+
 void MainWindow::debugNotFoundWhenKilling()
 {
     int i_AppItemCount = m_ApplicationItemsList.count ();
@@ -1005,7 +916,7 @@ void MainWindow::debugNotFoundWhenKilling()
     //for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
     for (int iCount = 0; iCount < i_AppItemCount; iCount++)
     {
-        foundItem = &m_ApplicationItemsList[iCount];
+        foundItem = m_ApplicationItemsList.at(iCount);
         if (foundItem->getFoundWhenKilling () == false) qDebug() << foundItem->getAppName ();
     }
 }
@@ -1017,7 +928,7 @@ void MainWindow::debugFoundWhenKilling()
     //for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
     for (int iCount = 0; iCount < i_AppItemCount; iCount++)
     {
-        foundItem = &m_ApplicationItemsList[iCount];
+        foundItem = m_ApplicationItemsList.at(iCount);
         if (foundItem->getFoundWhenKilling () && foundItem->getAppKillEnabled ())
         {
             ui->listWidgetKilled->addItem (foundItem->getAppName ());
@@ -1098,7 +1009,7 @@ void MainWindow::readStdError()
         outputProg = outList.at(2);
         outputProg.replace ("\"", "");
         //qDebug() << __FUNCTION__ << "err: " << outputProg;
-        foundItem = findApplicationItem (outputProg);
+        foundItem = m_ApplicationItemsList.findApplicationItem (outputProg);
         if (foundItem)
         {
             //qDebug() << "foundItem->getAppName () " << foundItem->getAppName ();
@@ -1121,7 +1032,7 @@ void MainWindow::on_pushButtonRun_clicked()
 {
     disconnectTimer ();
     //QProcess *process = new QProcess(this); // 'this' sets the parent, good for memory management
-    resetAllApplicationItems();
+    m_ApplicationItemsList.resetAllApplicationItems();
     process = new QProcess(this);
     connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(readStdOutput()));
     connect(process, SIGNAL(readyReadStandardError()), this, SLOT(readStdError()));

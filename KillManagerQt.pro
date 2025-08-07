@@ -16,18 +16,18 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     dialog.cpp \
-    applicationitem.cpp \
     addexedialog.cpp \
     runningprocesseslist.cpp \
-    myqlistwidget.cpp
+    myqlistwidget.cpp \
+    applicationitemlist.cpp
 
 HEADERS  += mainwindow.h \
     dialog.h \
-    applicationitem.h \
     addexedialog.h \
     runningprocesseslist.h \
     log_macros.h \
-    myqlistwidget.h
+    myqlistwidget.h \
+    applicationitemlist.h
 
 FORMS    += mainwindow.ui \
     dialog.ui \

@@ -12,6 +12,8 @@ public:
     void dragMoveEvent(QDragMoveEvent* );
     void dragEnterEvent(QDragEnterEvent* ) override;
     void mouseMoveEvent(QMouseEvent *) override;
+    bool containsItemText(const QString& );
+    // void addItem(QListWidgetItem* ) ;
 signals:
     void itemsReordered();
     void reordering();

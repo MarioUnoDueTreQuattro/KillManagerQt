@@ -3,7 +3,7 @@
 
 #include "log_macros.h"
 #include "addexedialog.h"
-#include "applicationitem.h"
+//#include "applicationitem.h"
 #include "dialog.h"
 #include <QList>
 #include <QListWidgetItem>
@@ -13,6 +13,8 @@
 #include <QPalette>
 #include <QTimer>
 #include "runningprocesseslist.h"
+#include "myqlistwidget.h"
+#include "applicationitemlist.h"
 
 // Include Windows API headers
 #ifdef Q_OS_WIN
@@ -33,6 +35,7 @@ public:
     ~MainWindow();
 
 private:
+    bool listContainsItemText(MyQListWidget*, const QString & );
     void updatePaths();
     void deleteOldBackups();
     RunningProcessesList m_ProcessList;
@@ -48,11 +51,9 @@ private:
     QString m_sSelectedDisabledItem;
     // QString m_sAppName;
     // QString m_sAppCompany;
-    QList<ApplicationItem> m_ApplicationItemsList;
+    //QList<ApplicationItem> m_ApplicationItemsList;
+    ApplicationItemList m_ApplicationItemsList;
     QStringList getRunningProcesses();
-    bool deleteApplicationItem(QString);
-    void resetAllApplicationItems();
-    bool moveApplicationItem(QString, bool);
     void readSettings();
     void writeSettings();
     void loadListFromFile(const QString &);
@@ -66,8 +67,6 @@ private:
     void enableSelectedDisabledItem();
     bool backupBatchFile();
     void addItemToListwidget(QListWidget*, QString);
-    ApplicationItem *findApplicationItem (QString);
-    int findApplicationItemIndex (QString);
     void debugNotFoundWhenKilling();
     void debugFoundWhenKilling();
     void disconnectTimer();
