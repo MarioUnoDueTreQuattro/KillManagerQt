@@ -250,12 +250,12 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
     QListWidgetItem* clickedItem = ui->listWidgetEnabled->itemAt(pos);
     // Create the menu
     QMenu contextMenu(tr("Context Menu"), this);
-    QAction* deleteAction = contextMenu.addAction(tr("Delete"));
-    QAction* enableAction = contextMenu.addAction(tr("Enable"));
     QAction* disableAction = contextMenu.addAction(tr("Disable"));
+    QAction* deleteAction = contextMenu.addAction(tr("Delete"));
+    //QAction* enableAction = contextMenu.addAction(tr("Enable"));
     QAction* copyAction = contextMenu.addAction(tr("Copy Text"));
     deleteAction->setIcon(QIcon(":/icons/img/icons8-delete-48.png"));
-    enableAction->setIcon(QIcon(":/icons/img/icons8-left-48.png"));
+    //enableAction->setIcon(QIcon(":/icons/img/icons8-left-48.png"));
     disableAction->setIcon(QIcon(":/icons/img/icons8-right-48.png"));
     copyAction->setIcon(QIcon(":/icons/img/icons8-copy-to-clipboard-48.png"));
     // contextMenu.addSeparator(); // Add a separator line
@@ -269,7 +269,7 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
     // Enable/disable actions based on whether an item was clicked
     bool itemClicked = (clickedItem != NULL);
     deleteAction->setEnabled(itemClicked);
-    enableAction->setEnabled(false);
+    //enableAction->setEnabled(false);
     disableAction->setEnabled(itemClicked);
     copyAction->setEnabled(itemClicked);
     // Show the menu at the global position of the mouse click
@@ -285,13 +285,13 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
     QListWidgetItem* clickedItem = ui->listWidgetDisabled->itemAt(pos);
     // Create the menu
     QMenu contextMenu(tr("Context Menu"), this);
-    QAction* deleteAction = contextMenu.addAction(tr("Delete"));
     QAction* enableAction = contextMenu.addAction(tr("Enable"));
-    QAction* disableAction = contextMenu.addAction(tr("Disable"));
+    QAction* deleteAction = contextMenu.addAction(tr("Delete"));
+    //QAction* disableAction = contextMenu.addAction(tr("Disable"));
     QAction* copyAction = contextMenu.addAction(tr("Copy Text"));
     deleteAction->setIcon(QIcon(":/icons/img/icons8-delete-48.png"));
     enableAction->setIcon(QIcon(":/icons/img/icons8-left-48.png"));
-    disableAction->setIcon(QIcon(":/icons/img/icons8-right-48.png"));
+    //disableAction->setIcon(QIcon(":/icons/img/icons8-right-48.png"));
     copyAction->setIcon(QIcon(":/icons/img/icons8-copy-to-clipboard-48.png"));
     // contextMenu.addSeparator(); // Add a separator line
     // QAction *globalAction = contextMenu.addAction(tr("Global Action")); // Always enabled
@@ -305,7 +305,7 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
     bool itemClicked = (clickedItem != NULL);
     deleteAction->setEnabled(itemClicked);
     enableAction->setEnabled(itemClicked);
-    disableAction->setEnabled(false);
+    //disableAction->setEnabled(false);
     copyAction->setEnabled(itemClicked);
     // Show the menu at the global position of the mouse click
     // mapToGlobal converts the local widget coordinate (pos) to a global screen coordinate

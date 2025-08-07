@@ -3,6 +3,7 @@
 
 #include <QList>
 #include <QString>
+#include "log_macros.h"
 
 class ApplicationItem
 {

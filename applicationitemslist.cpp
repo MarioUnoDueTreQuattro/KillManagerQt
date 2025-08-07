@@ -88,7 +88,7 @@ bool ApplicationItemsList::deleteApplicationItem(QString deleteString)
     {
         bFound = true;
         this->removeAt (iFoundItem);
-        qDebug() << "m_ApplicationItemsList.size=" << this->size();
+        LOG_MSG( "m_ApplicationItemsList.size= " << this->size());
     }
     // for (int i = m_ApplicationItemsList.size() - 1; i >= 0; --i)
     // {
@@ -118,13 +118,13 @@ bool ApplicationItemsList::moveApplicationItem(QString deleteString, bool bState
     bool bFound = false;
     QString itemString = "";
     // Iterate in reverse to safely remove items while modifying the list
-    qDebug() << "m_ApplicationItemsList.size=" << this->size();
+    LOG_MSG( "m_ApplicationItemsList.size= " << this->size());
     int iFoundItem = this->findApplicationItemIndex (deleteString);
     if (iFoundItem != -1)
     {
         bFound = true;
         this->at(iFoundItem)->setAppKillEnabled(bState);
-        qDebug() << "m_ApplicationItemsList.size=" << this->size();
+        //LOG_MSG( "m_ApplicationItemsList.size= " << this->size());
     }
     // for (int i = m_ApplicationItemsList.size() - 1; i >= 0; --i)
     // {
