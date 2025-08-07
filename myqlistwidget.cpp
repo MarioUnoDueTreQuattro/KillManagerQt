@@ -7,8 +7,13 @@
 
 MyQListWidget::MyQListWidget(QWidget *parent)
 {
-    setDragDropMode(QAbstractItemView::InternalMove);
-    setDefaultDropAction(Qt::MoveAction);
+    LOG_MSG(__FUNCTION__);
+    this->setDragDropMode(QAbstractItemView::InternalMove);
+    this->setDefaultDropAction(Qt::MoveAction);
+    this->setDragEnabled(true);
+    this->setAcceptDrops(true);
+    this->setDropIndicatorShown(true);
+    //ui->listWidgetEnabled->setSelectionMode(QAbstractItemView::SingleSelection);
 }
 
 void MyQListWidget::dropEvent(QDropEvent *event)
@@ -21,8 +26,9 @@ void MyQListWidget::dropEvent(QDropEvent *event)
         event->ignore();
         return;
     }
-    QModelIndex index = indexAt(event->pos());
+    //QModelIndex index = indexAt(event->pos());
     QListWidget::dropEvent(event);
+    //event->acceptProposedAction ();
     emit itemsReordered();
     // if (!indexAt(event->pos()).isValid()) {
     // event->ignore();
@@ -83,12 +89,12 @@ void MyQListWidget::dragMoveEvent(QDragMoveEvent *event)
 
 void MyQListWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    QModelIndex index = indexAt(event->pos());
-    if (!index.isValid())
-    {
-        // Mouse is in empty space — do not start drag
-        return;
-    }
+//    QModelIndex index = indexAt(event->pos());
+//    if (!index.isValid())
+//    {
+//        // Mouse is in empty space — do not start drag
+//        return;
+//    }
     // Otherwise, proceed with default behavior
     QListWidget::mouseMoveEvent(event);
 }

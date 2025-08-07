@@ -46,26 +46,13 @@ MainWindow::MainWindow(QWidget* parent)
     // m_sAppName = currentApp->applicationName();
     // m_sKillFile = getKillFilePath();
     // QString universalPath1 = QDir::fromNativeSeparators(m_sKillFile);
-    // Enable internal drag-and-drop reordering
-    ui->listWidgetEnabled->setDragDropMode(QAbstractItemView::InternalMove);
-    ui->listWidgetEnabled->setDefaultDropAction(Qt::MoveAction);
-    ui->listWidgetEnabled->setDragEnabled(true);
-    ui->listWidgetEnabled->setAcceptDrops(true);
-    ui->listWidgetEnabled->setDropIndicatorShown(true);
-    //ui->listWidgetEnabled->setSelectionMode(QAbstractItemView::SingleSelection);
-    connect(ui->listWidgetEnabled, &MyQListWidget::reordering, this, &MainWindow::disconnectTimer);
-    connect(ui->listWidgetEnabled, &MyQListWidget::itemsReordered, this, &MainWindow::writeListToFile);
-    ui->listWidgetDisabled->setDragDropMode(QAbstractItemView::InternalMove);
-    ui->listWidgetDisabled->setDefaultDropAction(Qt::MoveAction);
-    ui->listWidgetDisabled->setDragEnabled(true);
-    ui->listWidgetDisabled->setAcceptDrops(true);
-    ui->listWidgetDisabled->setDropIndicatorShown(true);
-    //ui->listWidgetDisabled->setSelectionMode(QAbstractItemView::SingleSelection);
-    connect(ui->listWidgetDisabled, &MyQListWidget::reordering, this, &MainWindow::disconnectTimer);
-    connect(ui->listWidgetDisabled, &MyQListWidget::itemsReordered, this, &MainWindow::writeListToFile);
     loadListFromFile();
     ui->listWidgetEnabled->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->listWidgetDisabled->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->listWidgetEnabled, &MyQListWidget::reordering, this, &MainWindow::disconnectTimer);
+    connect(ui->listWidgetEnabled, &MyQListWidget::itemsReordered, this, &MainWindow::writeListToFile);
+    connect(ui->listWidgetDisabled, &MyQListWidget::reordering, this, &MainWindow::disconnectTimer);
+    connect(ui->listWidgetDisabled, &MyQListWidget::itemsReordered, this, &MainWindow::writeListToFile);
     connect(ui->listWidgetEnabled, &QListWidget::customContextMenuRequested,
         this, &MainWindow::showListWidgetEnabledContextMenu);
     connect(ui->listWidgetDisabled, &QListWidget::customContextMenuRequested,
@@ -922,6 +909,7 @@ void MainWindow::debugNotFoundWhenKilling()
         if (foundItem->getFoundWhenKilling () == false) qDebug() << foundItem->getAppName ();
     }
 }
+
 void MainWindow::debugFoundWhenKilling()
 {
     ui->listWidgetKilled->clear ();
