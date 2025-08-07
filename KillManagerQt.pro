@@ -19,7 +19,7 @@ SOURCES += main.cpp\
     addexedialog.cpp \
     runningprocesseslist.cpp \
     myqlistwidget.cpp \
-    applicationitemlist.cpp
+    applicationitemslist.cpp
 
 HEADERS  += mainwindow.h \
     dialog.h \
@@ -27,7 +27,7 @@ HEADERS  += mainwindow.h \
     runningprocesseslist.h \
     log_macros.h \
     myqlistwidget.h \
-    applicationitemlist.h
+    applicationitemslist.h
 
 FORMS    += mainwindow.ui \
     dialog.ui \

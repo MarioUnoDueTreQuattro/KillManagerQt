@@ -22,10 +22,10 @@ public:
     void setFoundWhenKilling(bool value);
 };
 
-class ApplicationItemList
+class ApplicationItemsList
 {
 public:
-    ApplicationItemList();
+    ApplicationItemsList();
     void clear();
     void removeAt (int);
     int size() const;

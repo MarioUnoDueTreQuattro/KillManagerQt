@@ -1,45 +1,45 @@
-#include "applicationitemlist.h"
+#include "applicationitemslist.h"
 //#include "applicationitem.h"
 #include <QDebug>
 #include <QMessageBox>
 
-ApplicationItemList::ApplicationItemList()
+ApplicationItemsList::ApplicationItemsList()
 {
 
 }
 
-void ApplicationItemList::clear()
+void ApplicationItemsList::clear()
 {
     m_list.clear ();
 }
 
-void ApplicationItemList::removeAt(int iIndex)
+void ApplicationItemsList::removeAt(int iIndex)
 {
     m_list.removeAt (iIndex);
 }
 
-int ApplicationItemList::size() const
+int ApplicationItemsList::size() const
 {
     return m_list.size ();
 }
 
-int ApplicationItemList::count() const
+int ApplicationItemsList::count() const
 {
     return m_list.count ();
 
 }
 
-ApplicationItem* ApplicationItemList::at(int i)
+ApplicationItem* ApplicationItemsList::at(int i)
 {
     return &m_list[i];
 }
 
-void ApplicationItemList::append(ApplicationItem item)
+void ApplicationItemsList::append(ApplicationItem item)
 {
     m_list.append (item);
 }
 
-ApplicationItem *ApplicationItemList::findApplicationItem(QString sFound)
+ApplicationItem *ApplicationItemsList::findApplicationItem(QString sFound)
 {
     int i_AppItemCount = this->count ();
     ApplicationItem *foundItem;
@@ -52,7 +52,7 @@ ApplicationItem *ApplicationItemList::findApplicationItem(QString sFound)
     return NULL;
 }
 
-int ApplicationItemList::findApplicationItemIndex(QString sFound)
+int ApplicationItemsList::findApplicationItemIndex(QString sFound)
 {
     int i_AppItemCount = this->count ();
     ApplicationItem *foundItem;
@@ -65,7 +65,7 @@ int ApplicationItemList::findApplicationItemIndex(QString sFound)
     return -1;
 }
 
-void ApplicationItemList::resetAllApplicationItems()
+void ApplicationItemsList::resetAllApplicationItems()
 {
     int i_AppItemCount = this->count ();
     ApplicationItem *foundItem;
@@ -77,7 +77,7 @@ void ApplicationItemList::resetAllApplicationItems()
     }
 }
 
-bool ApplicationItemList::deleteApplicationItem(QString deleteString)
+bool ApplicationItemsList::deleteApplicationItem(QString deleteString)
 {
     bool bFound = false;
     QString itemString = "";
@@ -113,7 +113,7 @@ bool ApplicationItemList::deleteApplicationItem(QString deleteString)
 }
 
 
-bool ApplicationItemList::moveApplicationItem(QString deleteString, bool bState)
+bool ApplicationItemsList::moveApplicationItem(QString deleteString, bool bState)
 {
     bool bFound = false;
     QString itemString = "";

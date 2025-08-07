@@ -14,7 +14,7 @@
 #include <QTimer>
 #include "runningprocesseslist.h"
 #include "myqlistwidget.h"
-#include "applicationitemlist.h"
+#include "applicationitemslist.h"
 
 // Include Windows API headers
 #ifdef Q_OS_WIN
@@ -52,7 +52,7 @@ private:
     // QString m_sAppName;
     // QString m_sAppCompany;
     //QList<ApplicationItem> m_ApplicationItemsList;
-    ApplicationItemList m_ApplicationItemsList;
+    ApplicationItemsList m_ApplicationItemsList;
     QStringList getRunningProcesses();
     void readSettings();
     void writeSettings();
