@@ -153,15 +153,17 @@ void MainWindow::deleteOldBackups()
     int iBackupsCount = settings.value("Dialog/BackupsCount", 100).toInt();
     int iBackupsDays = settings.value("Dialog/BackupsDays", 30).toInt();
     if (bDeleteOldBackups == false) return;
+    QStringList nameFilters;
+    nameFilters << "*.bat";
     QDir dir(m_sBackupPath);
-    QFileInfoList files = dir.entryInfoList(QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+    QFileInfoList files = dir.entryInfoList(nameFilters, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
     int iFilesCount = files.count();
     if (iFilesCount < iBackupsCount)
     {
         LOG_MSG("iFilesCount < iBackupsCount = " + QString::number (iFilesCount));
         return;
     }
-    files = dir.entryInfoList(QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot); //, QDir::Time);
+    files = dir.entryInfoList(nameFilters, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot); //, QDir::Time);
     std::sort(files.begin(), files.end(), compareByLastModified);
     iFilesCount = files.size();
     int filesToDelete = iFilesCount - iBackupsCount;
@@ -680,16 +682,16 @@ bool MainWindow::writeListToFile()
     QString s_NoTaskKill = "REM taskkill /F /T /IM ";
     int iCount;
     iCount = ui->listWidgetEnabled->count();
-    QString  sItemText;
+    QString sItemText;
     for (int i = 0; i < iCount; i++)
     {
-        sItemText=ui->listWidgetEnabled->item(i)->text();
+        sItemText = ui->listWidgetEnabled->item(i)->text();
         out << s_TaskKill << sItemText << "\n";
     }
     iCount = ui->listWidgetDisabled->count();
     for (int i = 0; i < iCount; i++)
     {
-        sItemText=ui->listWidgetDisabled->item(i)->text();
+        sItemText = ui->listWidgetDisabled->item(i)->text();
         out << s_NoTaskKill << sItemText << "\n";
     }
     // out << QString("The current application path is: %1\n").arg(QCoreApplication::applicationDirPath());

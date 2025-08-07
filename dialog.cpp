@@ -17,9 +17,9 @@ Dialog::Dialog(QWidget* parent)
     this->setWindowIcon(QIcon(":/icons/img/KillManager.ico")); // Use the path defined in .qrc
     ui->setupUi(this);
     readSettings();
-    QApplication* currentApp = qApp;
-    QString orgName = currentApp->organizationName();
-    QString appName = currentApp->applicationName();
+    // QApplication* currentApp = qApp;
+    // QString orgName = currentApp->organizationName();
+    // QString appName = currentApp->applicationName();
     // QSettings settings;
     // QString readValue = settings.value("Path").toString();
     // qDebug() << "Read string from registry:" << readValue;
@@ -35,6 +35,16 @@ Dialog::Dialog(QWidget* parent)
     ui->lineEditPath->setText(m_sKillFile);
     ui->lineEditExternaEditor->setText(m_sExternalEditorInitialPath);
     ui->lineEditBackupPath->setText(m_sBackupInitialPath);
+    QStringList nameFilters;
+    nameFilters << "*.bat";
+    QDir dir(m_sBackupInitialPath);
+    QFileInfoList files = dir.entryInfoList(nameFilters, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+    int iFilesCount = files.count();
+    files = dir.entryInfoList(nameFilters, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot); //, QDir::Time);
+    //std::sort(files.begin(), files.end(), compareByLastModified);
+    iFilesCount = files.size();
+//    ui->labelBackupsInfo->setText ("Currently the folder contains&nbsp;<b><span style=\"color:#ff0000;\">" + QString::number (iFilesCount) + "</span></b>" + "&nbsp;backups.");
+    ui->labelBackupsInfo->setText ("Currently the folder contains " + QString::number (iFilesCount) + " backups.");
 }
 
 Dialog::~Dialog()

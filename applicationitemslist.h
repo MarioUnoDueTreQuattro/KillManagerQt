@@ -3,7 +3,6 @@
 
 #include <QList>
 #include <QString>
-//#include "applicationitem.h"
 
 class ApplicationItem
 {
