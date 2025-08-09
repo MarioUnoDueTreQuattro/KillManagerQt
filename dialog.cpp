@@ -9,6 +9,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QStandardPaths>
+#include "utility.h"
 
 Dialog::Dialog(QWidget* parent)
     : QDialog(parent)
@@ -43,8 +44,11 @@ Dialog::Dialog(QWidget* parent)
     files = dir.entryInfoList(nameFilters, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot); //, QDir::Time);
     //std::sort(files.begin(), files.end(), compareByLastModified);
     iFilesCount = files.size();
-//    ui->labelBackupsInfo->setText ("Currently the folder contains&nbsp;<b><span style=\"color:#ff0000;\">" + QString::number (iFilesCount) + "</span></b>" + "&nbsp;backups.");
+    // ui->labelBackupsInfo->setText ("Currently the folder contains&nbsp;<b><span style=\"color:#ff0000;\">" + QString::number (iFilesCount) + "</span></b>" + "&nbsp;backups.");
     ui->labelBackupsInfo->setText ("Currently the folder contains " + QString::number (iFilesCount) + " backups.");
+    // RunningProcessesListEx utility;
+    // QIcon icon = utility.getProcessIcon (ui->lineEditExternaEditor ->text ().toStdString (), true);
+    // ui->labelIcon->setPixmap (icon.pixmap (QSize(32, 32)));
 }
 
 Dialog::~Dialog()
@@ -66,7 +70,7 @@ void Dialog::readSettings()
     }
     m_sKillFile = sKillFile;
     m_sInitialPath = settings.value("Dialog/InitialPath", documentsPath).toString();
-    m_sExternalEditorInitialPath = settings.value("Dialog/External editor", "notepad.exe").toString();
+    m_sExternalEditorInitialPath = settings.value("Dialog/External editor", "C:\\Windows\\notepad.exe").toString();
     m_sBackupInitialPath = settings.value("Dialog/Backup path", documentsPath).toString ();
     int iRefreshRate = settings.value("Dialog/RefreshRate", 5).toInt(); // default to 5
     ui->spinBoxUpdateRate->setValue(iRefreshRate);
@@ -87,7 +91,7 @@ void Dialog::readSettings()
     }
     ui->spinBoxBackupsCount->setValue (iBackupsCount);
     ui->spinBoxBackupsDays->setValue (iBackupsDays);
-    bool bKillInternal= settings.value("Dialog/UseInternalKill", false).toBool ();
+    bool bKillInternal = settings.value("Dialog/UseInternalKill", false).toBool ();
     if (bKillInternal)
     {
         ui->checkBoxKill->setChecked (true);
@@ -96,8 +100,6 @@ void Dialog::readSettings()
     {
         ui->checkBoxKill->setChecked (false);
     }
-
-
 }
 
 void Dialog::writeSettings()
@@ -184,7 +186,6 @@ void Dialog::on_Dialog_accepted()
         }
     }
     settings.setValue("Dialog/UseInternalKill", ui->checkBoxKill->isChecked ());
-
     // else
     // {
     // QMessageBox::information(parent, "Folder Exists",
@@ -230,6 +231,9 @@ void Dialog::on_pushButtonChooseExternaEditor_clicked()
         // fileNameLabel->setText("No file selected.");
         qDebug() << "File dialog cancelled or no file selected.";
     }
+    RunningProcessesListEx utility;
+    QIcon icon = utility.getProcessIcon (ui->lineEditExternaEditor ->text ().toStdString (), true);
+    ui->labelIcon->setPixmap (icon.pixmap (QSize(32, 32)));
 }
 
 void Dialog::on_pushButtonChooseBackupPath_clicked()
@@ -360,4 +364,19 @@ void Dialog::on_checkBoxDeleteBackups_toggled(bool checked)
         ui->spinBoxBackupsCount->setEnabled (false);
         ui->spinBoxBackupsDays->setEnabled (false);
     }
+}
+
+void Dialog::on_lineEditExternaEditor_textChanged(const QString &arg1)
+{
+    bool bIsFullPath=false;
+    if (arg1.contains ("\\")) bIsFullPath=true;
+    m_sExternalEditorInitialPath = arg1;
+    RunningProcessesListEx utility;
+    QIcon icon;
+    if (bIsFullPath)
+     icon = utility.getProcessIcon (arg1.toStdString (), true);
+    else
+        icon = utility.getProcessIcon (arg1.toStdString (), false);
+    ui->labelIcon->setPixmap (icon.pixmap (QSize(32, 32)));
+    LOG_MSG(arg1);
 }

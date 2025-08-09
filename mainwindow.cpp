@@ -101,7 +101,7 @@ void MainWindow::timerUupdate()
     //qDebug() << __FUNCTION__ << m_iTimerUpdatesCount;
     loadListFromFile ();
     QString sRefreshed = ui->statusBar->currentMessage ();
-    if (sRefreshed == "" | sRefreshed.left (9) == "Refreshed")
+    if ((sRefreshed == "") | (sRefreshed.left (9) == "Refreshed"))
     {
         ui->statusBar->showMessage ("Refreshed every " + QString::number (m_iRefreshRate / 1000) + " seconds" + repeatedChar);
     }
@@ -900,6 +900,7 @@ void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemTe
             item->setForeground (m_TextBrush);
             //item->setBackground (QColor(247,209,209));
             item->setBackground (QColor(191, 191, 239));
+            item->setIcon (m_ProcessList.getProcessIcon (newItemText.toStdString (), false));
             listWidget->addItem(item);
             if (newItemText == m_sSelectedEnabledItem)
             {
@@ -963,7 +964,7 @@ void MainWindow::debugFoundWhenKilling()
         if (foundItem->getFoundWhenKilling () && foundItem->getAppKillEnabled ())
         {
             ui->listWidgetKilled->addItem (foundItem->getAppName ());
-            qDebug() << foundItem->getAppName ();
+            //qDebug() << foundItem->getAppName ();
         }
     }
     ui->labelKilled->setText("Killed: " + QString::number(ui->listWidgetKilled->count()));
@@ -1071,6 +1072,7 @@ void MainWindow::on_pushButtonRun_clicked()
     ui->statusBar->repaint ();
     if (m_bKillInternal)
     {
+        //m_ProcessList.debugProcessesMemory ();
         KillRunningProcesses();
         sStatusMessage = "TerminateProcess";
         sStatusMessage.append (" executed.");
@@ -1257,7 +1259,7 @@ QStringList MainWindow::getRunningProcesses()
 
 bool MainWindow::KillRunningProcesses()
 {
-    bool bKilled;
+    bool bKilled = false;
     int iCount;
     iCount = ui->listWidgetEnabled->count();
     QString sItemText;

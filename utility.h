@@ -9,11 +9,18 @@
 #include <QStringList>
 #include <QString>
 #include <windows.h>
-#include <windows.h>
 #include <tlhelp32.h>
 #include <psapi.h>
 #include <iostream>
 #include <QObject>
+#include <shellapi.h>
+#include <string>
+#include <vector>
+#include <QPixmap>
+#include <QIcon>
+//#include <QtWinExtras/QtWin>
+#include <QtWinExtras/QtWinExtras>
+#include <qt_windows.h>
 
 // Basic log with file, line, and function
 #define LOG() \
@@ -77,7 +84,6 @@ inline void writeToLogFile(const QString& message, const char* fileName, const c
 #ifndef MYUTILITY_H
 #define MYUTILITY_H
 
-
 // Include Windows API headers
 #ifdef Q_OS_WIN
     #include <windows.h>
@@ -87,12 +93,11 @@ inline void writeToLogFile(const QString& message, const char* fileName, const c
 class MyUtility
 {
 private:
-QStringList m_ProcessesList;
+    QStringList m_ProcessesList;
 public:
 
     bool KillRunningProcesses();
     QStringList getRunningProcesses();
-
 
 };
 
@@ -112,6 +117,10 @@ public:
     bool killProcessByName(const std::wstring& targetName);
     bool killProcessByName(QString);
     QString getProcessPath(HANDLE hProcess);
+    HANDLE getProcessHandle(const std::string& executablePath);
+    int debugProcessesMemory();
+    QIcon getProcessIcon(std::string,bool);
+    HICON getIconFromExecutable(const std::string& executablePath);
 
 private:
     QStringList processList;
@@ -121,4 +130,3 @@ public slots:
 };
 
 #endif // RUNNINGPROCESSESLISTEX_H
-

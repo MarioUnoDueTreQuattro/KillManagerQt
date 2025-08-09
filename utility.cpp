@@ -1,5 +1,19 @@
 #include "utility.h"
 
+// Funzione per convertire una stringa di caratteri wide (WCHAR) in una stringa standard (char)
+std::string WcharToString(const WCHAR* wstr)
+{
+    std::string str;
+    int size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, nullptr, 0, nullptr, nullptr);
+    if (size > 0)
+    {
+        std::vector<char> buffer(size);
+        WideCharToMultiByte(CP_UTF8, 0, wstr, -1, buffer.data(), size, nullptr, nullptr);
+        str.assign(buffer.begin(), buffer.end() - 1);
+    }
+    return str;
+}
+
 QStringList MyUtility::getRunningProcesses()
 {
     QStringList processList;
@@ -236,4 +250,144 @@ QString RunningProcessesListEx::getProcessPath(HANDLE hProcess)
         // Se c'è un errore, stampiamo il codice di errore per il debug.
         std::cerr << "Errore nel recupero del percorso: " << GetLastError() << std::endl;
     }
+    return "";
+}
+
+HANDLE RunningProcessesListEx::getProcessHandle(const std::string &executablePath)
+{
+    // conversione in wstring
+    std::wstring wideExecutablePath(executablePath.begin(), executablePath.end());
+    // ottieni il puntatore wchar_t*
+    const wchar_t *widePath = wideExecutablePath.c_str();
+    DWORD processIds[1024], bytesReturned;
+    if (!EnumProcesses(processIds, sizeof(processIds), &bytesReturned))
+    {
+        return 0;
+    }
+    DWORD processCount = bytesReturned / sizeof(DWORD);
+    for (DWORD i = 0; i < processCount; ++i)
+    {
+        DWORD pid = processIds[i];
+        if (pid == 0) continue;
+        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_TERMINATE, FALSE, pid);
+        if (!hProcess) continue;
+        HMODULE hMod;
+        DWORD cbNeeded;
+        if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeeded))
+        {
+            wchar_t processName[MAX_PATH];
+            if (GetModuleBaseName(hProcess, hMod, processName, sizeof(processName) / sizeof(wchar_t)))
+            {
+                if (_wcsicmp(processName, widePath) == 0)
+                {
+                    return hProcess;
+                }
+                else
+                {
+                    // std::cerr << "Failed to terminate process." << std::endl;
+                }
+            }
+        }
+        CloseHandle(hProcess);
+    }
+    //std::wcerr << L"Process not found: " << targetName << std::endl;
+    return 0;
+}
+
+int RunningProcessesListEx::debugProcessesMemory()
+{
+    DWORD processIds[1024];
+    DWORD bytesReturned;
+    // Ottiene i PID di tutti i processi attivi
+    if (!EnumProcesses(processIds, sizeof(processIds), &bytesReturned))
+    {
+        std::cerr << "Errore in EnumProcesses." << std::endl;
+        return 1;
+    }
+    int numProcesses = bytesReturned / sizeof(DWORD);
+    std::cout << "Elenco dei processi attivi:" << std::endl;
+    std::cout << "--------------------------------------------------------" << std::endl;
+    std::cout << "PID\t\tNome\t\tMemoria (MB)" << std::endl;
+    std::cout << "--------------------------------------------------------" << std::endl;
+    for (int i = 0; i < numProcesses; i++)
+    {
+        DWORD pid = processIds[i];
+        // Apri un handle per il processo con i diritti necessari
+        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+        if (hProcess != NULL)
+        {
+            // Ottieni il nome del processo
+            HMODULE hMod;
+            DWORD cbNeeded;
+            WCHAR processName[MAX_PATH] = L"Sconosciuto"; // Valore predefinito
+            if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeeded))
+            {
+                GetModuleBaseName(hProcess, hMod, processName, sizeof(processName) / sizeof(WCHAR));
+            }
+            // Ottieni l'utilizzo della memoria
+            PROCESS_MEMORY_COUNTERS pmc;
+            if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc)))
+            {
+                // Calcola la memoria di lavoro in megabyte
+                double memoryUsageMB = pmc.WorkingSetSize / (1024.0 * 1024.0);
+                // Stampa il PID, il nome e l'utilizzo della memoria
+                std::cout << pid << "\t\t" << WcharToString(processName) << "\t\t" << memoryUsageMB << std::endl;
+            }
+            // Chiudi l'handle del processo
+            CloseHandle(hProcess);
+        }
+    }
+    return 0;
+}
+
+QIcon RunningProcessesListEx::getProcessIcon( std::string sProcessPath, bool bIsFullPath)
+{
+    QIcon icon(":/icons/img/imageres_15.ico");
+    // const wchar_t *exePath = L"C:\\Program Files\\App\\app.exe";
+    // SHFILEINFO shinfo = {};
+    // QIcon icon = QtWin::fromHICON(hIcon); if (SHGetFileInfo(exePath, 0, &shinfo, sizeof(shinfo),
+    // SHGFI_ICON | SHGFI_SMALLICON))
+    // {
+    // QPixmap pixmap = HIconToQPixmap(shinfo.hIcon);
+    // DestroyIcon(shinfo.hIcon); // libera risorsa
+    // return pixmap;
+    // }
+    //std::string exePath = "C:\\Percorso\\del\\tuo\\file.exe";
+    HANDLE hProc = getProcessHandle (sProcessPath);
+    QString path;
+    if (bIsFullPath == false)
+        path = getProcessPath (hProc);
+    else
+        path = QString::fromStdString(sProcessPath);
+    HICON hIcon = getIconFromExecutable(path.toStdString ());
+    if (hIcon != NULL)
+    {
+        // Converte l'handle HICON di Windows in un QIcon di Qt
+        // Passaggio 1: Converti l'HICON in un QPixmap
+        // QPixmap pixmap = QtWin::fromHICON(hIcon);
+        // Passaggio 2: Converti il QPixmap in un QImage
+        // QImage image = pixmap.toImage();
+        icon = QIcon (QtWin::fromHICON (hIcon));
+        // Importante: distruggi l'handle dell'icona quando non è più necessario
+        DestroyIcon(hIcon);
+        return icon;
+    }
+    QString sLogMessage = QString::fromStdString (sProcessPath);
+    sLogMessage.append (" does not have an icon, using default icon.");
+    LOG_MSG(sLogMessage);
+    return icon;
+}
+
+HICON RunningProcessesListEx::getIconFromExecutable(const std::string& executablePath)
+{
+    if (executablePath.empty())
+    {
+        return NULL;
+    }
+    // Converti il percorso in una stringa di caratteri wide (LPCSTR)
+    const char *path = executablePath.c_str();
+    // ExtractIcon restituisce un handle a una singola icona.
+    // Il parametro '0' indica che vogliamo la prima icona disponibile nel file.
+    HICON hIcon = ExtractIconA(NULL, path, 0);
+    return hIcon;
 }

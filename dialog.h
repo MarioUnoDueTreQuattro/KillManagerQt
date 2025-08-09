@@ -29,6 +29,8 @@ private slots:
 
     void on_checkBoxDeleteBackups_toggled(bool checked);
 
+    void on_lineEditExternaEditor_textChanged(const QString &arg1);
+
 private:
     Ui::Dialog *ui;
     QString m_sKillFile;

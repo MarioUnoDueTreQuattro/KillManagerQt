@@ -131,9 +131,16 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
+         <widget class="QLabel" name="labelIcon">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLineEdit" name="lineEditExternaEditor">
           <property name="text">
-           <string>notepad.exe</string>
+           <string>external editor</string>
           </property>
          </widget>
         </item>

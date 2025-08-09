@@ -5,7 +5,7 @@
 #include <QDragMoveEvent>
 #include <QMimeData>
 
-MyQListWidget::MyQListWidget(QWidget *parent)
+MyQListWidget::MyQListWidget(QWidget *)
 {
     this->setDragDropMode(QAbstractItemView::InternalMove);
     this->setDefaultDropAction(Qt::MoveAction);

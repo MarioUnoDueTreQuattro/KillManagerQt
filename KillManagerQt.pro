@@ -8,7 +8,7 @@ CONFIG += c++11
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets winextras
 
 TARGET = KillManagerQt
 TEMPLATE = app
@@ -37,7 +37,7 @@ RESOURCES += \
 
 win32:RC_ICONS = KillManager.ico
 
-VERSION = 1.0.0.5
+VERSION = 1.0.0.6
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 win32:LIBS += -lpsapi

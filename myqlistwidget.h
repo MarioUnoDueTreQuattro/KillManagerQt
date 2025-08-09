@@ -7,7 +7,7 @@ class MyQListWidget : public QListWidget
 {
 Q_OBJECT
 public:
-    explicit MyQListWidget(QWidget* parent=nullptr);
+    explicit MyQListWidget(QWidget* =nullptr);
     void dropEvent(QDropEvent* ) override;
     void dragMoveEvent(QDragMoveEvent* );
     void dragEnterEvent(QDragEnterEvent* ) override;
