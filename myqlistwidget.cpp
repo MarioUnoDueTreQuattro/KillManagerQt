@@ -1,5 +1,5 @@
 #include "myqlistwidget.h"
-#include "log_macros.h"
+#include "utility.h"
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QDragMoveEvent>
@@ -7,7 +7,6 @@
 
 MyQListWidget::MyQListWidget(QWidget *parent)
 {
-    LOG_MSG(__FUNCTION__);
     this->setDragDropMode(QAbstractItemView::InternalMove);
     this->setDefaultDropAction(Qt::MoveAction);
     this->setDragEnabled(true);
@@ -41,6 +40,11 @@ void MyQListWidget::dropEvent(QDropEvent *event)
 void MyQListWidget::dragEnterEvent(QDragEnterEvent *event)
 {
     LOG_MSG("dragEnterEvent");
+    if (event->source() != this)
+    {
+        event->ignore();
+        return;
+    }
     event->acceptProposedAction();
     emit reordering();
     QListWidget::dragEnterEvent(event);
@@ -49,13 +53,13 @@ void MyQListWidget::dragEnterEvent(QDragEnterEvent *event)
 void MyQListWidget::dragMoveEvent(QDragMoveEvent *event)
 {
     QModelIndex index = indexAt(event->pos());
-    if (!index.isValid())
-    {
-        // Drop is in empty space — reject it
-        LOG_MSG("Drop is in empty space — reject it");
-        event->ignore();
-        return;
-    }
+    // if (!index.isValid())
+    // {
+    //        // Drop is in empty space — reject it
+    // LOG_MSG("Drop is in empty space — reject it");
+    // event->ignore();
+    // return;
+    // }
     // LOG_MSG("dragMoveEvent");
     //QModelIndex index = indexAt(event->pos());
     if (event->source() == this && index.isValid())
@@ -89,10 +93,20 @@ void MyQListWidget::dragMoveEvent(QDragMoveEvent *event)
 
 void MyQListWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    QModelIndex index = indexAt(event->pos());
-    QListWidgetItem *targetItem = item(index.row());
-    targetItem-> setFlags( targetItem->flags() | Qt::ItemIsDragEnabled);
-    currentItem()-> setFlags( currentItem ()->flags() | Qt::ItemIsDragEnabled);
+//    QModelIndex index = indexAt(event->pos());
+//    if (index.isValid ())
+//    {
+//        //LOG_MSG("index.isValid=true");
+//        QListWidgetItem *targetItem = item(index.row());
+//        targetItem-> setFlags( targetItem->flags() | Qt::ItemIsDragEnabled);
+//        currentItem()-> setFlags( currentItem ()->flags() | Qt::ItemIsDragEnabled);
+//    }
+//    else  LOG_MSG("index.isValid=false!!!!!!!!!");
+    QListWidgetItem* item = itemAt(event->pos());
+    if (!item) {
+       LOG_MSG("index.isValid=false!!!!!!!!!");
+    }
+    QListWidget::mouseMoveEvent(event);
     //LOG_MSG("");
     // QModelIndex index = indexAt(event->pos());
     // if (!index.isValid())
@@ -101,7 +115,6 @@ void MyQListWidget::mouseMoveEvent(QMouseEvent *event)
     // return;
     // }
     // Otherwise, proceed with default behavior
-    QListWidget::mouseMoveEvent(event);
 }
 
 //void MyQListWidget::addItem(QListWidgetItem* item) {

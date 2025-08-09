@@ -87,6 +87,17 @@ void Dialog::readSettings()
     }
     ui->spinBoxBackupsCount->setValue (iBackupsCount);
     ui->spinBoxBackupsDays->setValue (iBackupsDays);
+    bool bKillInternal= settings.value("Dialog/UseInternalKill", false).toBool ();
+    if (bKillInternal)
+    {
+        ui->checkBoxKill->setChecked (true);
+    }
+    else
+    {
+        ui->checkBoxKill->setChecked (false);
+    }
+
+
 }
 
 void Dialog::writeSettings()
@@ -172,6 +183,8 @@ void Dialog::on_Dialog_accepted()
             QMessageBox::critical(this, "Backup folder error", "Failed to create the backup folder:\n" + folderPath);
         }
     }
+    settings.setValue("Dialog/UseInternalKill", ui->checkBoxKill->isChecked ());
+
     // else
     // {
     // QMessageBox::information(parent, "Folder Exists",

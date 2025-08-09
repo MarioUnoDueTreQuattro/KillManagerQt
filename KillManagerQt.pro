@@ -17,17 +17,16 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     dialog.cpp \
     addexedialog.cpp \
-    runningprocesseslist.cpp \
     myqlistwidget.cpp \
-    applicationitemslist.cpp
+    applicationitemslist.cpp \
+    utility.cpp
 
 HEADERS  += mainwindow.h \
     dialog.h \
     addexedialog.h \
-    runningprocesseslist.h \
-    log_macros.h \
     myqlistwidget.h \
-    applicationitemslist.h
+    applicationitemslist.h \
+    utility.h
 
 FORMS    += mainwindow.ui \
     dialog.ui \
@@ -38,7 +37,7 @@ RESOURCES += \
 
 win32:RC_ICONS = KillManager.ico
 
-VERSION = 1.0.0.4
+VERSION = 1.0.0.5
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 win32:LIBS += -lpsapi

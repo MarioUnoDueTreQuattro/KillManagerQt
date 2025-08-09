@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "log_macros.h"
+#include "utility.h"
 #include "addexedialog.h"
 //#include "applicationitem.h"
 #include "dialog.h"
@@ -12,7 +12,7 @@
 #include <QFont>
 #include <QPalette>
 #include <QTimer>
-#include "runningprocesseslist.h"
+//#include "runningprocesseslist.h"
 #include "myqlistwidget.h"
 #include "applicationitemslist.h"
 
@@ -36,9 +36,9 @@ public:
 
 private:
     bool listContainsItemText(MyQListWidget*, const QString & );
-    void updatePaths();
+    void updateSettings();
     void deleteOldBackups();
-    RunningProcessesList m_ProcessList;
+    RunningProcessesListEx m_ProcessList;
     QFont m_Font;
     QBrush m_TextBrush;
     QTimer *timer;
@@ -54,11 +54,14 @@ private:
     //QList<ApplicationItem> m_ApplicationItemsList;
     ApplicationItemsList m_ApplicationItemsList;
     QStringList getRunningProcesses();
+    bool KillRunningProcesses();
     void readSettings();
     void writeSettings();
     void loadListFromFile(const QString &);
     void showListWidgetEnabledContextMenu(const QPoint& pos);
     void showListWidgetDisabledContextMenu(const QPoint& pos);
+    void killSelectedDisabledItem();
+    void killSelectedEnabledItem();
     void copySelectedEnabledItem();
     void deleteSelectedEnabledItem();
     void deleteSelectedDisabledItem();
@@ -72,6 +75,7 @@ private:
     void disconnectTimer();
     void connectTimer();
     bool m_bTimerIsConnected;
+    bool m_bKillInternal;
     int m_iTimerUpdatesCount;
     int m_iRefreshRate;
 protected:

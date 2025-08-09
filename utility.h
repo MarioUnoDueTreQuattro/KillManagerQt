@@ -6,6 +6,14 @@
 #include <QTextStream>
 #include <QDateTime>
 #include <QApplication>
+#include <QStringList>
+#include <QString>
+#include <windows.h>
+#include <windows.h>
+#include <tlhelp32.h>
+#include <psapi.h>
+#include <iostream>
+#include <QObject>
 
 // Basic log with file, line, and function
 #define LOG() \
@@ -65,3 +73,50 @@ inline void writeToLogFile(const QString& message, const char* fileName, const c
 }
 
 #endif // LOG_MACROS_H
+
+#ifndef MYUTILITY_H
+#define MYUTILITY_H
+
+
+// Include Windows API headers
+#ifdef Q_OS_WIN
+    #include <windows.h>
+    #include <psapi.h> // For EnumProcesses, EnumProcessModules, GetModuleBaseName
+#endif
+
+class MyUtility
+{
+private:
+QStringList m_ProcessesList;
+public:
+
+    bool KillRunningProcesses();
+    QStringList getRunningProcesses();
+
+
+};
+
+#endif // MYUTILITY_H
+
+#ifndef RUNNINGPROCESSESLISTEX_H
+#define RUNNINGPROCESSESLISTEX_H
+
+class RunningProcessesListEx : public QObject
+{
+    Q_OBJECT
+public:
+    explicit RunningProcessesListEx(QObject *parent = 0);
+    void populateProcessList();
+    QStringList getProcessList() const;
+    bool isRunning (QString);
+    bool killProcessByName(const std::wstring& targetName);
+    bool killProcessByName(QString);
+private:
+    QStringList processList;
+signals:
+
+public slots:
+};
+
+#endif // RUNNINGPROCESSESLISTEX_H
+

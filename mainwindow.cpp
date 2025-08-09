@@ -107,7 +107,7 @@ void MainWindow::timerUupdate()
     }
 }
 
-void MainWindow::updatePaths()
+void MainWindow::updateSettings()
 {
     QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     documentsPath = QDir::toNativeSeparators (documentsPath);
@@ -121,6 +121,7 @@ void MainWindow::updatePaths()
     }
     m_sKillFile = sKillFile;
     m_sBackupPath = settings.value("Dialog/Backup path", documentsPath).toString();
+    m_bKillInternal = settings.value("Dialog/UseInternalKill", false).toBool ();
     // else {
     //        //m_sKillFile = "C:\\Users\\Andrea\\Documents\\kill.bat";
     // qDebug() << "Read value OK";
@@ -241,6 +242,8 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
     QAction* deleteAction = contextMenu.addAction(tr("Delete"));
     //QAction* enableAction = contextMenu.addAction(tr("Enable"));
     QAction* copyAction = contextMenu.addAction(tr("Copy Text"));
+    QAction* killAction = contextMenu.addAction(tr("Terminate"));
+    killAction->setIcon(QIcon(":/icons/img/kill.png"));
     deleteAction->setIcon(QIcon(":/icons/img/icons8-delete-48.png"));
     //enableAction->setIcon(QIcon(":/icons/img/icons8-left-48.png"));
     disableAction->setIcon(QIcon(":/icons/img/icons8-right-48.png"));
@@ -252,6 +255,7 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
     connect(disableAction, &QAction::triggered, this, &MainWindow::disableSelectedEnabledItem);
     connect(copyAction, &QAction::triggered, this, &MainWindow::copySelectedEnabledItem);
     connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelectedEnabledItem);
+    connect(killAction, &QAction::triggered, this, &MainWindow::killSelectedEnabledItem);
     // You could connect globalAction to another slot if needed
     // Enable/disable actions based on whether an item was clicked
     bool itemClicked = (clickedItem != NULL);
@@ -276,6 +280,8 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
     QAction* deleteAction = contextMenu.addAction(tr("Delete"));
     //QAction* disableAction = contextMenu.addAction(tr("Disable"));
     QAction* copyAction = contextMenu.addAction(tr("Copy Text"));
+    QAction* killAction = contextMenu.addAction(tr("Terminate"));
+    killAction->setIcon(QIcon(":/icons/img/kill.png"));
     deleteAction->setIcon(QIcon(":/icons/img/icons8-delete-48.png"));
     enableAction->setIcon(QIcon(":/icons/img/icons8-left-48.png"));
     //disableAction->setIcon(QIcon(":/icons/img/icons8-right-48.png"));
@@ -287,6 +293,7 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
     connect(enableAction, &QAction::triggered, this, &MainWindow::enableSelectedDisabledItem);
     connect(copyAction, &QAction::triggered, this, &MainWindow::copySelectedDisabledItem);
     connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelectedDisabledItem);
+    connect(killAction, &QAction::triggered, this, &MainWindow::killSelectedDisabledItem);
     // You could connect globalAction to another slot if needed
     // Enable/disable actions based on whether an item was clicked
     bool itemClicked = (clickedItem != NULL);
@@ -299,6 +306,34 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
     disconnectTimer ();
     contextMenu.exec(ui->listWidgetDisabled->mapToGlobal(pos));
     connectTimer ();
+}
+
+void MainWindow::killSelectedDisabledItem()
+{
+    QListWidgetItem* currentItem = ui->listWidgetDisabled->currentItem();
+    if (currentItem)
+    {
+        m_ProcessList.killProcessByName (currentItem->text());
+        ui->statusBar->showMessage("Terminated: " + currentItem->text(), 10000);
+    }
+    else
+    {
+        qDebug() << "No item selected";
+    }
+}
+
+void MainWindow::killSelectedEnabledItem()
+{
+    QListWidgetItem* currentItem = ui->listWidgetEnabled->currentItem();
+    if (currentItem)
+    {
+        m_ProcessList.killProcessByName (currentItem->text());
+        ui->statusBar->showMessage("Terminated: " + currentItem->text(), 10000);
+    }
+    else
+    {
+        qDebug() << "No item selected";
+    }
 }
 
 void MainWindow::copySelectedDisabledItem()
@@ -605,7 +640,7 @@ void MainWindow::loadListFromFile(const QString& fileName)
 }
 void MainWindow::loadListFromFile()
 {
-    updatePaths();
+    updateSettings();
     // m_sKillFile.replace("\\", "\\\\");
     // qDebug() << m_sKillFile;
     QString universalPath1 = QDir::fromNativeSeparators(m_sKillFile);
@@ -779,7 +814,7 @@ void MainWindow::on_pushButtonAdd_clicked()
 }
 bool MainWindow::backupBatchFile()
 {
-    updatePaths();
+    updateSettings();
     deleteOldBackups ();
     // m_sKillFile.replace("\\", "\\\\");
     // qDebug() << m_sKillFile;
@@ -1020,63 +1055,85 @@ void MainWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus
 }
 void MainWindow::on_pushButtonRun_clicked()
 {
+    QString sStatusMessage;
+    m_bKillInternal = true;
     disconnectTimer ();
-    //QProcess *process = new QProcess(this); // 'this' sets the parent, good for memory management
     m_ApplicationItemsList.resetAllApplicationItems();
-    process = new QProcess(this);
-    connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(readStdOutput()));
-    connect(process, SIGNAL(readyReadStandardError()), this, SLOT(readStdError()));
-    connect(process, SIGNAL(finished(int, QProcess::ExitStatus)),
-        this, SLOT(onProcessFinished(int, QProcess::ExitStatus)));
-    QString program = "cmd.exe";
-    QStringList arguments;
-    arguments << "/c" << m_sKillFile;       // Use forward slashes for paths in Qt
-    // process.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments * args)
-    // {
-    //        // Questa flag dice a Windows di creare una NUOVA finestra console.
-    // args->flags |= CREATE_NEW_CONSOLE;
-    // });
-    ui->statusBar->showMessage(m_sKillFile + " started...", 10000);
+    sStatusMessage = "TerminateProcess";
+    sStatusMessage.append (" started...");
+    ui->statusBar->showMessage(sStatusMessage, 10000);
     ui->statusBar->repaint ();
-    qDebug() << "Process started " << arguments;
-    process->start (program, arguments);
-    //QProcess *process = new QProcess();
-    // Connect signals to slots to capture output and handle process finish
-    // QObject::connect(process, &QProcess::readyReadStandardOutput, [process]() {
-    // qDebug() << "Standard Output:" << process->readAllStandardOutput();
-    // });
-    // QObject::connect(process, &QProcess::readyReadStandardError, [process]() {
-    // qWarning() << "Standard Error:" << process->readAllStandardError();
-    // });
-    // QObject::connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-    // [process](int exitCode, QProcess::ExitStatus exitStatus) {
-    // qDebug() << "Batch file finished with exit code:" << exitCode
-    // << "and exit status:" << exitStatus;
-    // process->deleteLater(); // Clean up the process object
-    //          //QCoreApplication::quit(); // Quit the application after the batch file finishes
-    // });
-    // process->start("cmd.exe", QStringList() << "/c" << m_sKillFile);   //process.startDetached (program, QStringList() << "/C" << m_sKillFile);
-    // Optional: Wait for the process to finish
-    process->waitForStarted(-1);
-    process->waitForFinished(-1);       // -1 means wait indefinitely
-    process->deleteLater ();
-    delete process;
-    //ui->statusBar->showMessage(m_sKillFile + " executed.");
-    // Optional: Read standard output/error
-    // qDebug() << "Standard Output:" << process->readAllStandardOutput();
-    // qDebug() << "Standard Error:" << process->readAllStandardError();
-    // Connect to signals for asynchronous handling
-    // connect(process, &QProcess::finished, this, [=](int exitCode, QProcess::ExitStatus exitStatus) {
-    // qDebug() << "Batch file finished with exit code:" << exitCode << "and status:" << exitStatus;
-    // qDebug() << "Standard Output:\n" << process->readAllStandardOutput();
-    // qDebug() << "Standard Error:\n" << process->readAllStandardError();
-    // process->deleteLater(); // Clean up the QProcess object
-    // });
-    // connect(process, &QProcess::errorOccurred, this, [=](QProcess::ProcessError error) {
-    // qDebug() << "Error starting batch file:" << error;
-    // qDebug() << "Error string:" << process->errorString();
-    // process->deleteLater();
-    // });
+    if (m_bKillInternal)
+    {
+        KillRunningProcesses();
+        sStatusMessage = "TerminateProcess";
+        sStatusMessage.append (" executed.");
+        ui->statusBar->showMessage(sStatusMessage, 10000);
+        //debugNotFoundWhenKilling ();
+        debugFoundWhenKilling();
+        connectTimer ();
+        return;
+    }
+    else
+    {
+        //disconnectTimer ();
+        //QProcess *process = new QProcess(this); // 'this' sets the parent, good for memory management
+        //m_ApplicationItemsList.resetAllApplicationItems();
+        process = new QProcess(this);
+        connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(readStdOutput()));
+        connect(process, SIGNAL(readyReadStandardError()), this, SLOT(readStdError()));
+        connect(process, SIGNAL(finished(int, QProcess::ExitStatus)),
+            this, SLOT(onProcessFinished(int, QProcess::ExitStatus)));
+        QString program = "cmd.exe";
+        QStringList arguments;
+        arguments << "/c" << m_sKillFile;       // Use forward slashes for paths in Qt
+        // process.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments * args)
+        // {
+        //        // Questa flag dice a Windows di creare una NUOVA finestra console.
+        // args->flags |= CREATE_NEW_CONSOLE;
+        // });
+        // ui->statusBar->showMessage(m_sKillFile + " started...", 10000);
+        // ui->statusBar->repaint ();
+        qDebug() << "Process started " << arguments;
+        process->start (program, arguments);
+        //QProcess *process = new QProcess();
+        // Connect signals to slots to capture output and handle process finish
+        // QObject::connect(process, &QProcess::readyReadStandardOutput, [process]() {
+        // qDebug() << "Standard Output:" << process->readAllStandardOutput();
+        // });
+        // QObject::connect(process, &QProcess::readyReadStandardError, [process]() {
+        // qWarning() << "Standard Error:" << process->readAllStandardError();
+        // });
+        // QObject::connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+        // [process](int exitCode, QProcess::ExitStatus exitStatus) {
+        // qDebug() << "Batch file finished with exit code:" << exitCode
+        // << "and exit status:" << exitStatus;
+        // process->deleteLater(); // Clean up the process object
+        //          //QCoreApplication::quit(); // Quit the application after the batch file finishes
+        // });
+        // process->start("cmd.exe", QStringList() << "/c" << m_sKillFile);   //process.startDetached (program, QStringList() << "/C" << m_sKillFile);
+        // Optional: Wait for the process to finish
+        process->waitForStarted(-1);
+        process->waitForFinished(-1);       // -1 means wait indefinitely
+        process->deleteLater ();
+        delete process;
+        //ui->statusBar->showMessage(m_sKillFile + " executed.");
+        // Optional: Read standard output/error
+        // qDebug() << "Standard Output:" << process->readAllStandardOutput();
+        // qDebug() << "Standard Error:" << process->readAllStandardError();
+        // Connect to signals for asynchronous handling
+        // connect(process, &QProcess::finished, this, [=](int exitCode, QProcess::ExitStatus exitStatus) {
+        // qDebug() << "Batch file finished with exit code:" << exitCode << "and status:" << exitStatus;
+        // qDebug() << "Standard Output:\n" << process->readAllStandardOutput();
+        // qDebug() << "Standard Error:\n" << process->readAllStandardError();
+        // process->deleteLater(); // Clean up the QProcess object
+        // });
+        // connect(process, &QProcess::errorOccurred, this, [=](QProcess::ProcessError error) {
+        // qDebug() << "Error starting batch file:" << error;
+        // qDebug() << "Error string:" << process->errorString();
+        // process->deleteLater();
+        // });
+    }
 }
 void MainWindow::on_actionConfigure_app_triggered()
 {
@@ -1139,6 +1196,7 @@ void MainWindow::on_actionExecute_in_terminal_window_triggered()
     system(command.c_str());
     ui->statusBar->showMessage(m_sKillFile + " executed in terminal window.", 10000);
 }
+
 QStringList MainWindow::getRunningProcesses()
 {
     QStringList processList;
@@ -1189,4 +1247,31 @@ QStringList MainWindow::getRunningProcesses()
     // Sort the list for better readability
     processList.sort();
     return processList;
+}
+
+bool MainWindow::KillRunningProcesses()
+{
+    bool bKilled;
+    int iCount;
+    iCount = ui->listWidgetEnabled->count();
+    QString sItemText;
+    ApplicationItem *foundItem ;
+    for (int i = 0; i < iCount; i++)
+    {
+        sItemText = ui->listWidgetEnabled->item(i)->text();
+        bKilled = m_ProcessList.killProcessByName (sItemText);
+        foundItem = m_ApplicationItemsList.findApplicationItem (sItemText);
+        if (foundItem)
+        {
+            //LOG_MSG("KILLED " + sItemText);
+            //qDebug() << "foundItem->getAppName () " << foundItem->getAppName ();
+            foundItem->setFoundWhenKilling (bKilled);
+        }
+        else
+        {
+            foundItem->setFoundWhenKilling (bKilled);
+            qDebug() << "foundItem->getAppName () NOT FOUND";
+        }
+    }
+    return bKilled;
 }
