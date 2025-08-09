@@ -165,13 +165,12 @@ bool RunningProcessesListEx::isRunning(QString sProcessName)
 bool RunningProcessesListEx::killProcessByName(const std::wstring& targetName)
 {
     DWORD processIds[1024], bytesReturned;
-
-      if (!EnumProcesses(processIds, sizeof(processIds), &bytesReturned)) {
-          return false;
-      }
-
-      DWORD processCount = bytesReturned / sizeof(DWORD);
-      for (DWORD i = 0; i < processCount; ++i)
+    if (!EnumProcesses(processIds, sizeof(processIds), &bytesReturned))
+    {
+        return false;
+    }
+    DWORD processCount = bytesReturned / sizeof(DWORD);
+    for (DWORD i = 0; i < processCount; ++i)
     {
         DWORD pid = processIds[i];
         if (pid == 0) continue;
@@ -190,6 +189,7 @@ bool RunningProcessesListEx::killProcessByName(const std::wstring& targetName)
                     if (TerminateProcess(hProcess, 1))
                     {
                         std::wcout << L"Terminated process: " << processName << L" (PID: " << pid << L")" << std::endl;
+                        //std::wcout << "Percorso: " << getProcessPath (hProcess).toStdWString () << std::endl;
                         CloseHandle(hProcess);
                         return true;
                     }
@@ -210,5 +210,30 @@ bool RunningProcessesListEx::killProcessByName(QString sTargetName)
 {
     std::wstring wideName = sTargetName.toStdWString();
     return killProcessByName (wideName );
+}
 
+QString RunningProcessesListEx::getProcessPath(HANDLE hProcess)
+{
+    // Definiamo un buffer per memorizzare il percorso.
+    // MAX_PATH è una costante definita da Windows per la lunghezza massima del percorso.
+    //char szPath[MAX_PATH];
+    wchar_t szPath[MAX_PATH];
+    // Chiamiamo la funzione GetModuleFileNameEx.
+    // Il primo parametro è l'handle del processo.
+    // Il secondo parametro è l'handle del modulo (NULL per il modulo principale).
+    // Il terzo parametro è il nostro buffer.
+    // Il quarto parametro è la dimensione del buffer.
+    DWORD dwResult = GetModuleFileNameEx(hProcess, NULL, szPath, MAX_PATH);
+    // Controlliamo se la funzione è riuscita.
+    // Se dwResult è 0, c'è stato un errore.
+    if (dwResult != 0)
+    {
+        //std::cout << "Percorso del processo: " << szPath << std::endl;
+        return QString::fromStdWString (szPath);
+    }
+    else
+    {
+        // Se c'è un errore, stampiamo il codice di errore per il debug.
+        std::cerr << "Errore nel recupero del percorso: " << GetLastError() << std::endl;
+    }
 }

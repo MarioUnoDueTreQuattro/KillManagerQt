@@ -236,6 +236,8 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
 {
     // Get the item at the clicked position
     QListWidgetItem* clickedItem = ui->listWidgetEnabled->itemAt(pos);
+    bool bIsRunning;
+    bIsRunning = m_ProcessList.isRunning (clickedItem->text ());
     // Create the menu
     QMenu contextMenu(tr("Context Menu"), this);
     QAction* disableAction = contextMenu.addAction(tr("Disable"));
@@ -256,6 +258,7 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
     connect(copyAction, &QAction::triggered, this, &MainWindow::copySelectedEnabledItem);
     connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelectedEnabledItem);
     connect(killAction, &QAction::triggered, this, &MainWindow::killSelectedEnabledItem);
+    if (! bIsRunning) killAction->setVisible (false);
     // You could connect globalAction to another slot if needed
     // Enable/disable actions based on whether an item was clicked
     bool itemClicked = (clickedItem != NULL);
@@ -274,6 +277,8 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
 {
     // Get the item at the clicked position
     QListWidgetItem* clickedItem = ui->listWidgetDisabled->itemAt(pos);
+    bool bIsRunning;
+    bIsRunning = m_ProcessList.isRunning (clickedItem->text ());
     // Create the menu
     QMenu contextMenu(tr("Context Menu"), this);
     QAction* enableAction = contextMenu.addAction(tr("Enable"));
@@ -294,6 +299,7 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
     connect(copyAction, &QAction::triggered, this, &MainWindow::copySelectedDisabledItem);
     connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelectedDisabledItem);
     connect(killAction, &QAction::triggered, this, &MainWindow::killSelectedDisabledItem);
+    if (! bIsRunning) killAction->setVisible (false);
     // You could connect globalAction to another slot if needed
     // Enable/disable actions based on whether an item was clicked
     bool itemClicked = (clickedItem != NULL);

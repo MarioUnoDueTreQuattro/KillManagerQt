@@ -111,6 +111,8 @@ public:
     bool isRunning (QString);
     bool killProcessByName(const std::wstring& targetName);
     bool killProcessByName(QString);
+    QString getProcessPath(HANDLE hProcess);
+
 private:
     QStringList processList;
 signals:
