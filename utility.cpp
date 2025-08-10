@@ -1,5 +1,19 @@
 #include "utility.h"
 
+QStringList g_debugMessages;
+
+void customMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
+{
+    QString message = qFormatLogMessage(type, context, msg);
+    static FILE *f = fopen("KillManagerQt.txt", "a");
+    fprintf(f, "%s\n", qPrintable(message));
+    fflush(f);
+    Q_UNUSED(type)
+    Q_UNUSED(context)
+    g_debugMessages.append(msg);
+    std::cout << msg.toStdString () << std::endl;
+}
+
 // Funzione per convertire una stringa di caratteri wide (WCHAR) in una stringa standard (char)
 std::string WcharToString(const WCHAR* wstr)
 {

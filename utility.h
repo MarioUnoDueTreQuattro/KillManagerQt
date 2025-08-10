@@ -1,3 +1,15 @@
+#ifndef DEBUGMESSAGEHANDLER_H
+#define DEBUGMESSAGEHANDLER_H
+
+#include <QStringList>
+#include <QtGlobal>
+
+extern QStringList g_debugMessages;
+
+void customMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
+
+#endif // DEBUGMESSAGEHANDLER_H
+
 #ifndef LOG_MACROS_H
 #define LOG_MACROS_H
 

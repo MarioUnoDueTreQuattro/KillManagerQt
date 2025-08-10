@@ -170,7 +170,6 @@ void Dialog::on_Dialog_accepted()
     settings.setValue("Dialog/DeleteOldBackups", ui->checkBoxDeleteBackups->isChecked ());
     settings.setValue("Dialog/BackupsCount", ui->spinBoxBackupsCount->value ());
     settings.setValue("Dialog/BackupsDays", ui->spinBoxBackupsDays->value ());
-    qDebug() << "Wrote string to registry (or equivalent):" << mySettingValue;
     // create folder if does not exists
     QString folderPath = ui->lineEditBackupPath->text ();
     QDir dirBackup;
@@ -197,7 +196,6 @@ void Dialog::on_Dialog_accepted()
     // QSettings changes are not always written to persistent storage immediately
     // Forcing a write can be done with sync()
     settings.sync();
-    qDebug() << "Settings synchronized to persistent storage.";
     // QFileInfo myFile(mySettingValue);
     // m_sInitialPath = myFile.absolutePath();
     //writeSettings();
