@@ -355,7 +355,7 @@ QIcon RunningProcessesListEx::getProcessIcon( std::string sProcessPath, bool bIs
     // }
     //std::string exePath = "C:\\Percorso\\del\\tuo\\file.exe";
     HANDLE hProc = getProcessHandle (sProcessPath);
-    if (hProc == INVALID_HANDLE_VALUE | hProc == 0)
+    if (hProc == INVALID_HANDLE_VALUE | hProc == 0 && bIsFullPath==false)
     {
         LOG_VAR(QString::fromStdString (sProcessPath));
         LOG_VAR(bIsFullPath);
