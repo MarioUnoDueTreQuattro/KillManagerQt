@@ -20,9 +20,22 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    this->setWindowIcon(QIcon(":/icons/img/KillManager.ico"));       // Use the path defined in .qrc
+   qApp->setStyleSheet( "QStatusBar::item { border: 0px}" ) ;
+   this->setWindowIcon(QIcon(":/icons/img/KillManager.ico"));       // Use the path defined in .qrc
     m_ApplicationItemsList.clear();
     ui->setupUi(this);
+    m_statusBarMovie = new QMovie(":/icons/img/AGau.gif", QByteArray(), this);
+    m_statusBarMovie->setScaledSize (QSize(16, 16));
+    m_statusBarMovie->setCacheMode(QMovie::CacheAll);
+    m_statusBarMovie->start();
+    m_statusBarMovie->setPaused(true); // Fermiamo l'animazione automatica
+    m_StatusBarLabel = new QLabel("", this); // Il secondo parametro indica il genitore
+    m_StatusBarLabel->setMovie (m_statusBarMovie);
+    ui->statusBar->addPermanentWidget (m_StatusBarLabel);
+//    m_StatusBarLabel->setFrameShape (QFrame::NoFrame);
+//    m_StatusBarLabel->setFrameStyle (QFrame::Plain);
+    //m_StatusBarLabel->setFixedSize(QSize(32,32));
+    //m_statusBarMovie->setParent (m_StatusBarLabel);
     ui->pushButtonReload->setVisible (false);
     ui->pushButtonWrite->setVisible (false);
     m_iTimerUpdatesCount = 0;
@@ -90,11 +103,20 @@ void MainWindow::firstTimeConfiguration()
     menuConfigure ();
 }
 
-void MainWindow::timerUupdate()
+void MainWindow::timerUpdate()
 {
-    QString repeatedChar;
+    //m_statusBarMovie->start();
+    //m_statusBarMovie->setPaused(true); // Fermiamo l'animazione automatica
+    int frameCount = m_statusBarMovie->frameCount();
+    if (frameCount > 0)
+    {
+        int frameIndex = (1 * (frameCount - 1)) / 100;
+        m_statusBarMovie->jumpToFrame(frameIndex);
+    }
+    // m_StatusBarLabel->setFixedSize(m_statusBarMovie->currentImage().size());
     m_iTimerUpdatesCount += 1;
     int iModulus = m_iTimerUpdatesCount % 10 ;
+    QString repeatedChar;
     repeatedChar = QString(".").repeated(iModulus );
     // repeatedChar.prepend ("<html><head/><body><span style=\" font-weight:600; color:#ff0000;\">");
     // repeatedChar.append ("</span></body></html>");
@@ -105,6 +127,13 @@ void MainWindow::timerUupdate()
     {
         ui->statusBar->showMessage ("Refreshed every " + QString::number (m_iRefreshRate / 1000) + " seconds" + repeatedChar);
     }
+    int progress = iModulus * 10;
+    //progress=double(double(iModulus)/double(frameCount) *100);
+    //LOG_VAR(progress);
+    int frameIndex = (progress * m_statusBarMovie->frameCount()) / 100;
+    frameIndex = qMin(frameIndex, m_statusBarMovie->frameCount() - 1);
+    //LOG_VAR(frameIndex);
+    m_statusBarMovie->jumpToFrame(frameIndex);
 }
 
 void MainWindow::updateSettings()
@@ -604,13 +633,32 @@ void MainWindow::loadListFromFile(const QString& fileName)
             return;
         }
     }
+    // QTextStream inCount(&file);
+    // int lineCount = 0;
+    // while (!inCount.atEnd())
+    // {
+    // inCount.readLine();
+    // lineCount++;
+    // }
+    // file.close();
+    // file.open(QIODevice::ReadOnly | QIODevice::Text);
     QString file_line;
     QString firstThreeChars;
     QStringList line_parts;
     QString line_parts_last;
     QTextStream in(&file);
+    //int progress=0;
+    //int iLine=0;
     while (!in.atEnd())
     {
+        // QApplication::processEvents(); // Per mantenere l'UI reattiva
+        // iLine++;
+        // progress=double(double(iLine)/double(lineCount) *100);
+        //        //LOG_VAR(progress);
+        // int frameIndex = (progress * m_statusBarMovie->frameCount()) / 100;
+        // frameIndex = qMin(frameIndex, m_statusBarMovie->frameCount() - 1);
+        //        //LOG_VAR(frameIndex);
+        // m_statusBarMovie->jumpToFrame(frameIndex);
         file_line = in.readLine();
         // String with more than 3 characters
         firstThreeChars = file_line.left(3);           // Get the first 3 characters
@@ -974,7 +1022,7 @@ void MainWindow::disconnectTimer()
     if (m_bTimerIsConnected == true)
     {
         qDebug() << "Disconnecting timer";
-        disconnect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+        disconnect(timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
         m_bTimerIsConnected = false;
     }
 }
@@ -983,14 +1031,15 @@ void MainWindow::connectTimer()
     if (m_bTimerIsConnected == false)
     {
         qDebug() << "Reconnecting timer";
-        m_iTimerUpdatesCount = 0;
+        //m_iTimerUpdatesCount = 0;
         //timer->setInterval (m_iRefreshRate);
-        connect(timer, SIGNAL(timeout()), this, SLOT(timerUupdate()));
+        connect(timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
         m_bTimerIsConnected = true;
     }
 }
 void MainWindow::readStdOutput()
 {
+qApp->processEvents ();
     // QString standardOut = process->readAllStandardOutput ();
     // QString output = standardOut;
     //    //output.replace ("\r\n", "");
@@ -1018,6 +1067,7 @@ void MainWindow::readStdOutput()
 }
 void MainWindow::readStdError()
 {
+    qApp->processEvents ();
     QString output = QString(process->readAllStandardError ());
     //output.replace ("\r\n", "");
     QStringList lines = output.split ("\n");
@@ -1058,12 +1108,14 @@ void MainWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus
     ui->statusBar->showMessage(m_sKillFile + " executed.", 10000);
     //debugNotFoundWhenKilling ();
     debugFoundWhenKilling();
+    m_statusBarMovie->setPaused (true);
     connectTimer ();
 }
 void MainWindow::on_pushButtonRun_clicked()
 {
+    m_iTimerUpdatesCount = 0;
     QString sStatusMessage;
-    m_bKillInternal = true;
+    //m_bKillInternal = true;
     disconnectTimer ();
     m_ApplicationItemsList.resetAllApplicationItems();
     sStatusMessage = "TerminateProcess";
@@ -1084,6 +1136,17 @@ void MainWindow::on_pushButtonRun_clicked()
     }
     else
     {
+        LOG_MSG("animation");
+        //animation
+        int frameCount = m_statusBarMovie->frameCount();
+        if (frameCount > 0)
+        {
+            int frameIndex = (1 * (frameCount - 1)) / 100;
+            m_statusBarMovie->jumpToFrame(frameIndex);
+        }
+        m_statusBarMovie->start ();
+        //jumpToFrame(frameIndex);
+        //qApp->processEvents ();
         //disconnectTimer ();
         //QProcess *process = new QProcess(this); // 'this' sets the parent, good for memory management
         //m_ApplicationItemsList.resetAllApplicationItems();
@@ -1262,6 +1325,15 @@ bool MainWindow::KillRunningProcesses()
     bool bKilled = false;
     int iCount;
     iCount = ui->listWidgetEnabled->count();
+    //animation
+    int frameCount = m_statusBarMovie->frameCount();
+    if (frameCount > 0)
+    {
+        int frameIndex = (1 * (frameCount - 1)) / 100;
+        m_statusBarMovie->jumpToFrame(frameIndex);
+    }
+    //m_iTimerUpdatesCount += 1;
+    //int iModulus = m_iTimerUpdatesCount % 10 ;
     QString sItemText;
     ApplicationItem *foundItem ;
     for (int i = 0; i < iCount; i++)
@@ -1280,6 +1352,14 @@ bool MainWindow::KillRunningProcesses()
             foundItem->setFoundWhenKilling (bKilled);
             qDebug() << "foundItem->getAppName () NOT FOUND";
         }
+        int progress = double(double(i+1)/double(iCount)) * 100;
+        //progress=double(double(iModulus)/double(frameCount) *100);
+        //LOG_VAR(progress);
+        int frameIndex = (progress * m_statusBarMovie->frameCount()) / 100;
+        frameIndex = qMin(frameIndex, m_statusBarMovie->frameCount() - 1);
+        //LOG_VAR(frameIndex);
+        m_statusBarMovie->jumpToFrame(frameIndex);
+        qApp->processEvents ();
     }
     return bKilled;
 }

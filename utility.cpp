@@ -240,6 +240,7 @@ QString RunningProcessesListEx::getProcessPath(HANDLE hProcess)
     DWORD dwResult = GetModuleFileNameEx(hProcess, NULL, szPath, MAX_PATH);
     // Controlliamo se la funzione è riuscita.
     // Se dwResult è 0, c'è stato un errore.
+    if (hProcess == INVALID_HANDLE_VALUE | hProcess == 0) return "";
     if (dwResult != 0)
     {
         //std::cout << "Percorso del processo: " << szPath << std::endl;
@@ -248,7 +249,7 @@ QString RunningProcessesListEx::getProcessPath(HANDLE hProcess)
     else
     {
         // Se c'è un errore, stampiamo il codice di errore per il debug.
-        std::cerr << "Errore nel recupero del percorso: " << GetLastError() << std::endl;
+        std::cerr << "Errore nel recupero del percorso: " << GetLastError() << " HANDLE= " << hProcess << std::endl;
     }
     return "";
 }
@@ -269,7 +270,7 @@ HANDLE RunningProcessesListEx::getProcessHandle(const std::string &executablePat
     {
         DWORD pid = processIds[i];
         if (pid == 0) continue;
-        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_TERMINATE, FALSE, pid);
+        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ , FALSE, pid);
         if (!hProcess) continue;
         HMODULE hMod;
         DWORD cbNeeded;
@@ -354,6 +355,12 @@ QIcon RunningProcessesListEx::getProcessIcon( std::string sProcessPath, bool bIs
     // }
     //std::string exePath = "C:\\Percorso\\del\\tuo\\file.exe";
     HANDLE hProc = getProcessHandle (sProcessPath);
+    if (hProc == INVALID_HANDLE_VALUE | hProc == 0)
+    {
+        LOG_VAR(QString::fromStdString (sProcessPath));
+        LOG_VAR(bIsFullPath);
+        return icon;
+    }
     QString path;
     if (bIsFullPath == false)
         path = getProcessPath (hProc);

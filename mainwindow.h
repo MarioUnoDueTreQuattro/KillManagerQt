@@ -12,6 +12,8 @@
 #include <QFont>
 #include <QPalette>
 #include <QTimer>
+#include <QLabel>
+#include <QMovie>
 //#include "runningprocesseslist.h"
 #include "myqlistwidget.h"
 #include "applicationitemslist.h"
@@ -35,7 +37,9 @@ public:
     ~MainWindow();
 
 private:
-    bool listContainsItemText(MyQListWidget*, const QString & );
+    QLabel *m_StatusBarLabel;
+     QMovie *m_statusBarMovie;
+     bool listContainsItemText(MyQListWidget*, const QString & );
     void updateSettings();
     void deleteOldBackups();
     RunningProcessesListEx m_ProcessList;
@@ -82,7 +86,7 @@ protected:
     void closeEvent(QCloseEvent* event) override;
     void showEvent(QShowEvent *event);
 public slots:
-    void timerUupdate();
+    void timerUpdate();
     void menuConfigure();
     void firstTimeConfiguration();
     void showAddExeDialog();
