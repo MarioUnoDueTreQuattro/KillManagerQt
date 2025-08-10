@@ -270,7 +270,7 @@ HANDLE RunningProcessesListEx::getProcessHandle(const std::string &executablePat
     {
         DWORD pid = processIds[i];
         if (pid == 0) continue;
-        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ , FALSE, pid);
+        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
         if (!hProcess) continue;
         HMODULE hMod;
         DWORD cbNeeded;
@@ -355,7 +355,7 @@ QIcon RunningProcessesListEx::getProcessIcon( std::string sProcessPath, bool bIs
     // }
     //std::string exePath = "C:\\Percorso\\del\\tuo\\file.exe";
     HANDLE hProc = getProcessHandle (sProcessPath);
-    if (hProc == INVALID_HANDLE_VALUE | hProc == 0 && bIsFullPath==false)
+    if (hProc == INVALID_HANDLE_VALUE | hProc == 0 && bIsFullPath == false)
     {
         LOG_VAR(QString::fromStdString (sProcessPath));
         LOG_VAR(bIsFullPath);
