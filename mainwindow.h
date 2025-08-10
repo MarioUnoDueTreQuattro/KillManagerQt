@@ -14,6 +14,7 @@
 #include <QTimer>
 #include <QLabel>
 #include <QMovie>
+#include <QToolTip>
 //#include "runningprocesseslist.h"
 #include "myqlistwidget.h"
 #include "applicationitemslist.h"
@@ -107,6 +108,7 @@ private slots:
     void on_actionAbout_triggered();
     void on_actionOpen_in_external_editor_triggered();
     void on_actionExecute_in_terminal_window_triggered();
+    void on_actionOpen_log_file_in_external_editor_triggered();
 
 };
 

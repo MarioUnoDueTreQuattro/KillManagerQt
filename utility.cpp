@@ -1,17 +1,30 @@
 #include "utility.h"
 
 QStringList g_debugMessages;
+FILE *f;
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
+    // QString sFile = qApp->applicationName();
+    // sFile.append (".log");
     QString message = qFormatLogMessage(type, context, msg);
-    static FILE *f = fopen("KillManagerQt.txt", "a");
+    f = fopen("KillManagerQt.log", "a");
     fprintf(f, "%s\n", qPrintable(message));
     fflush(f);
     Q_UNUSED(type)
     Q_UNUSED(context)
     g_debugMessages.append(msg);
     std::cout << msg.toStdString () << std::endl;
+}
+
+void closeLogFile()
+{
+    if (f != NULL)
+    {
+        LOG_MSG("Closing LOG file...");
+        fclose(f);
+        f = NULL;
+    }
 }
 
 // Funzione per convertire una stringa di caratteri wide (WCHAR) in una stringa standard (char)
@@ -216,14 +229,14 @@ bool RunningProcessesListEx::killProcessByName(const std::wstring& targetName)
                     // Found the target process
                     if (TerminateProcess(hProcess, 1))
                     {
-                        std::wcout << L"Terminated process: " << processName << L" (PID: " << pid << L")" << std::endl;
+                        qDebug() << "Terminated process: " << QString::fromWCharArray (processName) << " (PID: " << pid << ")";
                         //std::wcout << "Percorso: " << getProcessPath (hProcess).toStdWString () << std::endl;
                         CloseHandle(hProcess);
                         return true;
                     }
                     else
                     {
-                        std::cerr << "Failed to terminate process." << std::endl;
+                        qDebug() << "Failed to terminate process.";
                     }
                 }
             }
@@ -263,7 +276,7 @@ QString RunningProcessesListEx::getProcessPath(HANDLE hProcess)
     else
     {
         // Se c'è un errore, stampiamo il codice di errore per il debug.
-        std::cerr << "Errore nel recupero del percorso: " << GetLastError() << " HANDLE= " << hProcess << std::endl;
+        qDebug() << "Errore nel recupero del percorso: " << QString::number(GetLastError()) << " HANDLE= " << hProcess ;
     }
     return "";
 }
@@ -316,14 +329,14 @@ int RunningProcessesListEx::debugProcessesMemory()
     // Ottiene i PID di tutti i processi attivi
     if (!EnumProcesses(processIds, sizeof(processIds), &bytesReturned))
     {
-        std::cerr << "Errore in EnumProcesses." << std::endl;
+        qDebug() << "Errore in EnumProcesses.";
         return 1;
     }
     int numProcesses = bytesReturned / sizeof(DWORD);
-    std::cout << "Elenco dei processi attivi:" << std::endl;
-    std::cout << "--------------------------------------------------------" << std::endl;
-    std::cout << "PID\t\tNome\t\tMemoria (MB)" << std::endl;
-    std::cout << "--------------------------------------------------------" << std::endl;
+    qDebug() << "Elenco dei processi attivi:" ;
+    qDebug() << "--------------------------------------------------------" ;
+    qDebug() << "PID\t\tNome\t\tMemoria (MB)" ;
+    qDebug() << "--------------------------------------------------------" ;
     for (int i = 0; i < numProcesses; i++)
     {
         DWORD pid = processIds[i];
@@ -346,7 +359,7 @@ int RunningProcessesListEx::debugProcessesMemory()
                 // Calcola la memoria di lavoro in megabyte
                 double memoryUsageMB = pmc.WorkingSetSize / (1024.0 * 1024.0);
                 // Stampa il PID, il nome e l'utilizzo della memoria
-                std::cout << pid << "\t\t" << WcharToString(processName) << "\t\t" << memoryUsageMB << std::endl;
+                qDebug() << pid << "\t\t" << QString::fromWCharArray (processName) << "\t\t" << memoryUsageMB ;
             }
             // Chiudi l'handle del processo
             CloseHandle(hProcess);

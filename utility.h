@@ -3,10 +3,13 @@
 
 #include <QStringList>
 #include <QtGlobal>
+#include <QDebug>
 
 extern QStringList g_debugMessages;
+extern FILE *f;
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
+void closeLogFile();
 
 #endif // DEBUGMESSAGEHANDLER_H
 

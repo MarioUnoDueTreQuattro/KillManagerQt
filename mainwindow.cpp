@@ -20,8 +20,8 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-   qApp->setStyleSheet( "QStatusBar::item { border: 0px}" ) ;
-   this->setWindowIcon(QIcon(":/icons/img/KillManager.ico"));       // Use the path defined in .qrc
+    qApp->setStyleSheet( "QStatusBar::item { border: 0px}" ) ;
+    this->setWindowIcon(QIcon(":/icons/img/KillManager.ico"));       // Use the path defined in .qrc
     m_ApplicationItemsList.clear();
     ui->setupUi(this);
     m_statusBarMovie = new QMovie(":/icons/img/AGau.gif", QByteArray(), this);
@@ -33,8 +33,8 @@ MainWindow::MainWindow(QWidget* parent)
     m_StatusBarLabel = new QLabel("", this); // Il secondo parametro indica il genitore
     m_StatusBarLabel->setMovie (m_statusBarMovie);
     ui->statusBar->addPermanentWidget (m_StatusBarLabel);
-//    m_StatusBarLabel->setFrameShape (QFrame::NoFrame);
-//    m_StatusBarLabel->setFrameStyle (QFrame::Plain);
+    // m_StatusBarLabel->setFrameShape (QFrame::NoFrame);
+    // m_StatusBarLabel->setFrameStyle (QFrame::Plain);
     //m_StatusBarLabel->setFixedSize(QSize(32,32));
     //m_statusBarMovie->setParent (m_StatusBarLabel);
     ui->pushButtonReload->setVisible (false);
@@ -135,6 +135,8 @@ void MainWindow::timerUpdate()
     frameIndex = qMin(frameIndex, m_statusBarMovie->frameCount() - 1);
     //LOG_VAR(frameIndex);
     m_statusBarMovie->jumpToFrame(frameIndex);
+    m_StatusBarLabel->setToolTip ("Updates count: " + QString::number(m_iTimerUpdatesCount) + "\nProgress: " + QString::number(progress) + "%");
+    //m_ProcessList.debugProcessesMemory ();
 }
 
 void MainWindow::updateSettings()
@@ -1040,7 +1042,7 @@ void MainWindow::connectTimer()
 }
 void MainWindow::readStdOutput()
 {
-qApp->processEvents ();
+    qApp->processEvents ();
     // QString standardOut = process->readAllStandardOutput ();
     // QString output = standardOut;
     //    //output.replace ("\r\n", "");
@@ -1248,7 +1250,7 @@ void MainWindow::on_actionOpen_in_external_editor_triggered()
     QSettings settings;
     QProcess process;
     QString program = "notepad.exe";
-    program = settings.value("Dialog/External editor", "notepad").toString();
+    program = settings.value("Dialog/External editor", "notepad.exe").toString();
     QStringList arguments;
     arguments << m_sKillFile;       // Use forward slashes for paths in Qt
     process.startDetached(program, arguments);
@@ -1267,6 +1269,19 @@ void MainWindow::on_actionExecute_in_terminal_window_triggered()
     std::string command = std::string("cmd /C ") + cstrKillFile;
     system(command.c_str());
     ui->statusBar->showMessage(m_sKillFile + " executed in terminal window.", 10000);
+}
+
+void MainWindow::on_actionOpen_log_file_in_external_editor_triggered()
+{
+    QSettings settings;
+    QProcess process;
+    QString program = "notepad.exe";
+    program = settings.value("Dialog/External editor", "notepad.exe").toString();
+    QStringList arguments;
+    arguments << "KillManagerQt.log";
+    process.startDetached(program, arguments);
+    ui->statusBar->showMessage("Log file opened in external editor.", 10000);
+    qDebug() << "Opening log file " << arguments;
 }
 
 QStringList MainWindow::getRunningProcesses()
@@ -1353,7 +1368,7 @@ bool MainWindow::KillRunningProcesses()
             foundItem->setFoundWhenKilling (bKilled);
             qDebug() << "foundItem->getAppName () NOT FOUND";
         }
-        int progress = double(double(i+1)/double(iCount)) * 100;
+        int progress = double(double(i + 1) / double(iCount)) * 100;
         //progress=double(double(iModulus)/double(frameCount) *100);
         //LOG_VAR(progress);
         int frameIndex = (progress * m_statusBarMovie->frameCount()) / 100;

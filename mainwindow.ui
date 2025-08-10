@@ -81,7 +81,7 @@
         <item>
          <widget class="QPushButton" name="pushButtonAdd">
           <property name="toolTip">
-           <string>Add applicaton to list</string>
+           <string>Add executable to list</string>
           </property>
           <property name="text">
            <string>Add...</string>
@@ -123,7 +123,7 @@
         <item>
          <widget class="QPushButton" name="pushButtonRun">
           <property name="toolTip">
-           <string>Run batch file</string>
+           <string>Kill running executables</string>
           </property>
           <property name="text">
            <string>Run</string>
@@ -166,6 +166,7 @@
     <addaction name="separator"/>
     <addaction name="actionOpen_in_external_editor"/>
     <addaction name="actionExecute_in_terminal_window"/>
+    <addaction name="actionOpen_log_file_in_external_editor"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
     <addaction name="actionAbout_Qt"/>
@@ -231,6 +232,18 @@
    </property>
    <property name="statusTip">
     <string>Execute batch file in terminal window</string>
+   </property>
+  </action>
+  <action name="actionOpen_log_file_in_external_editor">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/img/icons8-log-48.png</normaloff>:/icons/img/icons8-log-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open log file in external editor</string>
+   </property>
+   <property name="statusTip">
+    <string>Open log file in external editor</string>
    </property>
   </action>
  </widget>
