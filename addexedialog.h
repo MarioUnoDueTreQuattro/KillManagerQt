@@ -18,6 +18,8 @@ public:
 private slots:
     void on_pushButtonChoose_clicked();
     void on_AddExeDialog_accepted();
+    void on_lineEditPath_textChanged(const QString &arg1);
+
 private:
     Ui::AddExeDialog *ui;
     QString m_sInitialPath;

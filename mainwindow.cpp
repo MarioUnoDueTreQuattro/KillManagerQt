@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget* parent)
     m_statusBarMovie->setCacheMode(QMovie::CacheAll);
     m_statusBarMovie->start();
     m_statusBarMovie->setPaused(true); // Fermiamo l'animazione automatica
+    //connect(m_statusBarMovie, SIGNAL(frameChanged(int)), this, SLOT(onFrameChanged(int)));
     m_StatusBarLabel = new QLabel("", this); // Il secondo parametro indica il genitore
     m_StatusBarLabel->setMovie (m_statusBarMovie);
     ui->statusBar->addPermanentWidget (m_StatusBarLabel);
