@@ -79,6 +79,8 @@ Dialog::Dialog(QWidget* parent)
         qDebug() << "Log file " << filePath << " does not exist.";
         ui->labelLog->setText ("Log file doesn't exist.");
     }
+    // Adjust the size of the dialog to fit its contents
+       adjustSize();
 }
 
 Dialog::~Dialog()

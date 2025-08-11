@@ -13,6 +13,8 @@ AddExeDialog::AddExeDialog(QWidget* parent)
 {
     ui->setupUi(this);
     readSettings();
+    // Adjust the size of the dialog to fit its contents
+       adjustSize();
 }
 
 AddExeDialog::~AddExeDialog() { delete ui; }

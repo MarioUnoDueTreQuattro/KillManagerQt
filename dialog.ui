@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>443</width>
-    <height>719</height>
+    <height>709</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -432,12 +432,12 @@ Select the backup folder or type (or paste) the long path to the folder.</string
       <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeType">
-      <enum>QSizePolicy::Expanding</enum>
+      <enum>QSizePolicy::Minimum</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>10</height>
+       <height>0</height>
       </size>
      </property>
     </spacer>

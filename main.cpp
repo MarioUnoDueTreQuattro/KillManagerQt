@@ -23,26 +23,25 @@ int main(int argc, char* argv[])
     bool bLogToFile = settings.value("Dialog/UseLogFile", false).toBool ();
     if (bLogToFile)
     {
-        QObject::connect(&a, &QApplication::aboutToQuit, closeLogFile);
-        sLogFilePath = QCoreApplication::applicationDirPath();
-        sLogFilePath = QDir::toNativeSeparators (sLogFilePath);
-        sLogFilePath.append ("\\KillManagerQt.log");
-        QByteArray logPathByteArray;
-        logPathByteArray = sLogFilePath.toUtf8();
-        cLogFilePath = logPathByteArray.data();
+//        QObject::connect(&a, &QApplication::aboutToQuit, closeLogFile);
+//        sLogFilePath = QCoreApplication::applicationDirPath();
+//        sLogFilePath = QDir::toNativeSeparators (sLogFilePath);
+//        sLogFilePath.append ("\\KillManagerQt.log");
+//        QByteArray logPathByteArray;
+//        logPathByteArray = sLogFilePath.toUtf8();
+//        cLogFilePath = logPathByteArray.data();
         //LOG_MSG(sLogFilePath);
         // message hanlder
-        qInstallMessageHandler(customMessageHandler);
+        qInstallMessageHandler(myCustomMessageHandler);
         QDate today = QDate::currentDate();
         QTime currentTime = QTime::currentTime();
         QString repeatedChar;
         QString sMsg = "Starting KillManagerQt " + today.toString () + " " + currentTime.toString () ;
         repeatedChar = QString("*").repeated(80 );
-        qDebug() << "\n\n" << repeatedChar << "\n" << sMsg << "\n" << repeatedChar << "\n\n";
+        qDebug().noquote () << "\n\n" << repeatedChar << "\n" << sMsg << "\n" << repeatedChar << "\n\n";
         //QString allMessages = g_debugMessages.join("\n");
         //qDebug() << "Collected messages:\n" << allMessages;
     }
-    //settings.deleteLater ();
     MainWindow w;
     w.show();
     return a.exec();

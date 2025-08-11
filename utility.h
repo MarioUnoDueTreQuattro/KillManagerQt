@@ -5,14 +5,14 @@
 #include <QtGlobal>
 #include <QDebug>
 
-extern QStringList g_debugMessages;
-extern FILE *f;
-extern QString sLogFilePath;
-extern char * cLogFilePath;
+//extern QStringList g_debugMessages;
+//extern FILE *f;
+//extern QString sLogFilePath;
+//extern char * cLogFilePath;
 
-void customMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
-void closeLogFile();
-//void buildPath();
+//void customMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
+//void closeLogFile();
+void myCustomMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
 #endif // DEBUGMESSAGEHANDLER_H
 
