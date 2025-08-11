@@ -21,7 +21,7 @@ void MyQListWidget::dropEvent(QDropEvent *event)
     // Defensive: ensure drop is internal and flat
     if (event->source() != this)
     {
-        qWarning("Rejected external drop: only internal flat moves allowed.");
+        LOG_MSG("Rejected external drop: only internal flat moves allowed.");
         event->ignore();
         return;
     }
@@ -93,18 +93,19 @@ void MyQListWidget::dragMoveEvent(QDragMoveEvent *event)
 
 void MyQListWidget::mouseMoveEvent(QMouseEvent *event)
 {
-//    QModelIndex index = indexAt(event->pos());
-//    if (index.isValid ())
-//    {
-//        //LOG_MSG("index.isValid=true");
-//        QListWidgetItem *targetItem = item(index.row());
-//        targetItem-> setFlags( targetItem->flags() | Qt::ItemIsDragEnabled);
-//        currentItem()-> setFlags( currentItem ()->flags() | Qt::ItemIsDragEnabled);
-//    }
-//    else  LOG_MSG("index.isValid=false!!!!!!!!!");
+    // QModelIndex index = indexAt(event->pos());
+    // if (index.isValid ())
+    // {
+    //        //LOG_MSG("index.isValid=true");
+    // QListWidgetItem *targetItem = item(index.row());
+    // targetItem-> setFlags( targetItem->flags() | Qt::ItemIsDragEnabled);
+    // currentItem()-> setFlags( currentItem ()->flags() | Qt::ItemIsDragEnabled);
+    // }
+    // else  LOG_MSG("index.isValid=false!!!!!!!!!");
     QListWidgetItem* item = itemAt(event->pos());
-    if (!item) {
-       LOG_MSG("index.isValid=false!!!!!!!!!");
+    if (!item)
+    {
+        LOG_MSG("index.isValid=false!!!!!!!!!");
     }
     QListWidget::mouseMoveEvent(event);
     //LOG_MSG("");

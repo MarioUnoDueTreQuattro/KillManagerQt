@@ -176,7 +176,7 @@ bool MyUtility::KillRunningProcesses()
     // Get the list of process identifiers.
     if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded))
     {
-        qWarning() << "EnumProcesses failed!";
+         LOG_MSG("EnumProcesses failed!");
         return false;
     }
     // Calculate how many process identifiers were returned.
@@ -231,7 +231,7 @@ void RunningProcessesListEx::populateProcessList()
     if (hProcessSnap == INVALID_HANDLE_VALUE)
     {
         // Handle error, e.g., show a message box
-        qDebug() << __FUNCTION__ << " error: hProcessSnap == INVALID_HANDLE_VALUE";
+         LOG_MSG( "error: hProcessSnap == INVALID_HANDLE_VALUE");
         return;
     }
     PROCESSENTRY32 pe32;
@@ -303,14 +303,14 @@ bool RunningProcessesListEx::killProcessByName(const std::wstring& targetName)
                     // Found the target process
                     if (TerminateProcess(hProcess, 1))
                     {
-                        qDebug() << "Terminated process: " << QString::fromWCharArray (processName) << " (PID: " << pid << ")";
+                         LOG_MSG( "Terminated process: " + QString::fromWCharArray (processName) + " (PID: " + QString::number(pid) + ")");
                         //std::wcout << "Percorso: " << getProcessPath (hProcess).toStdWString () << std::endl;
                         CloseHandle(hProcess);
                         return true;
                     }
                     else
                     {
-                        qDebug() << "Failed to terminate process.";
+                         LOG_MSG( "Failed to terminate process.");
                     }
                 }
             }
@@ -403,7 +403,7 @@ int RunningProcessesListEx::debugProcessesMemory()
     // Ottiene i PID di tutti i processi attivi
     if (!EnumProcesses(processIds, sizeof(processIds), &bytesReturned))
     {
-        qDebug() << "Errore in EnumProcesses.";
+         LOG_MSG("Errore in EnumProcesses.");
         return 1;
     }
     int numProcesses = bytesReturned / sizeof(DWORD);
@@ -458,8 +458,8 @@ QIcon RunningProcessesListEx::getProcessIcon( std::string sProcessPath, bool bIs
     HANDLE hProc = getProcessHandle (sProcessPath);
     if (hProc == INVALID_HANDLE_VALUE | hProc == 0 && bIsFullPath == false)
     {
-        LOG_VAR(QString::fromStdString (sProcessPath));
-        LOG_VAR(bIsFullPath);
+        //LOG_VAR(QString::fromStdString (sProcessPath));
+        //LOG_VAR(bIsFullPath);
         return icon;
     }
     QString path;

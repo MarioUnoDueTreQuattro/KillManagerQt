@@ -411,17 +411,17 @@ void MainWindow::deleteSelectedEnabledItem()
         ui->listWidgetEnabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Removed: " + currentItem->text(), 10000);
         m_ApplicationItemsList.deleteApplicationItem(currentItem->text());
-        qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
+        LOG_MSG( "m_ApplicationItemsList.size=" + m_ApplicationItemsList.size());
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
-        qDebug() << "deleteSelectedEnabledItem";
+        LOG_MSG( "deleteSelectedEnabledItem");
         writeListToFile ();
         connectTimer ();
     }
     else
     {
-        qDebug() << "No item selected for deleting.";
+        LOG_MSG( "No item selected for deleting.");
     }
 }
 
@@ -434,17 +434,17 @@ void MainWindow::deleteSelectedDisabledItem()
         ui->listWidgetDisabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Removed: " + currentItem->text(), 10000);
         m_ApplicationItemsList.deleteApplicationItem(currentItem->text());
-        qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
+        LOG_MSG( "m_ApplicationItemsList.size=" + m_ApplicationItemsList.size());
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
-        qDebug() << "deleteSelectedDisabledItem";
+        LOG_MSG("deleteSelectedDisabledItem");
         writeListToFile ();
         connectTimer ();
     }
     else
     {
-        qDebug() << "No item selected for deleting.";
+        LOG_MSG( "No item selected for deleting.");
     }
 }
 
@@ -498,13 +498,13 @@ void MainWindow::disableSelectedEnabledItem()
 
 void MainWindow::menuConfigure()
 {
-    qDebug() << "menuConfigure";
+    LOG_MSG("menuConfigure");
     Dialog cd;       //=new configureDialog(this);
     connect(&cd, SIGNAL(accepted()), this, SLOT(loadListFromFile()));
     // cd.setParent (this);
     cd.setWindowTitle("Configure");
     cd.exec();
-    qDebug() << __FUNCTION__ << "Reading m_iRefreshRate";
+    //qDebug() << __FUNCTION__ << "Reading m_iRefreshRate";
     QSettings settings;
     int iRefreshRate = settings.value("Dialog/RefreshRate", 5).toInt(); // default to 5
     m_iRefreshRate = iRefreshRate * 1000;
@@ -521,7 +521,7 @@ void MainWindow::menuConfigure()
 
 void MainWindow::showAddExeDialog()
 {
-    qDebug() << "showAddExeDialog";
+    LOG_MSG("showAddExeDialog");
     AddExeDialog addExe;       //=new configureDialog(this);
     //connect(&addExe, SIGNAL(accepted()), this, SLOT(loadListFromFile()));
     addExe.setWindowTitle("Add executable");
@@ -555,21 +555,21 @@ void MainWindow::showAddExeDialog()
             {
                 ApplicationItem newAppItem(receivedText, true);
                 m_ApplicationItemsList.append(newAppItem);
-                qDebug() << "m_ApplicationItemsList ADDED " << receivedText;
+                LOG_MSG("m_ApplicationItemsList ADDED " + receivedText);
             }
-            qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
+            LOG_MSG("m_ApplicationItemsList.size=" + m_ApplicationItemsList.size());
             //QListWidgetItem* newitem = new QListWidgetItem(receivedText, ui->listWidgetEnabled);
             //ui->listWidgetEnabled->addItem(newitem);
-            qDebug() << "Dialog accepted. Received: " << receivedText;
+            LOG_MSG("Dialog accepted. Received: " + receivedText);
             writeListToFile ();
             connectTimer ();
         }
         else
-            qDebug() << "Dialog accepted but EMPTY";
+            LOG_MSG("Dialog accepted but EMPTY");
     }
     else
     {
-        qDebug() << "Dialog rejected.";
+        LOG_MSG("Dialog rejected.");
     }
     connectTimer ();
 }
@@ -724,11 +724,11 @@ bool MainWindow::writeListToFile()
     bool bBackuped = backupBatchFile();
     if (bBackuped == false)
     {
-        qDebug() << "NOT BACKUPED";
+        LOG_MSG("NOT BACKUPED");
         return false;
     }
     else
-        qDebug() << "BACKUP OK";
+        LOG_MSG( "BACKUP OK");
     //updatePaths();
     // m_sKillFile.replace("\\", "\\\\");
     // qDebug() << m_sKillFile;
@@ -780,7 +780,7 @@ bool MainWindow::writeListToFile()
     // automatically closed when the QFile object is destroyed.
     file.close();
     universalPath1 = QDir::toNativeSeparators(universalPath1);
-    qDebug() << "Batch file successfully written to:" << universalPath1;
+    LOG_MSG("Batch file successfully written to:" + universalPath1);
     ui->statusBar->showMessage("Batch file successfully written to: " + universalPath1, 10000);
     connectTimer ();
     return true;
@@ -881,32 +881,32 @@ bool MainWindow::backupBatchFile()
     universalPath1 = fileInfo.absolutePath();
     QString destinationPath = fileInfo.baseName();
     QDateTime current = QDateTime::currentDateTime();
-    qDebug() << "Current Date and Time:" << current.toString();
+    LOG_MSG("Current Date and Time:" + current.toString());
     // format it
     QString formatted = current.toString("yyyyMMdd_hhmmss");
     destinationPath = destinationPath + "_" + formatted;
-    qDebug() << "Formatted:" << destinationPath;
+    LOG_MSG("Formatted:" + destinationPath);
     destinationPath = m_sBackupPath + "\\" + destinationPath + ".bat";
-    qDebug() << "destinationPath:" << destinationPath;
+    LOG_MSG("destinationPath:" + destinationPath);
     // 2. Check if the destination file exists and remove it if it does (to allow overwriting)
     if (QFile::exists(destinationPath))
     {
-        qDebug() << "Destination file already exists. Removing...";
+        LOG_MSG( "Destination file already exists. Removing...");
         if (!QFile::remove(destinationPath))
         {
-            qDebug() << "Failed to remove existing destination file:" << destinationPath;
+            LOG_MSG("Failed to remove existing destination file:" + destinationPath);
             return false;
         }
     }
     // 3. Perform the copy
     if (QFile::copy(sourcePath, destinationPath))
     {
-        qDebug() << "File copied successfully from" << sourcePath << "to" << destinationPath;
+        LOG_MSG("File copied successfully from" + sourcePath + "to" + destinationPath);
         return true;
     }
     else
     {
-        qDebug() << "Failed to copy file from" << sourcePath << "to" << destinationPath;
+        LOG_MSG( "Failed to copy file from" + sourcePath + "to" + destinationPath);
         // You can get more specific error information if needed
         // For example:
         // QFile destFile(destinationPath);
@@ -1024,7 +1024,7 @@ void MainWindow::disconnectTimer()
 {
     if (m_bTimerIsConnected == true)
     {
-        qDebug() << "Disconnecting timer";
+        LOG_MSG("Disconnecting timer");
         disconnect(timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
         m_bTimerIsConnected = false;
     }
@@ -1033,7 +1033,7 @@ void MainWindow::connectTimer()
 {
     if (m_bTimerIsConnected == false)
     {
-        qDebug() << "Reconnecting timer";
+        LOG_MSG("Reconnecting timer");
         //m_iTimerUpdatesCount = 0;
         //timer->setInterval (m_iRefreshRate);
         connect(timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
@@ -1255,7 +1255,7 @@ void MainWindow::on_actionOpen_in_external_editor_triggered()
     arguments << m_sKillFile;       // Use forward slashes for paths in Qt
     process.startDetached(program, arguments);
     ui->statusBar->showMessage(m_sKillFile + " opened in external editor.", 10000);
-    qDebug() << "External editor started " << arguments;
+    LOG_MSG( "External editor started " + arguments.join (' '));
     // Optional: Wait for the process to finish
     // process.waitForStarted(-1);
     // process.waitForFinished(-1); // -1 means wait indefinitely
@@ -1268,7 +1268,7 @@ void MainWindow::on_actionExecute_in_terminal_window_triggered()
     const char *cstrKillFile = m_sKillFile.toUtf8().data();
     std::string command = std::string("cmd /C ") + cstrKillFile;
     system(command.c_str());
-    qDebug() << "Execute_in_terminal_window started: " << command.c_str ();
+    LOG_MSG("Execute_in_terminal_window started: " + QString::fromStdString (command.c_str()) );
     ui->statusBar->showMessage(m_sKillFile + " executed in terminal window.", 10000);
 }
 
