@@ -1,20 +1,48 @@
 #include "mainwindow.h"
-#include <QApplication>
 #include "utility.h"
+#include <QApplication>
+#include <QDateTime>
+#include <QSettings>
+
+//QByteArray setupLog(){
+// QString sLogFilePath = QCoreApplication::applicationDirPath();
+// sLogFilePath = QDir::toNativeSeparators (sLogFilePath);
+// sLogFilePath.append ("\\KillManagerQt.log");
+//    //QByteArray logPathByteArray = sLogFilePath.toUtf8();
+////    cLogFilePath = logPathByteArray.data();
+////    LOG_MSG(sLogFilePath);
+// return sLogFilePath.toUtf8();
+//}
 
 int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
-    QObject::connect(&a, &QApplication::aboutToQuit, closeLogFile);
     a.setOrganizationName("andreag");
     a.setApplicationName("KillManagerQt");
-    // message hanlder
-    qInstallMessageHandler(customMessageHandler);
-    QString repeatedChar;
-    repeatedChar = QString("*").repeated(80 );
-    qDebug() << "\n" << repeatedChar << "\n" "Starting KillManagerQt " << __DATE__ << " " << __TIME__ << "\n" << repeatedChar;
-    //QString allMessages = g_debugMessages.join("\n");
-    //qDebug() << "Collected messages:\n" << allMessages;
+    QSettings settings;
+    bool bLogToFile = settings.value("Dialog/UseLogFile", false).toBool ();
+    if (bLogToFile)
+    {
+        QObject::connect(&a, &QApplication::aboutToQuit, closeLogFile);
+        sLogFilePath = QCoreApplication::applicationDirPath();
+        sLogFilePath = QDir::toNativeSeparators (sLogFilePath);
+        sLogFilePath.append ("\\KillManagerQt.log");
+        QByteArray logPathByteArray;
+        logPathByteArray = sLogFilePath.toUtf8();
+        cLogFilePath = logPathByteArray.data();
+        //LOG_MSG(sLogFilePath);
+        // message hanlder
+        qInstallMessageHandler(customMessageHandler);
+        QDate today = QDate::currentDate();
+        QTime currentTime = QTime::currentTime();
+        QString repeatedChar;
+        QString sMsg = "Starting KillManagerQt " + today.toString () + " " + currentTime.toString () ;
+        repeatedChar = QString("*").repeated(80 );
+        //qDebug() << "\n" << repeatedChar << "\n" << sMsg << "\n" << repeatedChar;
+        //QString allMessages = g_debugMessages.join("\n");
+        //qDebug() << "Collected messages:\n" << allMessages;
+    }
+    //settings.deleteLater ();
     MainWindow w;
     w.show();
     return a.exec();

@@ -2,13 +2,18 @@
 
 QStringList g_debugMessages;
 FILE *f;
+QString sLogFilePath;
+char * cLogFilePath;
 
 void customMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
+    // if (sLogFilePath==nullptr) buildPath();
     // QString sFile = qApp->applicationName();
     // sFile.append (".log");
     QString message = qFormatLogMessage(type, context, msg);
     f = fopen("KillManagerQt.log", "a");
+    LOG_VAR(sLogFilePath);
+    //f = fopen(cLogFilePath, "a");
     fprintf(f, "%s\n", qPrintable(message));
     fflush(f);
     Q_UNUSED(type)

@@ -49,6 +49,36 @@ Dialog::Dialog(QWidget* parent)
     // RunningProcessesListEx utility;
     // QIcon icon = utility.getProcessIcon (ui->lineEditExternaEditor ->text ().toStdString (), true);
     // ui->labelIcon->setPixmap (icon.pixmap (QSize(32, 32)));
+    QString filePath = QCoreApplication::applicationDirPath();
+    filePath = QDir::toNativeSeparators (filePath);
+    filePath.append ("\\KillManagerQt.log");
+    //LOG_MSG(filePath);
+    QFileInfo fileInfo(filePath);
+    if (fileInfo.exists())
+    {
+        //file size in bytes
+        int iFileSize = fileInfo.size();
+        QString sMsg = "Path: ";
+         sMsg.append (filePath);
+         sMsg.append ("\nSize: ");
+        if (iFileSize < 1024)
+        {
+            sMsg.append (QString::number (iFileSize));
+            sMsg.append (" bytes.");
+        }
+        else
+        {
+            sMsg.append (QString::number (iFileSize/1024));
+            sMsg.append (" KB.");
+        }
+        ui->labelLog->setText (sMsg);
+    }
+    else
+    {
+        // If the file doesn't exist, print a message and return 0
+        qDebug() << "Log file " << filePath << " does not exist.";
+        ui->labelLog->setText ("Log file doesn't exist.");
+    }
 }
 
 Dialog::~Dialog()
@@ -99,6 +129,15 @@ void Dialog::readSettings()
     else
     {
         ui->checkBoxKill->setChecked (false);
+    }
+    bool bLogToFile = settings.value("Dialog/UseLogFile", false).toBool ();
+    if (bLogToFile)
+    {
+        ui->checkBoxLog->setChecked (true);
+    }
+    else
+    {
+        ui->checkBoxLog->setChecked (false);
     }
 }
 
@@ -185,6 +224,7 @@ void Dialog::on_Dialog_accepted()
         }
     }
     settings.setValue("Dialog/UseInternalKill", ui->checkBoxKill->isChecked ());
+    settings.setValue("Dialog/UseLogFile", ui->checkBoxLog->isChecked ());
     // else
     // {
     // QMessageBox::information(parent, "Folder Exists",
@@ -366,13 +406,13 @@ void Dialog::on_checkBoxDeleteBackups_toggled(bool checked)
 
 void Dialog::on_lineEditExternaEditor_textChanged(const QString &arg1)
 {
-    bool bIsFullPath=false;
-    if (arg1.contains ("\\")) bIsFullPath=true;
+    bool bIsFullPath = false;
+    if (arg1.contains ("\\")) bIsFullPath = true;
     m_sExternalEditorInitialPath = arg1;
     RunningProcessesListEx utility;
     QIcon icon;
     if (bIsFullPath)
-     icon = utility.getProcessIcon (arg1.toStdString (), true);
+        icon = utility.getProcessIcon (arg1.toStdString (), true);
     else
         icon = utility.getProcessIcon (arg1.toStdString (), false);
     ui->labelIcon->setPixmap (icon.pixmap (QSize(32, 32)));

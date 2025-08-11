@@ -110,6 +110,7 @@ private slots:
     void on_actionExecute_in_terminal_window_triggered();
     void on_actionOpen_log_file_in_external_editor_triggered();
 
+    void on_actionExit_triggered();
 };
 
 #endif // MAINWINDOW_H

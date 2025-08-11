@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>443</width>
-    <height>675</height>
+    <height>719</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -403,6 +403,23 @@ Select the backup folder or type (or paste) the long path to the folder.</string
        <widget class="QCheckBox" name="checkBoxKill">
         <property name="text">
          <string>Use internal kill (TerminateProcess function) instead of executing the batch file</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxLog">
+        <property name="toolTip">
+         <string>After changing this option, you must restart the program for it to take effect.</string>
+        </property>
+        <property name="text">
+         <string>Log to file</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelLog">
+        <property name="text">
+         <string>TextLabel</string>
         </property>
        </widget>
       </item>

@@ -170,6 +170,8 @@
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
     <addaction name="actionAbout_Qt"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
    </widget>
    <addaction name="menu"/>
   </widget>
@@ -244,6 +246,18 @@
    </property>
    <property name="statusTip">
     <string>Open log file in external editor</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/img/icons8-quit-48.png</normaloff>:/icons/img/icons8-quit-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="statusTip">
+    <string>Exit application</string>
    </property>
   </action>
  </widget>

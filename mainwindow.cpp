@@ -1255,7 +1255,7 @@ void MainWindow::on_actionOpen_in_external_editor_triggered()
     arguments << m_sKillFile;       // Use forward slashes for paths in Qt
     process.startDetached(program, arguments);
     ui->statusBar->showMessage(m_sKillFile + " opened in external editor.", 10000);
-    qDebug() << "Process started " << arguments;
+    qDebug() << "External editor started " << arguments;
     // Optional: Wait for the process to finish
     // process.waitForStarted(-1);
     // process.waitForFinished(-1); // -1 means wait indefinitely
@@ -1268,17 +1268,21 @@ void MainWindow::on_actionExecute_in_terminal_window_triggered()
     const char *cstrKillFile = m_sKillFile.toUtf8().data();
     std::string command = std::string("cmd /C ") + cstrKillFile;
     system(command.c_str());
+    qDebug() << "Execute_in_terminal_window started: " << command.c_str ();
     ui->statusBar->showMessage(m_sKillFile + " executed in terminal window.", 10000);
 }
 
 void MainWindow::on_actionOpen_log_file_in_external_editor_triggered()
 {
+    QString filePath = QCoreApplication::applicationDirPath();
+    filePath = QDir::toNativeSeparators (filePath);
+    filePath.append ("\\KillManagerQt.log");
     QSettings settings;
     QProcess process;
     QString program = "notepad.exe";
     program = settings.value("Dialog/External editor", "notepad.exe").toString();
     QStringList arguments;
-    arguments << "KillManagerQt.log";
+    arguments << filePath;
     process.startDetached(program, arguments);
     ui->statusBar->showMessage("Log file opened in external editor.", 10000);
     qDebug() << "Opening log file " << arguments;
@@ -1378,4 +1382,9 @@ bool MainWindow::KillRunningProcesses()
         qApp->processEvents ();
     }
     return bKilled;
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    QApplication::quit();
 }
