@@ -61,7 +61,7 @@ Dialog::Dialog(QWidget* parent)
         QString sMsg = "Path: ";
          sMsg.append (filePath);
          sMsg.append ("\nSize: ");
-        if (iFileSize < 1024)
+        if (iFileSize < 10240)
         {
             sMsg.append (QString::number (iFileSize));
             sMsg.append (" bytes.");

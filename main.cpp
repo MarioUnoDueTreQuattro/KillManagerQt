@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
         QString repeatedChar;
         QString sMsg = "Starting KillManagerQt " + today.toString () + " " + currentTime.toString () ;
         repeatedChar = QString("*").repeated(80 );
-        //qDebug() << "\n" << repeatedChar << "\n" << sMsg << "\n" << repeatedChar;
+        qDebug() << "\n\n" << repeatedChar << "\n" << sMsg << "\n" << repeatedChar << "\n\n";
         //QString allMessages = g_debugMessages.join("\n");
         //qDebug() << "Collected messages:\n" << allMessages;
     }
