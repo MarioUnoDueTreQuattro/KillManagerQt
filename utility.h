@@ -4,6 +4,7 @@
 #include <QStringList>
 #include <QtGlobal>
 #include <QDebug>
+#include <QFile>
 
 //extern QStringList g_debugMessages;
 //extern FILE *f;
@@ -12,7 +13,8 @@
 
 //void customMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
 //void closeLogFile();
-void myCustomMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+
+//void myCustomMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
 #endif // DEBUGMESSAGEHANDLER_H
 

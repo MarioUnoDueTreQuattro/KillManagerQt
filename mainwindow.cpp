@@ -144,6 +144,7 @@ void MainWindow::updateSettings()
     QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     documentsPath = QDir::toNativeSeparators (documentsPath);
     QSettings settings;
+    m_sLogFileName= settings.value("LogFileName", "").toString();
     QString sKillFile = settings.value("Path").toString();
     //qDebug() << "Read string from registry:" << sKillFile;
     if (sKillFile == "")
@@ -1274,15 +1275,15 @@ void MainWindow::on_actionExecute_in_terminal_window_triggered()
 
 void MainWindow::on_actionOpen_log_file_in_external_editor_triggered()
 {
-    QString filePath = QCoreApplication::applicationDirPath();
-    filePath = QDir::toNativeSeparators (filePath);
-    filePath.append ("\\KillManagerQt.log");
+//    QString filePath = QCoreApplication::applicationDirPath();
+//    filePath = QDir::toNativeSeparators (filePath);
+//    filePath.append ("\\KillManagerQt.log");
     QSettings settings;
     QProcess process;
     QString program = "notepad.exe";
     program = settings.value("Dialog/External editor", "notepad.exe").toString();
     QStringList arguments;
-    arguments << filePath;
+    arguments << m_sLogFileName;
     process.startDetached(program, arguments);
     ui->statusBar->showMessage("Log file opened in external editor.", 10000);
     qDebug() << "Opening log file " << arguments;

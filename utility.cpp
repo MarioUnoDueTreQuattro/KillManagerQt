@@ -1,6 +1,5 @@
 #include "utility.h"
 #include <QMessageLogContext>
-#include <QFile>
 #include <QTextStream>
 #include <QDateTime>
 #include <QMutex>
@@ -10,95 +9,32 @@
 //QString sLogFilePath;
 //char *cLogFilePath;
 // Dichiariamo una QMutex per rendere il nostro gestore di messaggi thread-safe
-QMutex g_mutex;
-
-void myCustomMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
-{
-    QMutexLocker locker(&g_mutex);
-    // 1. Formattazione del messaggio
-    QString formattedMessage = QString("[%1] ").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
-    //formattedMessage += " ";
-    // Identifichiamo il tipo di messaggio
-//    switch (type)
-//    {
-//    case QtDebugMsg:
-//        formattedMessage += "[DEBUG] ";
-//        break;
-//    case QtInfoMsg:
-//        formattedMessage += "[INFO] ";
-//        break;
-//    case QtWarningMsg:
-//        formattedMessage += "[WARNING] ";
-//        break;
-//    case QtCriticalMsg:
-//        formattedMessage += "[CRITICAL] ";
-//        break;
-//    case QtFatalMsg:
-//        formattedMessage += "[FATAL] ";
-//        break;
-//    }
-    formattedMessage += msg;
-    //formattedMessage += QString("%1 (%2:%3)").arg(msg).arg(context.file).arg(context.line);
-    //formattedMessage +=QString("%1 (%2:%3)").arg(msg).arg(__FILE__).arg(__LINE__);
-    // 2. Scrittura del messaggio sul file di log
-    QString logFilePath = "KillManagerQt.log";
-    QFile logFile(logFilePath);
-    if (logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
-    {
-        QTextStream out(&logFile);
-        out << formattedMessage << Qt::endl;
-        logFile.close();
-    }
-    else
-    {
-        QTextStream(stderr) << "Errore: Impossibile aprire il file di log " << logFilePath << Qt::endl;
-    }
-    // 3. Stampa del messaggio a terminale (separando stdout e stderr)
-    // Per i messaggi di warning, critical e fatal, usiamo stderr
-    if (type == QtWarningMsg || type == QtCriticalMsg || type == QtFatalMsg)
-    {
-        QTextStream terminalOut(stderr);
-        terminalOut << formattedMessage << Qt::endl;
-        terminalOut.flush();
-    }
-    // Per tutti gli altri (debug, info), usiamo stdout
-    else
-    {
-        QTextStream terminalOut(stdout);
-        terminalOut << formattedMessage << Qt::endl;
-        terminalOut.flush();
-    }
-    if (type == QtFatalMsg)
-    {
-        abort();
-    }
-}
 
 //void customMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 //{
 //    // if (sLogFilePath==nullptr) buildPath();
 //    // QString sFile = qApp->applicationName();
 //    // sFile.append (".log");
-//    QString message = qFormatLogMessage(type, context, msg);
-//    f = fopen("KillManagerQt.log", "a");
+// QString message = qFormatLogMessage(type, context, msg);
+// f = fopen("KillManagerQt.log", "a");
 //    //LOG_VAR(sLogFilePath);
 //    //f = fopen(cLogFilePath, "a");
-//    fprintf(f, "%s\n", qPrintable(message));
-//    fflush(f);
-//    Q_UNUSED(type)
-//    Q_UNUSED(context)
-//    g_debugMessages.append(msg);
-//    std::cout << msg.toStdString () << std::endl;
+// fprintf(f, "%s\n", qPrintable(message));
+// fflush(f);
+// Q_UNUSED(type)
+// Q_UNUSED(context)
+// g_debugMessages.append(msg);
+// std::cout << msg.toStdString () << std::endl;
 //}
 
 //void closeLogFile()
 //{
-//    if (f != NULL)
-//    {
-//        LOG_MSG("Closing LOG file...");
-//        fclose(f);
-//        f = NULL;
-//    }
+// if (f != NULL)
+// {
+// LOG_MSG("Closing LOG file...");
+// fclose(f);
+// f = NULL;
+// }
 //}
 
 // Funzione per convertire una stringa di caratteri wide (WCHAR) in una stringa standard (char)
@@ -176,7 +112,7 @@ bool MyUtility::KillRunningProcesses()
     // Get the list of process identifiers.
     if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded))
     {
-         LOG_MSG("EnumProcesses failed!");
+        LOG_MSG("EnumProcesses failed!");
         return false;
     }
     // Calculate how many process identifiers were returned.
@@ -231,7 +167,7 @@ void RunningProcessesListEx::populateProcessList()
     if (hProcessSnap == INVALID_HANDLE_VALUE)
     {
         // Handle error, e.g., show a message box
-         LOG_MSG( "error: hProcessSnap == INVALID_HANDLE_VALUE");
+        LOG_MSG( "error: hProcessSnap == INVALID_HANDLE_VALUE");
         return;
     }
     PROCESSENTRY32 pe32;
@@ -303,14 +239,14 @@ bool RunningProcessesListEx::killProcessByName(const std::wstring& targetName)
                     // Found the target process
                     if (TerminateProcess(hProcess, 1))
                     {
-                         LOG_MSG( "Terminated process: " + QString::fromWCharArray (processName) + " (PID: " + QString::number(pid) + ")");
+                        LOG_MSG( "Terminated process: " + QString::fromWCharArray (processName) + " (PID: " + QString::number(pid) + ")");
                         //std::wcout << "Percorso: " << getProcessPath (hProcess).toStdWString () << std::endl;
                         CloseHandle(hProcess);
                         return true;
                     }
                     else
                     {
-                         LOG_MSG( "Failed to terminate process.");
+                        LOG_MSG( "Failed to terminate process.");
                     }
                 }
             }
@@ -403,7 +339,7 @@ int RunningProcessesListEx::debugProcessesMemory()
     // Ottiene i PID di tutti i processi attivi
     if (!EnumProcesses(processIds, sizeof(processIds), &bytesReturned))
     {
-         LOG_MSG("Errore in EnumProcesses.");
+        LOG_MSG("Errore in EnumProcesses.");
         return 1;
     }
     int numProcesses = bytesReturned / sizeof(DWORD);

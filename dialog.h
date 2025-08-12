@@ -33,6 +33,7 @@ private slots:
 
 private:
     Ui::Dialog *ui;
+    QString m_sLogFileName;
     QString m_sKillFile;
     QString m_sInitialPath;
     QString m_sExternalEditorInitialPath;

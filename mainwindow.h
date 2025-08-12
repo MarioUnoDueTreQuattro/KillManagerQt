@@ -49,6 +49,7 @@ private:
     QTimer *timer;
     QProcess *process;
     Ui::MainWindow *ui;
+    QString m_sLogFileName;
     QString m_sKillFile;
     QString m_sInitialPath;
     QString m_sBackupPath;

@@ -49,17 +49,18 @@ Dialog::Dialog(QWidget* parent)
     // RunningProcessesListEx utility;
     // QIcon icon = utility.getProcessIcon (ui->lineEditExternaEditor ->text ().toStdString (), true);
     // ui->labelIcon->setPixmap (icon.pixmap (QSize(32, 32)));
-    QString filePath = QCoreApplication::applicationDirPath();
+ /*   QString filePath = QCoreApplication::applicationDirPath();
     filePath = QDir::toNativeSeparators (filePath);
     filePath.append ("\\KillManagerQt.log");
+*/
     //LOG_MSG(filePath);
-    QFileInfo fileInfo(filePath);
+    QFileInfo fileInfo(m_sLogFileName);
     if (fileInfo.exists())
     {
         //file size in bytes
         int iFileSize = fileInfo.size();
         QString sMsg = "Path: ";
-         sMsg.append (filePath);
+         sMsg.append (m_sLogFileName);
          sMsg.append ("\nSize: ");
         if (iFileSize < 10240)
         {
@@ -76,7 +77,7 @@ Dialog::Dialog(QWidget* parent)
     else
     {
         // If the file doesn't exist, print a message and return 0
-        qDebug() << "Log file " << filePath << " does not exist.";
+        qDebug() << "Log file " << m_sLogFileName << " does not exist.";
         ui->labelLog->setText ("Log file doesn't exist.");
     }
     // Adjust the size of the dialog to fit its contents
@@ -93,6 +94,7 @@ void Dialog::readSettings()
     QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     documentsPath = QDir::toNativeSeparators (documentsPath);
     QSettings settings; // QSettings will use the organization and application names set in main()
+    m_sLogFileName= settings.value("LogFileName", "").toString();
     QString sKillFile = settings.value("Path").toString();
     if (sKillFile == "")
     {
