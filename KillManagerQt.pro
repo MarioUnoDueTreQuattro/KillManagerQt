@@ -37,6 +37,6 @@ RESOURCES += \
 
 win32:RC_ICONS = KillManager.ico
 
-VERSION = 1.0.0.7
+VERSION = 1.0.0.8
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 win32:LIBS += -lpsapi

@@ -15,12 +15,37 @@
 #include <QDateTime>
 #include <QStandardPaths>
 #include <cstdlib>  // for system()
+//#include "SimpleZipper/src/SimpleZipper.h"
+
+//void createTestFile(const QString& path) {
+//    QFile file(path);
+//    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+//        QTextStream out(&file);
+//        out << "Hello from SimpleZipper!";
+//        file.close();
+//    } else {
+//        qWarning() << "Failed to create test file.";
+//    }
+//}
+
+//void zipTestFile(const QString& inputPath, const QString& outputPath) {
+//    if (SimpleZipper::zipFile(inputPath, outputPath)) {
+//        qDebug() << "File zipped successfully.";
+//    } else {
+//        qWarning() << "Zipping failed.";
+//    }
+//}
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    qApp->setStyleSheet( "QStatusBar::item { border: 0px}" ) ;
+//    QString testFile = "test.txt";
+//     QString zipFile = "test.zip";
+//     createTestFile(testFile);
+//     zipTestFile(testFile, zipFile);
+     //unzipTestFile(zipFile, unzipFolder);
+     qApp->setStyleSheet( "QStatusBar::item { border: 0px}" ) ;
     this->setWindowIcon(QIcon(":/icons/img/KillManager.ico"));       // Use the path defined in .qrc
     m_ApplicationItemsList.clear();
     ui->setupUi(this);
