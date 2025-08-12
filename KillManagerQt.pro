@@ -39,5 +39,4 @@ win32:RC_ICONS = KillManager.ico
 
 VERSION = 1.0.0.7
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
-DEFINES += Q_FORCE_ASSERTS
 win32:LIBS += -lpsapi
