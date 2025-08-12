@@ -19,14 +19,16 @@ SOURCES += main.cpp\
     addexedialog.cpp \
     myqlistwidget.cpp \
     applicationitemslist.cpp \
-    utility.cpp
+    utility.cpp \
+    scheduler.cpp
 
 HEADERS  += mainwindow.h \
     dialog.h \
     addexedialog.h \
     myqlistwidget.h \
     applicationitemslist.h \
-    utility.h
+    utility.h \
+    scheduler.h
 
 FORMS    += mainwindow.ui \
     dialog.ui \

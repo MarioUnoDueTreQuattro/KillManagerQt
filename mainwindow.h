@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "scheduler.h"
 #include "utility.h"
 #include "addexedialog.h"
 //#include "applicationitem.h"
@@ -38,6 +39,7 @@ public:
     ~MainWindow();
 
 private:
+    Scheduler m_scheduler;
     QLabel *m_StatusBarLabel;
      QMovie *m_statusBarMovie;
      bool listContainsItemText(MyQListWidget*, const QString & );
