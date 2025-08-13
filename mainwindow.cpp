@@ -949,12 +949,12 @@ bool MainWindow::backupBatchFile()
     // 3. Perform the copy
     if (QFile::copy(sourcePath, destinationPath))
     {
-        LOG_MSG("File copied successfully from" + sourcePath + "to" + destinationPath);
+        LOG_MSG("File copied successfully from " + sourcePath + " to " + destinationPath);
         return true;
     }
     else
     {
-        LOG_MSG( "Failed to copy file from" + sourcePath + "to" + destinationPath);
+        LOG_MSG( "Failed to copy file from " + sourcePath + " to " + destinationPath);
         // You can get more specific error information if needed
         // For example:
         // QFile destFile(destinationPath);
