@@ -1,20 +1,20 @@
 #ifndef DEBUGMESSAGEHANDLER_H
-#define DEBUGMESSAGEHANDLER_H
+    #define DEBUGMESSAGEHANDLER_H
 
-#include <QStringList>
-#include <QtGlobal>
-#include <QDebug>
-#include <QFile>
+    #include <QStringList>
+    #include <QtGlobal>
+    #include <QDebug>
+    #include <QFile>
 
-//extern QStringList g_debugMessages;
-//extern FILE *f;
-//extern QString sLogFilePath;
-//extern char * cLogFilePath;
+    //extern QStringList g_debugMessages;
+    //extern FILE *f;
+    //extern QString sLogFilePath;
+    //extern char * cLogFilePath;
 
-//void customMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
-//void closeLogFile();
+    //void customMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
+    //void closeLogFile();
 
-//void myCustomMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    //void myCustomMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
 #endif // DEBUGMESSAGEHANDLER_H
 
@@ -45,14 +45,14 @@
 // Basic log with file, line, and function
 #define LOG() \
     qDebug() << "File:" << __FILE__ \
-             << "Line:" << __LINE__ \
-             << "Function:" << __FUNCTION__
+             << "Function:" << __FUNCTION__ \
+             << "Line:" << __LINE__
 
 // Log with custom message
 #define LOG_MSG(msg) \
     qDebug() << "File:" << __FILE__ \
-             << "Line:" << __LINE__ \
              << "Function:" << __FUNCTION__ \
+             << "Line:" << __LINE__ \
              << "Msg:" \
              << msg
 
@@ -60,8 +60,8 @@
 #define LOG_MSG_IF(cond, msg) \
              if (cond) qDebug() \
              << "File:" << __FILE__ \
-             << "Line:" << __LINE__ \
              << "Function:" << __FUNCTION__ \
+             << "Line:" << __LINE__ \
              << "Msg:" \
              << msg
 
@@ -69,16 +69,16 @@
 #define LOG_MSG_IF_FALSE(cond, msg) \
              if (cond==false) qDebug() \
              << "File:" << __FILE__ \
-             << "Line:" << __LINE__ \
              << "Function:" << __FUNCTION__ \
+             << "Line:" << __LINE__ \
              << "Msg:" \
              << msg
 
 // Log a variable name and value
 #define LOG_VAR(var) \
     qDebug() << "File:" << __FILE__ \
-             << "Line:" << __LINE__ \
              << "Function:" << __FUNCTION__ \
+             << "Line:" << __LINE__ \
              << "Var:" << #var << "=" << var
 
 // Log to file
@@ -101,27 +101,27 @@ inline void writeToLogFile(const QString& message, const char* fileName, const c
 
 #endif // LOG_MACROS_H
 
-#ifndef MYUTILITY_H
-#define MYUTILITY_H
+//#ifndef MYUTILITY_H
+//#define MYUTILITY_H
 
-// Include Windows API headers
-#ifdef Q_OS_WIN
-    #include <windows.h>
-    #include <psapi.h> // For EnumProcesses, EnumProcessModules, GetModuleBaseName
-#endif
+//// Include Windows API headers
+//#ifdef Q_OS_WIN
+// #include <windows.h>
+// #include <psapi.h> // For EnumProcesses, EnumProcessModules, GetModuleBaseName
+//#endif
 
-class MyUtility
-{
-private:
-    QStringList m_ProcessesList;
-public:
+//class MyUtility
+//{
+//private:
+// QStringList m_ProcessesList;
+//public:
 
-    bool KillRunningProcesses();
-    QStringList getRunningProcesses();
+// bool KillRunningProcesses();
+// QStringList getRunningProcesses();
 
-};
+//};
 
-#endif // MYUTILITY_H
+//#endif // MYUTILITY_H
 
 #ifndef RUNNINGPROCESSESLISTEX_H
 #define RUNNINGPROCESSESLISTEX_H
@@ -131,15 +131,21 @@ class RunningProcessesListEx : public QObject
     Q_OBJECT
 public:
     explicit RunningProcessesListEx(QObject *parent = 0);
-    void populateProcessList();
+    bool enableDebugPrivileges();
+   void populateProcessList();
     QStringList getProcessList() const;
     bool isRunning (QString);
     bool killProcessByName(const std::wstring& targetName);
     bool killProcessByName(QString);
+    bool killProcessAndChildsByNameEx(const std::string& processName);
+    bool killProcessAndChildsByNameEx(QString);
+    bool killProcessTree(DWORD parentPid);
+    bool killProcessAndChildsByName(const std::string& processName);
+    bool killProcessAndChildsByName(QString);
     QString getProcessPath(HANDLE hProcess);
     HANDLE getProcessHandle(const std::string& executablePath);
     int debugProcessesMemory();
-    QIcon getProcessIcon(std::string,bool);
+    QIcon getProcessIcon(std::string, bool);
     HICON getIconFromExecutable(const std::string& executablePath);
 
 private:

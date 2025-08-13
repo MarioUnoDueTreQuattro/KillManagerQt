@@ -40,6 +40,10 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    if (!m_ProcessList.enableDebugPrivileges())
+    {
+        LOG_MSG("Failed to enable debug privileges. Access to some processes might be denied.");
+    }
     // QString testFile = "test.txt";
     // QString zipFile = "test.zip";
     // createTestFile(testFile);
@@ -129,13 +133,13 @@ void MainWindow::showEvent(QShowEvent *event)
 void MainWindow::onLogCompressionExecuted()
 {
     //LOG_MSG("");
-    ui->statusBar->showMessage ("Old log files compressed in ZIP format",30000);
+    ui->statusBar->showMessage ("Old log files compressed in ZIP format", 30000);
 }
 
 void MainWindow::onLogCompressionChecked()
 {
     //LOG_MSG("");
-    ui->statusBar->showMessage ("Checked if it's time to compress old log files.",10000);
+    ui->statusBar->showMessage ("Checked if it's time to compress old log files.", 10000);
 }
 
 void MainWindow::firstTimeConfiguration()
@@ -389,10 +393,11 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
 
 void MainWindow::killSelectedDisabledItem()
 {
+    bool bKilled = false;
     QListWidgetItem* currentItem = ui->listWidgetDisabled->currentItem();
     if (currentItem)
     {
-        m_ProcessList.killProcessByName (currentItem->text());
+        bKilled = m_ProcessList.killProcessAndChildsByName (currentItem->text());
         ui->statusBar->showMessage("Terminated: " + currentItem->text(), 10000);
     }
     else
@@ -403,10 +408,11 @@ void MainWindow::killSelectedDisabledItem()
 
 void MainWindow::killSelectedEnabledItem()
 {
+    bool bKilled = false;
     QListWidgetItem* currentItem = ui->listWidgetEnabled->currentItem();
     if (currentItem)
     {
-        m_ProcessList.killProcessByName (currentItem->text());
+        bKilled = m_ProcessList.killProcessAndChildsByName (currentItem->text());
         ui->statusBar->showMessage("Terminated: " + currentItem->text(), 10000);
     }
     else
@@ -1170,7 +1176,9 @@ void MainWindow::on_pushButtonRun_clicked()
     if (m_bKillInternal)
     {
         //m_ProcessList.debugProcessesMemory ();
-        KillRunningProcesses();
+        bool bKillOk=KillRunningProcesses();
+//        if (bKillOk) LOG_MSG("Internal TerminateProcess result= OK");
+//        else LOG_MSG("Internal TerminateProcess result= NOT all processes killed");
         sStatusMessage = "TerminateProcess";
         sStatusMessage.append (" executed.");
         ui->statusBar->showMessage(sStatusMessage, 10000);
@@ -1401,10 +1409,11 @@ bool MainWindow::KillRunningProcesses()
     for (int i = 0; i < iCount; i++)
     {
         sItemText = ui->listWidgetEnabled->item(i)->text();
-        bKilled = m_ProcessList.killProcessByName (sItemText);
+        bKilled = m_ProcessList.killProcessAndChildsByNameEx (sItemText);
         foundItem = m_ApplicationItemsList.findApplicationItem (sItemText);
         if (foundItem)
         {
+            //LOG_MSG(sItemText);
             //LOG_MSG("KILLED " + sItemText);
             //qDebug() << "foundItem->getAppName () " << foundItem->getAppName ();
             foundItem->setFoundWhenKilling (bKilled);

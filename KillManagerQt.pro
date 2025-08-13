@@ -34,6 +34,8 @@ FORMS    += mainwindow.ui \
     dialog.ui \
     addexedialog.ui
 
+#RC_FILE = KillManagerQt.manifest
+RC_FILE = app.rc
 RESOURCES += \
     icons.qrc
 
@@ -42,3 +44,7 @@ win32:RC_ICONS = KillManager.ico
 VERSION = 1.0.0.8
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 win32:LIBS += -lpsapi
+
+DISTFILES += \
+    KillManagerQt.manifest \
+    app.rc

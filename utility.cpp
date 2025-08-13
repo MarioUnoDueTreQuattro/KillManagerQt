@@ -37,6 +37,23 @@
 // }
 //}
 
+// Function to convert WCHAR* to std::string
+std::string wideCharToString(const WCHAR* wideString)
+{
+    if (wideString == nullptr)
+    {
+        return "";
+    }
+    int bufferSize = WideCharToMultiByte(CP_UTF8, 0, wideString, -1, NULL, 0, NULL, NULL);
+    if (bufferSize <= 0)
+    {
+        return "";
+    }
+    std::string convertedString(bufferSize - 1, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, wideString, -1, &convertedString[0], bufferSize, NULL, NULL);
+    return convertedString;
+}
+
 // Funzione per convertire una stringa di caratteri wide (WCHAR) in una stringa standard (char)
 std::string WcharToString(const WCHAR* wstr)
 {
@@ -51,107 +68,136 @@ std::string WcharToString(const WCHAR* wstr)
     return str;
 }
 
-QStringList MyUtility::getRunningProcesses()
-{
-    QStringList processList;
-#ifdef Q_OS_WIN
-    DWORD aProcesses[1024], cbNeeded, cProcesses;
-    unsigned int i;
-    // Get the list of process identifiers.
-    if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded))
-    {
-        qWarning() << "EnumProcesses failed!";
-        return processList;
-    }
-    // Calculate how many process identifiers were returned.
-    cProcesses = cbNeeded / sizeof(DWORD);
-    // Iterate through each process to get its name.
-    for (i = 0; i < cProcesses; i++)
-    {
-        if (aProcesses[i] == 0)
-            continue;
-        // Open process with necessary access rights
-        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, aProcesses[i]);
-        if (NULL != hProcess)
-        {
-            HMODULE hMod;
-            DWORD cbNeededModule;
-            char szProcessName[MAX_PATH] = { 0 };
-            // Get a list of all modules in the process.
-            if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeededModule))
-            {
-                // Get the base name of the first module (usually the executable).
-                GetModuleBaseNameA(hProcess, hMod, szProcessName, sizeof(szProcessName) / sizeof(char));
-            }
-            // If we got a name, add it to our list
-            if (szProcessName[0] != '\0')
-            {
-                processList << QString::fromLocal8Bit(szProcessName);
-            }
-            // Release the handle to the process.
-            CloseHandle(hProcess);
-        }
-    }
-#else
-    // For non-Windows platforms, you would use different methods.
-    // For example, on Linux, you might read from /proc/<pid>/comm or use 'ps' command.
-    qDebug() << "This function is designed for Windows. Other OS not implemented.";
-    processList << "Not available on this OS.";
-#endif
-    // Sort the list for better readability
-    processList.sort();
-    return processList;
-}
+//QStringList MyUtility::getRunningProcesses()
+//{
+// QStringList processList;
+//#ifdef Q_OS_WIN
+// DWORD aProcesses[1024], cbNeeded, cProcesses;
+// unsigned int i;
+//    // Get the list of process identifiers.
+// if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded))
+// {
+// qWarning() << "EnumProcesses failed!";
+// return processList;
+// }
+//    // Calculate how many process identifiers were returned.
+// cProcesses = cbNeeded / sizeof(DWORD);
+//    // Iterate through each process to get its name.
+// for (i = 0; i < cProcesses; i++)
+// {
+// if (aProcesses[i] == 0)
+// continue;
+//        // Open process with necessary access rights
+// HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, aProcesses[i]);
+// if (NULL != hProcess)
+// {
+// HMODULE hMod;
+// DWORD cbNeededModule;
+// char szProcessName[MAX_PATH] = { 0 };
+//            // Get a list of all modules in the process.
+// if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeededModule))
+// {
+//                // Get the base name of the first module (usually the executable).
+// GetModuleBaseNameA(hProcess, hMod, szProcessName, sizeof(szProcessName) / sizeof(char));
+// }
+//            // If we got a name, add it to our list
+// if (szProcessName[0] != '\0')
+// {
+// processList << QString::fromLocal8Bit(szProcessName);
+// }
+//            // Release the handle to the process.
+// CloseHandle(hProcess);
+// }
+// }
+//#else
+//    // For non-Windows platforms, you would use different methods.
+//    // For example, on Linux, you might read from /proc/<pid>/comm or use 'ps' command.
+// qDebug() << "This function is designed for Windows. Other OS not implemented.";
+// processList << "Not available on this OS.";
+//#endif
+//    // Sort the list for better readability
+// processList.sort();
+// return processList;
+//}
 
-bool MyUtility::KillRunningProcesses()
+//bool MyUtility::KillRunningProcesses()
+//{
+// QStringList processList;
+//#ifdef Q_OS_WIN
+// DWORD aProcesses[1024], cbNeeded, cProcesses;
+// unsigned int i;
+//    // Get the list of process identifiers.
+// if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded))
+// {
+// LOG_MSG("EnumProcesses failed!");
+// return false;
+// }
+//    // Calculate how many process identifiers were returned.
+// cProcesses = cbNeeded / sizeof(DWORD);
+//    // Iterate through each process to get its name.
+// for (i = 0; i < cProcesses; i++)
+// {
+// if (aProcesses[i] == 0)
+// continue;
+//        // Open process with necessary access rights
+// HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, aProcesses[i]);
+// if (NULL != hProcess)
+// {
+// HMODULE hMod;
+// DWORD cbNeededModule;
+// char szProcessName[MAX_PATH] = { 0 };
+//            // Get a list of all modules in the process.
+// if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeededModule))
+// {
+//                // Get the base name of the first module (usually the executable).
+// GetModuleBaseNameA(hProcess, hMod, szProcessName, sizeof(szProcessName) / sizeof(char));
+// }
+//            // If we got a name, add it to our list
+// if (szProcessName[0] != '\0')
+// {
+// processList << QString::fromLocal8Bit(szProcessName);
+// }
+//            // Release the handle to the process.
+// CloseHandle(hProcess);
+// }
+// }
+//#else
+//    // For non-Windows platforms, you would use different methods.
+//    // For example, on Linux, you might read from /proc/<pid>/comm or use 'ps' command.
+// qDebug() << "This function is designed for Windows. Other OS not implemented.";
+// processList << "Not available on this OS.";
+//#endif
+//    // Sort the list for better readability
+// processList.sort();
+// return true;
+//}
+
+bool RunningProcessesListEx::enableDebugPrivileges()
 {
-    QStringList processList;
-#ifdef Q_OS_WIN
-    DWORD aProcesses[1024], cbNeeded, cProcesses;
-    unsigned int i;
-    // Get the list of process identifiers.
-    if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded))
+    HANDLE hToken;
+    LUID luid;
+    TOKEN_PRIVILEGES tp;
+    // Open the current process token.
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
     {
-        LOG_MSG("EnumProcesses failed!");
         return false;
     }
-    // Calculate how many process identifiers were returned.
-    cProcesses = cbNeeded / sizeof(DWORD);
-    // Iterate through each process to get its name.
-    for (i = 0; i < cProcesses; i++)
+    // Get the LUID for the SeDebugPrivilege.
+    if (!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid))
     {
-        if (aProcesses[i] == 0)
-            continue;
-        // Open process with necessary access rights
-        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, aProcesses[i]);
-        if (NULL != hProcess)
-        {
-            HMODULE hMod;
-            DWORD cbNeededModule;
-            char szProcessName[MAX_PATH] = { 0 };
-            // Get a list of all modules in the process.
-            if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeededModule))
-            {
-                // Get the base name of the first module (usually the executable).
-                GetModuleBaseNameA(hProcess, hMod, szProcessName, sizeof(szProcessName) / sizeof(char));
-            }
-            // If we got a name, add it to our list
-            if (szProcessName[0] != '\0')
-            {
-                processList << QString::fromLocal8Bit(szProcessName);
-            }
-            // Release the handle to the process.
-            CloseHandle(hProcess);
-        }
+        CloseHandle(hToken);
+        return false;
     }
-#else
-    // For non-Windows platforms, you would use different methods.
-    // For example, on Linux, you might read from /proc/<pid>/comm or use 'ps' command.
-    qDebug() << "This function is designed for Windows. Other OS not implemented.";
-    processList << "Not available on this OS.";
-#endif
-    // Sort the list for better readability
-    processList.sort();
+    tp.PrivilegeCount = 1;
+    tp.Privileges[0].Luid = luid;
+    tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+    // Enable the privilege.
+    if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), NULL, NULL))
+    {
+        CloseHandle(hToken);
+        return false;
+    }
+    CloseHandle(hToken);
     return true;
 }
 
@@ -213,6 +259,174 @@ bool RunningProcessesListEx::isRunning(QString sProcessName)
     return bFound;
 }
 
+// Recursive function to terminate a process and its children
+bool RunningProcessesListEx::killProcessTree(DWORD parentPid)
+{
+    bool terminationSuccessful = true;
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE)
+    {
+        std::cerr << "Failed to get process snapshot. Error code: " << GetLastError() << std::endl;
+        return false;
+    }
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+    if (!Process32First(hSnapshot, &pe32))
+    {
+        CloseHandle(hSnapshot);
+        return false;
+    }
+    do
+    {
+        if (pe32.th32ParentProcessID == parentPid)
+        {
+            // Found a child process, so kill its entire tree first.
+            if (!killProcessTree(pe32.th32ProcessID))
+            {
+                terminationSuccessful = false;
+            }
+        }
+    }
+    while (Process32Next(hSnapshot, &pe32));
+    CloseHandle(hSnapshot);
+    // Now terminate the parent process itself.
+    if (parentPid != 0)
+    {
+        HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, parentPid);
+        if (hProcess != NULL)
+        {
+            if (!TerminateProcess(hProcess, 1))
+            {
+                std::cerr << "Failed to terminate process with PID " << parentPid
+                    << ". Error code: " << GetLastError() << std::endl;
+                terminationSuccessful = false;
+            }
+            else
+            {
+                std::cout << "Process with PID " << parentPid << " terminated successfully." << std::endl;
+            }
+            CloseHandle(hProcess);
+        }
+        else
+        {
+            std::cerr << "Failed to open process with PID " << parentPid
+                << ". Error code: " << GetLastError() << std::endl;
+            terminationSuccessful = false;
+        }
+    }
+    return terminationSuccessful;
+}
+
+// Main function to start the termination
+bool RunningProcessesListEx::killProcessAndChildsByNameEx(const std::string& processName)
+{
+    QString qsProcessName, qsCurrentProcessName;
+    qsProcessName = QString::fromStdString (processName);
+    qsProcessName=qsProcessName.toUpper ();
+    bool overallSuccess = false;
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE)
+    {
+        std::cerr << "Failed to get process snapshot. Error code: " << GetLastError() << std::endl;
+        return false;
+    }
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+    if (!Process32First(hSnapshot, &pe32))
+    {
+        CloseHandle(hSnapshot);
+        return false;
+    }
+    do
+    {
+        std::string currentProcessName = WcharToString(pe32.szExeFile);
+        qsCurrentProcessName = QString::fromStdString (currentProcessName);
+        qsCurrentProcessName=qsCurrentProcessName.toUpper ();
+        // if (currentProcessName == processName) {
+        if (qsCurrentProcessName == qsProcessName)
+        {
+            LOG_MSG( "Found process to kill: " << QString::fromStdString (processName) << " with PID: " << pe32.th32ProcessID);
+            if (killProcessTree(pe32.th32ProcessID))
+            {
+                overallSuccess = true;
+            }
+        }
+    }
+    while (Process32Next(hSnapshot, &pe32));
+    CloseHandle(hSnapshot);
+    return overallSuccess;
+}
+
+bool RunningProcessesListEx::killProcessAndChildsByNameEx(QString sTargetName)
+{
+    std::string wideName = sTargetName.toStdString();
+    return killProcessAndChildsByNameEx (wideName );
+}
+
+bool RunningProcessesListEx::killProcessAndChildsByName(const std::string& processName)
+{
+    bool terminationSuccessful = false;
+    // Get a snapshot of all running processes
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE)
+    {
+        std::cerr << "Failed to get process snapshot. Error code: " << GetLastError() << std::endl;
+        return false;
+    }
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+    // Get the first process from the snapshot
+    if (!Process32First(hSnapshot, &pe32))
+    {
+        std::cerr << "Failed to get first process. Error code: " << GetLastError() << std::endl;
+        CloseHandle(hSnapshot);
+        return false;
+    }
+    // Loop through all processes
+    do
+    {
+        // Convert the process name from wide-char to a standard string
+        // std::string currentProcessName(pe32.szExeFile);
+        // Correctly convert the wide character string to a standard string
+        std::string currentProcessName = WcharToString (pe32.szExeFile);
+        // Compare the names
+        LOG_MSG(QString::fromStdString (currentProcessName) + " " + QString::fromStdString (processName));
+        if (currentProcessName == processName)
+        {
+            std::cout << "Found process: " << processName << " with PID: " << pe32.th32ProcessID << std::endl;
+            // Open the process with the necessary rights to terminate it
+            HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pe32.th32ProcessID);
+            if (hProcess == NULL)
+            {
+                std::cerr << "Failed to open process. Error code: " << GetLastError() << std::endl;
+                continue; // Continue to the next process
+            }
+            // Terminate the process
+            if (TerminateProcess(hProcess, 1))
+            {
+                std::cout << "Process with PID " << pe32.th32ProcessID << " terminated successfully." << std::endl;
+                terminationSuccessful = true;
+            }
+            else
+            {
+                std::cerr << "Failed to terminate process. Error code: " << GetLastError() << std::endl;
+            }
+            // Always close the handle
+            CloseHandle(hProcess);
+        }
+    }
+    while (Process32Next(hSnapshot, &pe32));
+    // Close the snapshot handle when you're done
+    CloseHandle(hSnapshot);
+    return terminationSuccessful;
+}
+
+bool RunningProcessesListEx::killProcessAndChildsByName(QString sTargetName)
+{
+    std::string wideName = sTargetName.toStdString();
+    return killProcessAndChildsByName (wideName );
+}
+
 bool RunningProcessesListEx::killProcessByName(const std::wstring& targetName)
 {
     DWORD processIds[1024], bytesReturned;
@@ -225,7 +439,8 @@ bool RunningProcessesListEx::killProcessByName(const std::wstring& targetName)
     {
         DWORD pid = processIds[i];
         if (pid == 0) continue;
-        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_TERMINATE, FALSE, pid);
+        //HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_TERMINATE, FALSE, pid);
+        HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
         if (!hProcess) continue;
         HMODULE hMod;
         DWORD cbNeeded;
@@ -247,6 +462,8 @@ bool RunningProcessesListEx::killProcessByName(const std::wstring& targetName)
                     else
                     {
                         LOG_MSG( "Failed to terminate process.");
+                        CloseHandle(hProcess);
+                        return false;
                     }
                 }
             }
