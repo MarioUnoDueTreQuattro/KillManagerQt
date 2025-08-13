@@ -458,7 +458,7 @@ void MainWindow::deleteSelectedEnabledItem()
         ui->listWidgetEnabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Removed: " + currentItem->text(), 10000);
         m_ApplicationItemsList.deleteApplicationItem(currentItem->text());
-        LOG_MSG( "m_ApplicationItemsList.size=" + m_ApplicationItemsList.size());
+        LOG_MSG( "m_ApplicationItemsList.size= " + m_ApplicationItemsList.size());
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
@@ -481,7 +481,7 @@ void MainWindow::deleteSelectedDisabledItem()
         ui->listWidgetDisabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Removed: " + currentItem->text(), 10000);
         m_ApplicationItemsList.deleteApplicationItem(currentItem->text());
-        LOG_MSG( "m_ApplicationItemsList.size=" + m_ApplicationItemsList.size());
+        LOG_MSG( "m_ApplicationItemsList.size= " + m_ApplicationItemsList.size());
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
@@ -604,7 +604,7 @@ void MainWindow::showAddExeDialog()
                 m_ApplicationItemsList.append(newAppItem);
                 LOG_MSG("m_ApplicationItemsList ADDED " + receivedText);
             }
-            LOG_MSG("m_ApplicationItemsList.size=" + m_ApplicationItemsList.size());
+            LOG_MSG("m_ApplicationItemsList.size= " + m_ApplicationItemsList.size());
             //QListWidgetItem* newitem = new QListWidgetItem(receivedText, ui->listWidgetEnabled);
             //ui->listWidgetEnabled->addItem(newitem);
             LOG_MSG("Dialog accepted. Received: " + receivedText);
@@ -827,7 +827,7 @@ bool MainWindow::writeListToFile()
     // automatically closed when the QFile object is destroyed.
     file.close();
     universalPath1 = QDir::toNativeSeparators(universalPath1);
-    LOG_MSG("Batch file successfully written to:" + universalPath1);
+    LOG_MSG("Batch file successfully written to: " + universalPath1);
     ui->statusBar->showMessage("Batch file successfully written to: " + universalPath1, 10000);
     connectTimer ();
     return true;
@@ -929,20 +929,20 @@ bool MainWindow::backupBatchFile()
     universalPath1 = fileInfo.absolutePath();
     QString destinationPath = fileInfo.baseName();
     QDateTime current = QDateTime::currentDateTime();
-    LOG_MSG("Current Date and Time:" + current.toString());
+    LOG_MSG("Current Date and Time: " + current.toString());
     // format it
     QString formatted = current.toString("yyyyMMdd_hhmmss");
     destinationPath = destinationPath + "_" + formatted;
-    LOG_MSG("Formatted:" + destinationPath);
+    LOG_MSG("Formatted: " + destinationPath);
     destinationPath = m_sBackupPath + "\\" + destinationPath + ".bat";
-    LOG_MSG("destinationPath:" + destinationPath);
+    LOG_MSG("destinationPath: " + destinationPath);
     // 2. Check if the destination file exists and remove it if it does (to allow overwriting)
     if (QFile::exists(destinationPath))
     {
         LOG_MSG( "Destination file already exists. Removing...");
         if (!QFile::remove(destinationPath))
         {
-            LOG_MSG("Failed to remove existing destination file:" + destinationPath);
+            LOG_MSG("Failed to remove existing destination file: " + destinationPath);
             return false;
         }
     }
