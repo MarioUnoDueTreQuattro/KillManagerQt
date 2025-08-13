@@ -13,7 +13,7 @@ class Scheduler : public QObject
     Q_OBJECT
 public:
     explicit Scheduler(QObject *parent = nullptr);
-
+    ~Scheduler();
 public slots:
     void checkForExecution();
 
@@ -21,9 +21,9 @@ private:
     void executeProgram();
     bool shouldExecute();
 
-    QProcess *process;
-    QDateTime lastExecutionTime;
-    QTimer *timer;
+    QProcess *m_ZipProcess;
+    QDateTime m_LastExecutionTime;
+    QTimer *m_ZipTimer;
 signals:
 };
 
