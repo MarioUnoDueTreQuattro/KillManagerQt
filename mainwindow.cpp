@@ -18,34 +18,34 @@
 //#include "SimpleZipper/src/SimpleZipper.h"
 
 //void createTestFile(const QString& path) {
-//    QFile file(path);
-//    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-//        QTextStream out(&file);
-//        out << "Hello from SimpleZipper!";
-//        file.close();
-//    } else {
-//        qWarning() << "Failed to create test file.";
-//    }
+// QFile file(path);
+// if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+// QTextStream out(&file);
+// out << "Hello from SimpleZipper!";
+// file.close();
+// } else {
+// qWarning() << "Failed to create test file.";
+// }
 //}
 
 //void zipTestFile(const QString& inputPath, const QString& outputPath) {
-//    if (SimpleZipper::zipFile(inputPath, outputPath)) {
-//        qDebug() << "File zipped successfully.";
-//    } else {
-//        qWarning() << "Zipping failed.";
-//    }
+// if (SimpleZipper::zipFile(inputPath, outputPath)) {
+// qDebug() << "File zipped successfully.";
+// } else {
+// qWarning() << "Zipping failed.";
+// }
 //}
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-//    QString testFile = "test.txt";
-//     QString zipFile = "test.zip";
-//     createTestFile(testFile);
-//     zipTestFile(testFile, zipFile);
-     //unzipTestFile(zipFile, unzipFolder);
-     qApp->setStyleSheet( "QStatusBar::item { border: 0px}" ) ;
+    // QString testFile = "test.txt";
+    // QString zipFile = "test.zip";
+    // createTestFile(testFile);
+    // zipTestFile(testFile, zipFile);
+    //unzipTestFile(zipFile, unzipFolder);
+    qApp->setStyleSheet( "QStatusBar::item { border: 0px}" ) ;
     this->setWindowIcon(QIcon(":/icons/img/KillManager.ico"));       // Use the path defined in .qrc
     m_ApplicationItemsList.clear();
     ui->setupUi(this);
@@ -100,7 +100,10 @@ MainWindow::MainWindow(QWidget* parent)
     //connect(ui->actionConfigure_app, SIGNAL(triggered(QAction*)), this, SLOT(menuConfigure()));
     timer = new QTimer(this);
     connectTimer ();
-    timer->start(m_iRefreshRate);  // ogni secondo
+    timer->start(m_iRefreshRate);
+    // Connect the signal from the scheduler to our slot in MainApp.
+    connect(&m_scheduler, &Scheduler::logCompressionExecuted, this, &MainWindow::onLogCompressionExecuted); //&MainWindow::handleProgramExecuted);
+    connect(&m_scheduler, &Scheduler::logCompressionChecked, this, &MainWindow::onLogCompressionChecked); //&MainWindow::handleProgramExecuted);
 }
 
 MainWindow::~MainWindow()
@@ -121,6 +124,18 @@ void MainWindow::showEvent(QShowEvent *event)
     {
         QTimer::singleShot(200, this, SLOT(firstTimeConfiguration()) );
     }
+}
+
+void MainWindow::onLogCompressionExecuted()
+{
+    //LOG_MSG("");
+    ui->statusBar->showMessage ("Old log files compressed in ZIP format",30000);
+}
+
+void MainWindow::onLogCompressionChecked()
+{
+    //LOG_MSG("");
+    ui->statusBar->showMessage ("Checked if it's time to compress old log files.",10000);
 }
 
 void MainWindow::firstTimeConfiguration()
@@ -169,7 +184,7 @@ void MainWindow::updateSettings()
     QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     documentsPath = QDir::toNativeSeparators (documentsPath);
     QSettings settings;
-    m_sLogFileName= settings.value("LogFileName", "").toString();
+    m_sLogFileName = settings.value("LogFileName", "").toString();
     QString sKillFile = settings.value("Path").toString();
     //qDebug() << "Read string from registry:" << sKillFile;
     if (sKillFile == "")
@@ -811,6 +826,7 @@ bool MainWindow::writeListToFile()
     connectTimer ();
     return true;
 }
+
 void MainWindow::on_listWidgetEnabled_itemClicked(QListWidgetItem * item)
 {
     if (item)         // Always check if the item pointer is valid
@@ -1300,9 +1316,9 @@ void MainWindow::on_actionExecute_in_terminal_window_triggered()
 
 void MainWindow::on_actionOpen_log_file_in_external_editor_triggered()
 {
-//    QString filePath = QCoreApplication::applicationDirPath();
-//    filePath = QDir::toNativeSeparators (filePath);
-//    filePath.append ("\\KillManagerQt.log");
+    // QString filePath = QCoreApplication::applicationDirPath();
+    // filePath = QDir::toNativeSeparators (filePath);
+    // filePath.append ("\\KillManagerQt.log");
     QSettings settings;
     QProcess process;
     QString program = "notepad.exe";

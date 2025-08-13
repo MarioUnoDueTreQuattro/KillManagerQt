@@ -16,15 +16,16 @@ public:
     ~Scheduler();
 public slots:
     void checkForExecution();
-
 private:
     void executeProgram();
     bool shouldExecute();
-
     QProcess *m_ZipProcess;
     QDateTime m_LastExecutionTime;
     QTimer *m_ZipTimer;
+    int m_iInitialDelay;
 signals:
+    void logCompressionExecuted();
+    void logCompressionChecked();
 };
 
 #endif // SCHEDULER_H

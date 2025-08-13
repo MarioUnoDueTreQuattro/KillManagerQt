@@ -6,15 +6,20 @@
 Scheduler::Scheduler(QObject *parent)
     : QObject(parent)
 {
+    m_iInitialDelay = 10000;
     QSettings settings;
-    m_LastExecutionTime = settings.value("LogCompressionLastExecutionTime").toDateTime();
-    LOG_MSG("Last execution time loaded:" << m_LastExecutionTime);
-    m_ZipProcess = new QProcess(this);
-    m_ZipTimer = new QTimer(this);
-    connect(m_ZipTimer, &QTimer::timeout, this, &Scheduler::checkForExecution);
-    //timer->start(1000 * 60 * 60); // 1 hour in milliseconds
-    // We start the timer with an initial delay of 10 seconds, then repeat every hour.
-    m_ZipTimer->start(1000 * 10); // 10 seconds in milliseconds for the first shot
+    bool bLogIsEnabled = settings.value("Dialog/UseLogFile", false).toBool ();
+    if (bLogIsEnabled)
+    {
+        m_LastExecutionTime = settings.value("LogCompressionLastExecutionTime").toDateTime();
+        LOG_MSG("Last backup of log files time:" << m_LastExecutionTime);
+        m_ZipProcess = new QProcess(this);
+        m_ZipTimer = new QTimer(this);
+        connect(m_ZipTimer, &QTimer::timeout, this, &Scheduler::checkForExecution);
+        //timer->start(1000 * 60 * 60); // 1 hour in milliseconds
+        // We start the timer with an initial delay of 10 seconds, then repeat every hour.
+        m_ZipTimer->start(m_iInitialDelay); // 10 seconds in milliseconds for the first shot
+    }
 }
 
 Scheduler::~Scheduler()
@@ -28,11 +33,12 @@ void Scheduler::checkForExecution()
 {
     // The first time this is called, we want to reset the timer for the
     // periodic check.
-    if (m_ZipTimer->interval() != (1000 * 60 * 60))
+    emit logCompressionChecked();
+    if (m_ZipTimer->interval() == (m_iInitialDelay))
     {
         m_ZipTimer->stop();
         m_ZipTimer->start(1000 * 60 * 60 * 6); // Set to 6 hours
-        LOG_MSG("Timer to execute KillManagerQtZip.exe: interval changed to 6 hours.");
+        //LOG_MSG("Timer to execute KillManagerQtZip.exe: interval changed to 6 hours.");
     }
     if (shouldExecute())
     {
@@ -69,6 +75,8 @@ void Scheduler::executeProgram()
         QSettings settings;
         m_LastExecutionTime = QDateTime::currentDateTime();
         settings.setValue("LogCompressionLastExecutionTime", m_LastExecutionTime);
+        // Emit the signal
+        emit logCompressionExecuted();
     }
     else
     {

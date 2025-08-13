@@ -97,6 +97,8 @@ public slots:
     void loadListFromFile();
     bool writeListToFile();
 private slots:
+    void onLogCompressionExecuted();
+    void onLogCompressionChecked();
     void readStdOutput();
     void readStdError();
     void onProcessFinished(int, QProcess::ExitStatus );
