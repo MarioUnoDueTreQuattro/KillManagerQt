@@ -15,7 +15,7 @@ Dialog::Dialog(QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::Dialog)
 {
-    this->setWindowIcon(QIcon(":/icons/img/KillManager.ico")); // Use the path defined in .qrc
+    //this->setWindowIcon(QIcon(":/icons/img/KillManager.ico")); // Use the path defined in .qrc
     ui->setupUi(this);
     readSettings();
     // QApplication* currentApp = qApp;

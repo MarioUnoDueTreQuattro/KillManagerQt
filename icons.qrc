@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/icons">
-        <file>1298219997_gnome-panel-force-quit.ico</file>
         <file>img/icons8-rotate-right-48.png</file>
         <file>img/icons8-add-48.png</file>
         <file>img/icons8-save-48.png</file>
@@ -15,7 +14,6 @@
         <file>img/qt-logo.png</file>
         <file>img/icons8-pencil-drawing-48.png</file>
         <file>img/KillManager.png</file>
-        <file>img/KillManager.ico</file>
         <file>img/icons8-terminal-48.png</file>
         <file>img/icons8-history-folder-48.png</file>
         <file>img/kill.png</file>

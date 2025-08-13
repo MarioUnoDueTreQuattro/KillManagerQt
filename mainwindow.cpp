@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget* parent)
     // zipTestFile(testFile, zipFile);
     //unzipTestFile(zipFile, unzipFolder);
     qApp->setStyleSheet( "QStatusBar::item { border: 0px}" ) ;
-    this->setWindowIcon(QIcon(":/icons/img/KillManager.ico"));       // Use the path defined in .qrc
+    this->setWindowIcon(QIcon(":/icons/img/KillManager.png"));       // Use the path defined in .qrc
     m_ApplicationItemsList.clear();
     ui->setupUi(this);
     m_statusBarMovie = new QMovie(":/icons/img/AGau.gif", QByteArray(), this);

@@ -42,7 +42,6 @@ RC_FILE = app.rc
 RESOURCES += \
     icons.qrc
 
-
 VERSION = 1.0.0.8
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 win32:LIBS += -lpsapi
