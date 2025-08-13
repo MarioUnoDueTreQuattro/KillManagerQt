@@ -390,7 +390,7 @@ bool RunningProcessesListEx::killProcessAndChildsByName(const std::string& proce
         // Correctly convert the wide character string to a standard string
         std::string currentProcessName = WcharToString (pe32.szExeFile);
         // Compare the names
-        LOG_MSG(QString::fromStdString (currentProcessName) + " " + QString::fromStdString (processName));
+//        LOG_MSG(QString::fromStdString (currentProcessName) + " " + QString::fromStdString (processName));
         if (currentProcessName == processName)
         {
             std::cout << "Found process: " << processName << " with PID: " << pe32.th32ProcessID << std::endl;

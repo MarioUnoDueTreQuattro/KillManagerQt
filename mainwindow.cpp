@@ -397,7 +397,7 @@ void MainWindow::killSelectedDisabledItem()
     QListWidgetItem* currentItem = ui->listWidgetDisabled->currentItem();
     if (currentItem)
     {
-        bKilled = m_ProcessList.killProcessAndChildsByName (currentItem->text());
+        bKilled = m_ProcessList.killProcessAndChildsByNameEx (currentItem->text());
         ui->statusBar->showMessage("Terminated: " + currentItem->text(), 10000);
     }
     else
@@ -412,7 +412,7 @@ void MainWindow::killSelectedEnabledItem()
     QListWidgetItem* currentItem = ui->listWidgetEnabled->currentItem();
     if (currentItem)
     {
-        bKilled = m_ProcessList.killProcessAndChildsByName (currentItem->text());
+        bKilled = m_ProcessList.killProcessAndChildsByNameEx (currentItem->text());
         ui->statusBar->showMessage("Terminated: " + currentItem->text(), 10000);
     }
     else
