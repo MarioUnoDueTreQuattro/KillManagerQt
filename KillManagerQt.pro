@@ -12,6 +12,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets winextras
 
 TARGET = KillManagerQt
 TEMPLATE = app
+win32:RC_ICONS = KillManager.ico
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -35,11 +36,12 @@ FORMS    += mainwindow.ui \
     addexedialog.ui
 
 #RC_FILE = KillManagerQt.manifest
+
 RC_FILE = app.rc
+
 RESOURCES += \
     icons.qrc
 
-win32:RC_ICONS = KillManager.ico
 
 VERSION = 1.0.0.8
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
