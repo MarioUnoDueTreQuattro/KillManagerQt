@@ -3,8 +3,10 @@
 
 #include "scheduler.h"
 #include "utility.h"
+#include "myqlistwidget.h"
+#include "applicationitemslist.h"
+#include "processitemslist.h"
 #include "addexedialog.h"
-//#include "applicationitem.h"
 #include "dialog.h"
 #include <QList>
 #include <QListWidgetItem>
@@ -16,10 +18,6 @@
 #include <QLabel>
 #include <QMovie>
 #include <QToolTip>
-//#include "runningprocesseslist.h"
-#include "myqlistwidget.h"
-#include "applicationitemslist.h"
-#include "processitemslist.h"
 
 // Include Windows API headers
 #ifdef Q_OS_WIN
