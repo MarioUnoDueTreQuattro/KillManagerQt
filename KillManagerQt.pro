@@ -20,6 +20,7 @@ SOURCES += main.cpp\
     addexedialog.cpp \
     myqlistwidget.cpp \
     applicationitemslist.cpp \
+    processitemslist.cpp \
     utility.cpp \
     scheduler.cpp
 
@@ -28,6 +29,7 @@ HEADERS  += mainwindow.h \
     addexedialog.h \
     myqlistwidget.h \
     applicationitemslist.h \
+    processitemslist.h \
     utility.h \
     scheduler.h
 

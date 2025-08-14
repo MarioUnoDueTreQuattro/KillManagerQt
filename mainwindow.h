@@ -19,6 +19,7 @@
 //#include "runningprocesseslist.h"
 #include "myqlistwidget.h"
 #include "applicationitemslist.h"
+#include "processitemslist.h"
 
 // Include Windows API headers
 #ifdef Q_OS_WIN
@@ -45,7 +46,6 @@ private:
     bool listContainsItemText(MyQListWidget*, const QString & );
     void updateSettings();
     void deleteOldBackups();
-    RunningProcessesListEx m_ProcessList;
     QFont m_Font;
     QBrush m_TextBrush;
     QTimer *timer;
@@ -60,6 +60,7 @@ private:
     // QString m_sAppName;
     // QString m_sAppCompany;
     //QList<ApplicationItem> m_ApplicationItemsList;
+    RunningProcessesListEx m_ProcessList;
     ApplicationItemsList m_ApplicationItemsList;
     QStringList getRunningProcesses();
     bool KillRunningProcesses();

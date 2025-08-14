@@ -46,7 +46,7 @@ void Scheduler::checkForExecution()
     }
     else
     {
-        LOG_MSG("It's not yet time to execute backup log files");
+        LOG_MSG("It's not yet time to backup log files");
     }
 }
 

@@ -10,33 +10,33 @@ ApplicationItemsList::ApplicationItemsList()
 
 void ApplicationItemsList::clear()
 {
-    m_list.clear ();
+    m_ProcessItemsList.clear ();
 }
 
 void ApplicationItemsList::removeAt(int iIndex)
 {
-    m_list.removeAt (iIndex);
+    m_ProcessItemsList.removeAt (iIndex);
 }
 
 int ApplicationItemsList::size() const
 {
-    return m_list.size ();
+    return m_ProcessItemsList.size ();
 }
 
 int ApplicationItemsList::count() const
 {
-    return m_list.count ();
+    return m_ProcessItemsList.count ();
 
 }
 
 ApplicationItem* ApplicationItemsList::at(int i)
 {
-    return &m_list[i];
+    return &m_ProcessItemsList[i];
 }
 
 void ApplicationItemsList::append(ApplicationItem item)
 {
-    m_list.append (item);
+    m_ProcessItemsList.append (item);
 }
 
 ApplicationItem *ApplicationItemsList::findApplicationItem(QString sFound)

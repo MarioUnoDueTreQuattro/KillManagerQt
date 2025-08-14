@@ -38,7 +38,7 @@ public:
     bool deleteApplicationItem(QString);
     bool moveApplicationItem(QString, bool );
 private:
-    QList<ApplicationItem> m_list;
+    QList<ApplicationItem> m_ProcessItemsList;
 };
 
 
