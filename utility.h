@@ -147,6 +147,7 @@ public:
     int debugProcessesMemory();
     QIcon getProcessIcon(std::string, bool);
     HICON getIconFromExecutable(const std::string& executablePath);
+    bool processIsService(DWORD processId);
 
 private:
     QStringList processList;

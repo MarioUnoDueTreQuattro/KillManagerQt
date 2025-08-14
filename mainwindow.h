@@ -41,8 +41,8 @@ public:
 private:
     Scheduler m_scheduler;
     QLabel *m_StatusBarLabel;
-     QMovie *m_statusBarMovie;
-     bool listContainsItemText(MyQListWidget*, const QString & );
+    QMovie *m_statusBarMovie;
+    bool listContainsItemText(MyQListWidget*, const QString & );
     void updateSettings();
     void deleteOldBackups();
     RunningProcessesListEx m_ProcessList;
@@ -88,7 +88,7 @@ private:
     int m_iRefreshRate;
 protected:
     void closeEvent(QCloseEvent* event) override;
-    void showEvent(QShowEvent *event);
+    void showEvent(QShowEvent *event) override;
 public slots:
     void timerUpdate();
     void menuConfigure();

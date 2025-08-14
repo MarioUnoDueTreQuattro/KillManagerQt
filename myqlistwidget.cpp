@@ -7,6 +7,7 @@
 
 MyQListWidget::MyQListWidget(QWidget *)
 {
+    setAlternatingRowColors(true);
     this->setDragDropMode(QAbstractItemView::InternalMove);
     this->setDefaultDropAction(Qt::MoveAction);
     this->setDragEnabled(true);

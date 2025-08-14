@@ -206,7 +206,7 @@ void MainWindow::updateSettings()
     //return sKillFile;
 }
 
-bool compareByLastModified(const QFileInfo &a, const QFileInfo &b)
+compareByLastModified(const QFileInfo &a, const QFileInfo &b)
 {
     return a.lastModified() > b.lastModified(); // Newest first
 }
@@ -994,6 +994,7 @@ void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemTe
         //qDebug() << __FUNCTION__ << newItemText;
         if (bFound)
         {
+        // TODO Check if is a service
             QListWidgetItem* item = new QListWidgetItem(newItemText);
             item->setFont(m_Font);
             item->setForeground (m_TextBrush);

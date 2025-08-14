@@ -222,6 +222,10 @@ void RunningProcessesListEx::populateProcessList()
     {
         do
         {
+            // NOTE bIsService
+//            bool bIsService;
+//            bIsService = processIsService(pe32.th32ProcessID);
+//            if (bIsService) qDebug() << QString::fromWCharArray(pe32.szExeFile) << " SERVICE";
             // Convert the wide-character string (wchar_t*) to QString
             QString processName = QString::fromWCharArray(pe32.szExeFile);
             // Add the process name to the QListWidget
@@ -322,7 +326,7 @@ bool RunningProcessesListEx::killProcessAndChildsByNameEx(const std::string& pro
 {
     QString qsProcessName, qsCurrentProcessName;
     qsProcessName = QString::fromStdString (processName);
-    qsProcessName=qsProcessName.toUpper ();
+    qsProcessName = qsProcessName.toUpper ();
     bool overallSuccess = false;
     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hSnapshot == INVALID_HANDLE_VALUE)
@@ -341,7 +345,7 @@ bool RunningProcessesListEx::killProcessAndChildsByNameEx(const std::string& pro
     {
         std::string currentProcessName = WcharToString(pe32.szExeFile);
         qsCurrentProcessName = QString::fromStdString (currentProcessName);
-        qsCurrentProcessName=qsCurrentProcessName.toUpper ();
+        qsCurrentProcessName = qsCurrentProcessName.toUpper ();
         // if (currentProcessName == processName) {
         if (qsCurrentProcessName == qsProcessName)
         {
@@ -390,7 +394,7 @@ bool RunningProcessesListEx::killProcessAndChildsByName(const std::string& proce
         // Correctly convert the wide character string to a standard string
         std::string currentProcessName = WcharToString (pe32.szExeFile);
         // Compare the names
-//        LOG_MSG(QString::fromStdString (currentProcessName) + " " + QString::fromStdString (processName));
+        // LOG_MSG(QString::fromStdString (currentProcessName) + " " + QString::fromStdString (processName));
         if (currentProcessName == processName)
         {
             std::cout << "Found process: " << processName << " with PID: " << pe32.th32ProcessID << std::endl;
@@ -593,6 +597,22 @@ int RunningProcessesListEx::debugProcessesMemory()
         }
     }
     return 0;
+}
+
+bool RunningProcessesListEx::processIsService(DWORD processId)
+{
+    DWORD sessionId;
+    // Questa funzione ottiene l'ID della sessione per un dato PID.
+    // I servizi di Windows, per la maggior parte, girano nella sessione 0.
+    // Le applicazioni utente girano in sessioni con ID maggiore di 0.
+    if (ProcessIdToSessionId(processId, &sessionId))
+    {
+        if (sessionId == 0)
+        {
+            return true; // Molto probabile che sia un servizio
+        }
+    }
+    return false; // Applicazione utente o errore
 }
 
 QIcon RunningProcessesListEx::getProcessIcon( std::string sProcessPath, bool bIsFullPath)
