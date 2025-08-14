@@ -128,6 +128,7 @@ void MainWindow::showEvent(QShowEvent *event)
     {
         QTimer::singleShot(200, this, SLOT(firstTimeConfiguration()) );
     }
+    QMainWindow::showEvent(event);       // Call the base class's showEvent
 }
 
 void MainWindow::onLogCompressionExecuted()
