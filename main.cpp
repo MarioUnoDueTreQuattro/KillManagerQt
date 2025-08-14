@@ -46,7 +46,7 @@ void myCustomMessageHandler(QtMsgType type, const QMessageLogContext &context, c
     //formattedMessage += QString("%1 (%2:%3)").arg(msg).arg(context.file).arg(context.line);
     //formattedMessage +=QString("%1 (%2:%3)").arg(msg).arg(__FILE__).arg(__LINE__);
     // 2. Scrittura del messaggio sul file di log
-    QString logFilePath = "KillManagerQt.log";
+    //QString logFilePath = "KillManagerQt.log";
     // Se il file di log non è aperto, non fare nulla
     if (!logFile || !logFile->isOpen())
         return;
