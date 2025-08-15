@@ -38,7 +38,7 @@
 //}
 
 // Function to convert WCHAR* to std::string
-std::string wideCharToString(const WCHAR* wideString)
+std::string RunningProcessesListEx::wideCharToString(const WCHAR* wideString)
 {
     if (wideString == nullptr)
     {
@@ -55,7 +55,7 @@ std::string wideCharToString(const WCHAR* wideString)
 }
 
 // Funzione per convertire una stringa di caratteri wide (WCHAR) in una stringa standard (char)
-std::string WcharToString(const WCHAR* wstr)
+std::string RunningProcessesListEx::WcharToString(const WCHAR* wstr)
 {
     std::string str;
     int size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, nullptr, 0, nullptr, nullptr);

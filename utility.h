@@ -151,6 +151,8 @@ public:
 
 private:
     QStringList processList;
+    std::string WcharToString(const WCHAR* wstr);
+    std::string wideCharToString(const WCHAR* wideString);
 signals:
 
 public slots:

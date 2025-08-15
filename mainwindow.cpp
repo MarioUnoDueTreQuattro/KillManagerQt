@@ -998,10 +998,6 @@ void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemTe
         //qDebug() << __FUNCTION__ << newItemText;
         if (bFound)
         {
-            // TODO Check if is a service
-            // int iPos=m_ProcessListEx.findApplicationItemIndex (newItemText);
-            //iPos=m_ProcessListEx.count ();
-            //if (m_ProcessListEx.processIsService (iPos)) qDebug() << newItemText << " "<< "SERVICE";
             QListWidgetItem* item = new QListWidgetItem(newItemText);
             bool bIsService = m_ProcessListEx.processIsService (newItemText);
             if (bIsService)

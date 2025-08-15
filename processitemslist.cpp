@@ -5,7 +5,7 @@
 
 // TODO Rename WcharToString2 to WcharToString
 // Funzione per convertire una stringa di caratteri wide (WCHAR) in una stringa standard (char)
-std::string WcharToString2(const WCHAR* wstr)
+std::string ProcessItemsList::WcharToString(const WCHAR* wstr)
 {
     std::string str;
     int size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, nullptr, 0, nullptr, nullptr);
@@ -21,6 +21,71 @@ std::string WcharToString2(const WCHAR* wstr)
 ProcessItemsList::ProcessItemsList(QObject *parent) : QObject(parent)
 {
     m_ProcessList.clear();
+}
+
+//// Struttura per passare i dati alla callback di EnumWindows
+//struct WindowInfo
+//{
+//    DWORD processId;
+//    QString windowTitle;
+//};
+
+bool ProcessItemsList::g_windowIsVisible = false;
+
+// La callback viene eseguita per ogni finestra
+BOOL CALLBACK ProcessItemsList::EnumWindowsCallback2(HWND hwnd, LPARAM lParam)
+{
+    ProcessItemsList::WindowInfo* info = reinterpret_cast<ProcessItemsList::WindowInfo *>(lParam);
+    DWORD windowProcessId;
+    GetWindowThreadProcessId(hwnd, &windowProcessId);
+    // Controlla se i PID corrispondono e se la finestra è visibile.
+    if (info->processId == windowProcessId && IsWindowVisible(hwnd))
+    {
+        // Se i PID corrispondono, otteniamo il titolo.
+        TCHAR windowTitle[256];
+        GetWindowText(hwnd, windowTitle, sizeof(windowTitle) / sizeof(TCHAR));
+        info->windowTitle = QString::fromWCharArray(windowTitle);
+        return FALSE; // Fermiamo l'enumerazione.
+    }
+    return TRUE; // Continua l'enumerazione.
+}
+
+// Variabile per memorizzare il risultato della ricerca.
+//static bool g_windowIsVisible = false;
+
+// Callback che viene eseguita per ogni finestra di primo livello.
+BOOL CALLBACK ProcessItemsList::EnumWindowsCallback(HWND hwnd, LPARAM lParam)
+{
+    DWORD currentProcessId = *reinterpret_cast<DWORD *>(lParam);
+    DWORD windowProcessId;
+    // Ottiene il PID del processo che possiede la finestra.
+    GetWindowThreadProcessId(hwnd, &windowProcessId);
+    // Controlla se i PID corrispondono e se la finestra è visibile.
+    if (currentProcessId == windowProcessId && IsWindowVisible(hwnd))
+    {
+        g_windowIsVisible = true;
+        return FALSE; // Ferma l'enumerazione non appena la finestra viene trovata.
+    }
+    return TRUE; // Continua l'enumerazione.
+}
+
+// Funzione helper che restituisce il titolo della finestra
+QString ProcessItemsList::getWindowTitle(DWORD processId)
+{
+    ProcessItemsList::WindowInfo info;
+    info.processId = processId;
+    info.windowTitle = ""; // Inizializziamo il titolo a una stringa vuota.
+    // Enumera le finestre e popola la nostra struttura
+    EnumWindows(EnumWindowsCallback2, reinterpret_cast<LPARAM>(&info));
+    return info.windowTitle;
+}
+
+// Funzione helper per verificare se un processo ha una finestra visibile.
+bool ProcessItemsList::isProcessWindowVisible(DWORD processId)
+{
+    g_windowIsVisible = false;
+    EnumWindows(EnumWindowsCallback, reinterpret_cast<LPARAM>(&processId));
+    return g_windowIsVisible;
 }
 
 void ProcessItemsList::populateProcessList()
@@ -40,10 +105,6 @@ void ProcessItemsList::populateProcessList()
     {
         do
         {
-            // NOTE bIsService
-            // bool bIsService;
-            // bIsService = processIsService(pe32.th32ProcessID);
-            // if (bIsService) qDebug() << QString::fromWCharArray(pe32.szExeFile) << " SERVICE";
             // Convert the wide-character string (wchar_t*) to QString
             QString processName = QString::fromWCharArray(pe32.szExeFile);
             // Add the process name to the QListWidget
@@ -51,7 +112,38 @@ void ProcessItemsList::populateProcessList()
             ProcessItem newItem(processName, true);
             bool bIsService = processIsService(pe32.th32ProcessID);
             newItem.setIsService (bIsService);
-            //m_list.append (newItem);
+            newItem.setProcessID (pe32.th32ProcessID);
+            newItem.setThreadCount (pe32.cntThreads);
+            newItem.setParentProcessID (pe32.th32ParentProcessID);
+            newItem.setPriority (pe32.pcPriClassBase);
+            DWORD processId = pe32.th32ProcessID;
+            if (isProcessWindowVisible(processId))
+            {
+                // Il processo ha una finestra visibile.
+                newItem.setIsProcessWindowVisible (true);
+                //qDebug() << newItem.getAppName () << " VISIBLE";
+                // Otteniamo il titolo della finestra
+                QString windowTitle = getWindowTitle(processId);
+                // Verifichiamo se abbiamo trovato un titolo
+                //QString windowStatus;
+                if (!windowTitle.isEmpty())
+                {
+                    //windowStatus = "Visible Window Title: " + windowTitle;
+                    newItem.setWindowTitle (windowTitle);
+                    //qDebug() << windowTitle;
+                }
+                else
+                {
+                    //windowStatus = "No visible window found.";
+                    newItem.setWindowTitle ("");
+                }
+            }
+            else
+            {
+                // Il processo non ha una finestra visibile.
+                // Potrebbe essere un processo in background o un servizio.
+                newItem.setIsProcessWindowVisible (false);
+            }
             m_ProcessList.append (newItem);
         }
         while (Process32Next(hProcessSnap, &pe32));
@@ -80,7 +172,7 @@ bool ProcessItemsList::killProcessAndChildsByNameEx(const std::string &processNa
     }
     do
     {
-        std::string currentProcessName = WcharToString2(pe32.szExeFile);
+        std::string currentProcessName = WcharToString(pe32.szExeFile);
         qsCurrentProcessName = QString::fromStdString (currentProcessName);
         qsCurrentProcessName = qsCurrentProcessName.toUpper ();
         // if (currentProcessName == processName) {
@@ -175,7 +267,7 @@ QIcon ProcessItemsList::getProcessIcon(std::string sProcessPath, bool bIsFullPat
     // }
     //std::string exePath = "C:\\Percorso\\del\\tuo\\file.exe";
     HANDLE hProc = getProcessHandle (sProcessPath);
-    if (hProc == INVALID_HANDLE_VALUE | hProc == 0 && bIsFullPath == false)
+    if ((hProc == INVALID_HANDLE_VALUE) | (hProc == 0 && bIsFullPath == false))
     {
         //LOG_VAR(QString::fromStdString (sProcessPath));
         //LOG_VAR(bIsFullPath);
@@ -199,9 +291,9 @@ QIcon ProcessItemsList::getProcessIcon(std::string sProcessPath, bool bIsFullPat
         DestroyIcon(hIcon);
         return icon;
     }
-    QString sLogMessage = QString::fromStdString (sProcessPath);
-    sLogMessage.append (" does not have an icon, using default icon.");
-    LOG_MSG(sLogMessage);
+    // QString sLogMessage = QString::fromStdString (sProcessPath);
+    // sLogMessage.append (" does not have an icon, using default icon.");
+    // LOG_MSG(sLogMessage);
     return icon;
 }
 
@@ -233,7 +325,7 @@ QString ProcessItemsList::getProcessPath(HANDLE hProcess)
     DWORD dwResult = GetModuleFileNameEx(hProcess, NULL, szPath, MAX_PATH);
     // Controlliamo se la funzione è riuscita.
     // Se dwResult è 0, c'è stato un errore.
-    if (hProcess == INVALID_HANDLE_VALUE | hProcess == 0) return "";
+    if ((hProcess == INVALID_HANDLE_VALUE) | (hProcess == 0)) return "";
     if (dwResult != 0)
     {
         //std::cout << "Percorso del processo: " << szPath << std::endl;
@@ -316,7 +408,7 @@ bool ProcessItemsList::processIsService(int iPos)
 
 bool ProcessItemsList::processIsService(QString sName)
 {
-   ProcessItem *foundItem;
+    ProcessItem *foundItem;
     int i_AppItemCount = m_ProcessList.count ();
     for (int iCount = 0; iCount < i_AppItemCount; iCount++)
     {
@@ -327,7 +419,6 @@ bool ProcessItemsList::processIsService(QString sName)
         }
     }
     return false;
-
 }
 
 QStringList ProcessItemsList::getRunningProcesses()
@@ -591,6 +682,96 @@ bool ProcessItem::getIsService() const
 void ProcessItem::setIsService(bool bIsService)
 {
     m_bIsService = bIsService;
+}
+
+DWORD ProcessItem::getProcessID() const
+{
+    return m_ProcessID;
+}
+
+void ProcessItem::setProcessID(const DWORD &value)
+{
+    m_ProcessID = value;
+}
+
+DWORD ProcessItem::getThreadCount() const
+{
+    return m_ThreadCount;
+}
+
+void ProcessItem::setThreadCount(const DWORD &value)
+{
+    m_ThreadCount = value;
+}
+
+DWORD ProcessItem::getParentProcessID() const
+{
+    return m_ParentProcessID;
+}
+
+void ProcessItem::setParentProcessID(const DWORD &value)
+{
+    m_ParentProcessID = value;
+}
+
+DWORD ProcessItem::getPriority() const
+{
+    return m_Priority;
+}
+
+void ProcessItem::setPriority(const DWORD &value)
+{
+    m_Priority = value;
+}
+
+QString ProcessItem::getPriorityClassName()
+{
+    DWORD priorityClass = getPriority ();
+    if (priorityClass == REALTIME_PRIORITY_CLASS)
+    {
+        return "Realtime";
+    }
+    else if (priorityClass == HIGH_PRIORITY_CLASS)
+    {
+        return "High";
+    }
+    else if (priorityClass == ABOVE_NORMAL_PRIORITY_CLASS)
+    {
+        return "Above normal";
+    }
+    else if (priorityClass == NORMAL_PRIORITY_CLASS)
+    {
+        return "Normal";
+    }
+    else if (priorityClass == BELOW_NORMAL_PRIORITY_CLASS)
+    {
+        return "Below normal";
+    }
+    else if (priorityClass == IDLE_PRIORITY_CLASS)
+    {
+        return "Idle (Low)";
+    }
+    return "Unknown";
+}
+
+bool ProcessItem::getIsProcessWindowVisible() const
+{
+    return m_IsProcessWindowVisible;
+}
+
+void ProcessItem::setIsProcessWindowVisible(bool value)
+{
+    m_IsProcessWindowVisible = value;
+}
+
+QString ProcessItem::getWindowTitle() const
+{
+    return m_WindowTitle;
+}
+
+void ProcessItem::setWindowTitle(const QString &value)
+{
+    m_WindowTitle = value;
 }
 
 ProcessItem::ProcessItem(QString sAppName, bool bAppKillEnabled)
