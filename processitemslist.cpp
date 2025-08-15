@@ -23,6 +23,31 @@ ProcessItemsList::ProcessItemsList(QObject *parent) : QObject(parent)
     m_ProcessList.clear();
 }
 
+QString ProcessItemsList::getProcessFullPath(DWORD processId)
+{
+    // Tentiamo di aprire il processo con i permessi necessari
+    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processId);
+
+    if (hProcess == nullptr) {
+        // Potrebbe fallire a causa di permessi insufficienti
+        return QString("N/A (Could not open process)");
+    }
+
+    TCHAR processPath[MAX_PATH];
+    DWORD pathSize = sizeof(processPath) / sizeof(TCHAR);
+
+    // Usiamo GetModuleFileNameEx per ottenere il percorso completo dell'eseguibile principale
+    if (GetModuleFileNameEx(hProcess, nullptr, processPath, pathSize)) {
+        // Se la funzione ha successo, convertiamo il percorso in una QString
+        CloseHandle(hProcess);
+        return QString::fromWCharArray(processPath);
+    } else {
+        // Se la funzione fallisce, chiudiamo l'handle e restituiamo un errore
+        CloseHandle(hProcess);
+        return QString("N/A (Could not get process path)");
+    }
+}
+
 //// Struttura per passare i dati alla callback di EnumWindows
 //struct WindowInfo
 //{
@@ -149,13 +174,15 @@ void ProcessItemsList::populateProcessList()
             // Add the process name to the QListWidget
             //qDebug() << __FUNCTION__ << processName;
             ProcessItem newItem(processName, true);
-            bool bIsService = processIsService(pe32.th32ProcessID);
+            DWORD processId = pe32.th32ProcessID;
+            bool bIsService = processIsService(processId);
             newItem.setIsService (bIsService);
-            newItem.setProcessID (pe32.th32ProcessID);
+            newItem.setProcessID (processId);
             newItem.setThreadCount (pe32.cntThreads);
             newItem.setParentProcessID (pe32.th32ParentProcessID);
             newItem.setPriority (pe32.pcPriClassBase);
-            DWORD processId = pe32.th32ProcessID;
+            QString sProcessPath=getProcessFullPath (processId);
+            newItem.setProcessPath (sProcessPath);
             QString windowTitleRef="";
             bool hasVisibleWindow = getWindowInfo(processId, windowTitleRef);
             //if (isProcessWindowVisible(processId))
@@ -814,6 +841,16 @@ QString ProcessItem::getWindowTitle() const
 void ProcessItem::setWindowTitle(const QString &value)
 {
     m_WindowTitle = value;
+}
+
+QString ProcessItem::getProcessPath() const
+{
+    return m_ProcessPath;
+}
+
+void ProcessItem::setProcessPath(const QString &value)
+{
+    m_ProcessPath = value;
 }
 
 ProcessItem::ProcessItem(QString sAppName, bool bAppKillEnabled)

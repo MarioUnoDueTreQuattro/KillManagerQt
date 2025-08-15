@@ -19,6 +19,7 @@ private:
     DWORD m_Priority;
     bool m_IsProcessWindowVisible;
     QString m_WindowTitle;
+    QString m_ProcessPath;
 public:
     //ProcessItem();
     ProcessItem(QString, bool);
@@ -43,6 +44,8 @@ public:
     void setIsProcessWindowVisible(bool value);
     QString getWindowTitle() const;
     void setWindowTitle(const QString &value);
+    QString getProcessPath() const;
+    void setProcessPath(const QString &value);
 };
 
 class ProcessItemsList : public QObject
@@ -102,7 +105,7 @@ private:
 
     // Funzione helper unificata.
     bool getWindowInfo(DWORD processId, QString& windowTitle);
-
+QString getProcessFullPath(DWORD processId);
 };
 
 #endif // PROCESSITEMSLIST_H
