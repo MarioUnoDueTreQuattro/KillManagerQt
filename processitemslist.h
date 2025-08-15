@@ -40,7 +40,8 @@ public:
     HICON getIconFromExecutable(const std::string& executablePath);
     QString getProcessPath(HANDLE hProcess);
     HANDLE getProcessHandle(const std::string& executablePath);
-    bool processIsService(DWORD processId);
+    bool processIsService(int iPos);
+    bool processIsService(QString);
     bool enableDebugPrivileges();
     bool isRunning (QString);
     void clear();
@@ -58,6 +59,7 @@ private:
     QList<ProcessItem> m_ProcessItemsList;
     //QStringList m_ProcessList;
     QList<ProcessItem>  m_ProcessList;
+    bool processIsService(DWORD processId);
 };
 
 #endif // PROCESSITEMSLIST_H

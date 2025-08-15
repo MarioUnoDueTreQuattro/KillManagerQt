@@ -290,6 +290,7 @@ HANDLE ProcessItemsList::getProcessHandle(const std::string &executablePath)
 
 bool ProcessItemsList::processIsService(DWORD processId)
 {
+    // FIXME works?
     DWORD sessionId;
     // Questa funzione ottiene l'ID della sessione per un dato PID.
     // I servizi di Windows, per la maggior parte, girano nella sessione 0.
@@ -302,6 +303,31 @@ bool ProcessItemsList::processIsService(DWORD processId)
         }
     }
     return false; // Applicazione utente o errore
+}
+
+bool ProcessItemsList::processIsService(int iPos)
+{
+    // FIXME works?
+    QString sName = m_ProcessItemsList.at (iPos).getAppName ();
+    HANDLE hProcess = getProcessHandle(sName.toStdString ());
+    bool bIsService = processIsService (DWORD(hProcess));
+    return bIsService;
+}
+
+bool ProcessItemsList::processIsService(QString sName)
+{
+   ProcessItem *foundItem;
+    int i_AppItemCount = m_ProcessList.count ();
+    for (int iCount = 0; iCount < i_AppItemCount; iCount++)
+    {
+        foundItem = &m_ProcessList[iCount];
+        if (foundItem->getAppName () == sName)
+        {
+            return foundItem->getIsService ();
+        }
+    }
+    return false;
+
 }
 
 QStringList ProcessItemsList::getRunningProcesses()

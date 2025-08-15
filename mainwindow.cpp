@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    if (!m_ProcessList.enableDebugPrivileges())
+    if (!m_ProcessListEx.enableDebugPrivileges())
     {
         LOG_MSG("Failed to enable debug privileges. Access to some processes might be denied.");
     }
@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget* parent)
     //unzipTestFile(zipFile, unzipFolder);
     qApp->setStyleSheet( "QStatusBar::item { border: 0px}" ) ;
     this->setWindowIcon(QIcon(":/icons/img/KillManager.png"));       // Use the path defined in .qrc
-    m_ApplicationItemsList.clear();
+    m_ProcessListEx.clear();
     ui->setupUi(this);
     m_statusBarMovie = new QMovie(":/icons/img/AGau.gif", QByteArray(), this);
     m_statusBarMovie->setScaledSize (QSize(16, 16));
@@ -80,6 +80,9 @@ MainWindow::MainWindow(QWidget* parent)
     m_TextBrush.setColor (myColor);
     // m_TextBrush = QBrush (myColor,Qt::SolidPattern);
     // m_TextBrush.setColor (myColor);
+    QColor myServiceColor(128, 0, 0);
+    m_ServiceTextBrush = QBrush (myServiceColor);
+    m_ServiceTextBrush.setColor (myServiceColor);
     ui->labelKilled->setText("Killed: 0" );
     readSettings();
     //setWindowTitle("Qt " +qtVersion + " Version"+ APP_VERSION);
@@ -315,7 +318,7 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
     // Get the item at the clicked position
     QListWidgetItem* clickedItem = ui->listWidgetEnabled->itemAt(pos);
     bool bIsRunning;
-    bIsRunning = m_ProcessList.isRunning (clickedItem->text ());
+    bIsRunning = m_ProcessListEx.isRunning (clickedItem->text ());
     // Create the menu
     QMenu contextMenu(tr("Context Menu"), this);
     QAction* disableAction = contextMenu.addAction(tr("Disable"));
@@ -356,7 +359,7 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
     // Get the item at the clicked position
     QListWidgetItem* clickedItem = ui->listWidgetDisabled->itemAt(pos);
     bool bIsRunning;
-    bIsRunning = m_ProcessList.isRunning (clickedItem->text ());
+    bIsRunning = m_ProcessListEx.isRunning (clickedItem->text ());
     // Create the menu
     QMenu contextMenu(tr("Context Menu"), this);
     QAction* enableAction = contextMenu.addAction(tr("Enable"));
@@ -398,7 +401,7 @@ void MainWindow::killSelectedDisabledItem()
     QListWidgetItem* currentItem = ui->listWidgetDisabled->currentItem();
     if (currentItem)
     {
-        bKilled = m_ProcessList.killProcessAndChildsByNameEx (currentItem->text());
+        bKilled = m_ProcessListEx.killProcessAndChildsByNameEx (currentItem->text());
         ui->statusBar->showMessage("Terminated: " + currentItem->text(), 10000);
     }
     else
@@ -413,7 +416,7 @@ void MainWindow::killSelectedEnabledItem()
     QListWidgetItem* currentItem = ui->listWidgetEnabled->currentItem();
     if (currentItem)
     {
-        bKilled = m_ProcessList.killProcessAndChildsByNameEx (currentItem->text());
+        bKilled = m_ProcessListEx.killProcessAndChildsByNameEx (currentItem->text());
         ui->statusBar->showMessage("Terminated: " + currentItem->text(), 10000);
     }
     else
@@ -458,8 +461,8 @@ void MainWindow::deleteSelectedEnabledItem()
         disconnectTimer ();
         ui->listWidgetEnabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Removed: " + currentItem->text(), 10000);
-        m_ApplicationItemsList.deleteApplicationItem(currentItem->text());
-        LOG_MSG( "m_ApplicationItemsList.size= " + m_ApplicationItemsList.size());
+        m_ProcessListEx.deleteApplicationItem(currentItem->text());
+        LOG_MSG( "m_ApplicationItemsList.size= " + m_ProcessListEx.size());
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
@@ -481,8 +484,8 @@ void MainWindow::deleteSelectedDisabledItem()
         disconnectTimer ();
         ui->listWidgetDisabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Removed: " + currentItem->text(), 10000);
-        m_ApplicationItemsList.deleteApplicationItem(currentItem->text());
-        LOG_MSG( "m_ApplicationItemsList.size= " + m_ApplicationItemsList.size());
+        m_ProcessListEx.deleteApplicationItem(currentItem->text());
+        LOG_MSG( "m_ApplicationItemsList.size= " + m_ProcessListEx.size());
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
@@ -506,7 +509,7 @@ void MainWindow::enableSelectedDisabledItem()
         ui->listWidgetEnabled->addItem(temp);
         ui->listWidgetDisabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Enabled: " + currentItem->text(), 10000);
-        m_ApplicationItemsList.moveApplicationItem(currentItem->text(), true);
+        m_ProcessListEx.moveApplicationItem(currentItem->text(), true);
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
@@ -530,7 +533,7 @@ void MainWindow::disableSelectedEnabledItem()
         ui->listWidgetDisabled->addItem(temp);
         ui->listWidgetEnabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Disabled: " + currentItem->text(), 10000);
-        m_ApplicationItemsList.moveApplicationItem(currentItem->text(), false);
+        m_ProcessListEx.moveApplicationItem(currentItem->text(), false);
         delete currentItem;
         ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
         ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
@@ -583,7 +586,7 @@ void MainWindow::showAddExeDialog()
             disconnectTimer ();
             addItemToListwidget(ui->listWidgetEnabled, receivedText);
             bool bFound = false;
-            int iFoundItem = m_ApplicationItemsList.findApplicationItemIndex (receivedText);
+            int iFoundItem = m_ProcessListEx.findApplicationItemIndex (receivedText);
             if (iFoundItem != -1)
             {
                 bFound = true;
@@ -601,11 +604,11 @@ void MainWindow::showAddExeDialog()
             // }
             if (!bFound)
             {
-                ApplicationItem newAppItem(receivedText, true);
-                m_ApplicationItemsList.append(newAppItem);
+                ProcessItem newAppItem(receivedText, true);
+                m_ProcessListEx.append(newAppItem);
                 LOG_MSG("m_ApplicationItemsList ADDED " + receivedText);
             }
-            LOG_MSG("m_ApplicationItemsList.size= " + m_ApplicationItemsList.size());
+            LOG_MSG("m_ApplicationItemsList.size= " + m_ProcessListEx.size());
             //QListWidgetItem* newitem = new QListWidgetItem(receivedText, ui->listWidgetEnabled);
             //ui->listWidgetEnabled->addItem(newitem);
             LOG_MSG("Dialog accepted. Received: " + receivedText);
@@ -629,8 +632,8 @@ void MainWindow::loadListFromFile(const QString& fileName)
         qDebug() << __PRETTY_FUNCTION__ << "fileName==\"\"";
         return;
     }
-    m_ApplicationItemsList.clear();
-    m_ProcessList.populateProcessList ();
+    m_ProcessListEx.clear();
+    m_ProcessListEx.populateProcessList ();
     QListWidgetItem* selectedEnabledItem;
     QListWidgetItem* selectedDisabledItem;
     m_sSelectedEnabledItem = "";
@@ -720,8 +723,8 @@ void MainWindow::loadListFromFile(const QString& fileName)
             line_parts_last = line_parts.last();
             addItemToListwidget(ui->listWidgetDisabled, line_parts_last);
             //ui->listWidgetDisabled->addItem(line_parts_last);
-            ApplicationItem appItem(line_parts_last, false);
-            m_ApplicationItemsList.append(appItem);
+            ProcessItem appItem(line_parts_last, false);
+            m_ProcessListEx.append(appItem);
         }
         else
         {
@@ -729,8 +732,8 @@ void MainWindow::loadListFromFile(const QString& fileName)
             line_parts_last = line_parts.last();
             addItemToListwidget(ui->listWidgetEnabled, line_parts_last);
             //ui->listWidgetEnabled->addItem(line_parts_last);
-            ApplicationItem appItem(line_parts_last, true);
-            m_ApplicationItemsList.append(appItem);
+            ProcessItem appItem(line_parts_last, true);
+            m_ProcessListEx.append(appItem);
         }
         // You can also create a QListWidgetItem and add it
         // QListWidgetItem *item = new QListWidgetItem(line);
@@ -969,7 +972,7 @@ void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemTe
     QString itemString = "";
     // Iterate in reverse to safely remove items while modifying the list
     //qDebug()<< "m_ApplicationItemsList.size="<<m_ApplicationItemsList.size();
-    int iFound = m_ApplicationItemsList.findApplicationItemIndex (newItemText);
+    int iFound = m_ProcessListEx.findApplicationItemIndex (newItemText);
     if (iFound != -1) bFound = true;
     // for (int i = m_ApplicationItemsList.size() - 1; i >= 0; --i)
     // {
@@ -991,17 +994,30 @@ void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemTe
     }
     else
     {
-        bFound = m_ProcessList.isRunning (newItemText);
+        bFound = m_ProcessListEx.isRunning (newItemText);
         //qDebug() << __FUNCTION__ << newItemText;
         if (bFound)
         {
-        // TODO Check if is a service
+            // TODO Check if is a service
+            // int iPos=m_ProcessListEx.findApplicationItemIndex (newItemText);
+            //iPos=m_ProcessListEx.count ();
+            //if (m_ProcessListEx.processIsService (iPos)) qDebug() << newItemText << " "<< "SERVICE";
             QListWidgetItem* item = new QListWidgetItem(newItemText);
-            item->setFont(m_Font);
-            item->setForeground (m_TextBrush);
-            //item->setBackground (QColor(247,209,209));
-            item->setBackground (QColor(191, 191, 239));
-            item->setIcon (m_ProcessList.getProcessIcon (newItemText.toStdString (), false));
+            bool bIsService = m_ProcessListEx.processIsService (newItemText);
+            if (bIsService)
+            {
+                item->setFont(m_Font);
+                item->setForeground (m_ServiceTextBrush);
+                item->setBackground (QColor(239, 191, 191));
+            }
+            else
+            {
+                item->setFont(m_Font);
+                item->setForeground (m_TextBrush);
+                //item->setBackground (QColor(247,209,209));
+                item->setBackground (QColor(191, 191, 239));
+            }
+            item->setIcon (m_ProcessListEx.getProcessIcon (newItemText.toStdString (), false));
             listWidget->addItem(item);
             if (newItemText == m_sSelectedEnabledItem)
             {
@@ -1043,12 +1059,12 @@ void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemTe
 
 void MainWindow::debugNotFoundWhenKilling()
 {
-    int i_AppItemCount = m_ApplicationItemsList.count ();
-    ApplicationItem *foundItem;
+    int i_AppItemCount = m_ProcessListEx.count ();
+    ProcessItem *foundItem;
     //for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
     for (int iCount = 0; iCount < i_AppItemCount; iCount++)
     {
-        foundItem = m_ApplicationItemsList.at(iCount);
+        foundItem = m_ProcessListEx.at(iCount);
         if (foundItem->getFoundWhenKilling () == false) qDebug() << foundItem->getAppName ();
     }
 }
@@ -1056,12 +1072,12 @@ void MainWindow::debugNotFoundWhenKilling()
 void MainWindow::debugFoundWhenKilling()
 {
     ui->listWidgetKilled->clear ();
-    int i_AppItemCount = m_ApplicationItemsList.count ();
-    ApplicationItem *foundItem;
+    int i_AppItemCount = m_ProcessListEx.count ();
+    ProcessItem *foundItem;
     //for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
     for (int iCount = 0; iCount < i_AppItemCount; iCount++)
     {
-        foundItem = m_ApplicationItemsList.at(iCount);
+        foundItem = m_ProcessListEx.at(iCount);
         if (foundItem->getFoundWhenKilling () && foundItem->getAppKillEnabled ())
         {
             ui->listWidgetKilled->addItem (foundItem->getAppName ());
@@ -1132,7 +1148,7 @@ void MainWindow::readStdError()
     }
     QStringList outList;
     QString outputProg;
-    ApplicationItem *foundItem ;
+    ProcessItem *foundItem ;
     for (int iRepeat = 0; iRepeat < iLines - 1; iRepeat++)
     {
         // QString outputProg = output;
@@ -1144,7 +1160,7 @@ void MainWindow::readStdError()
         outputProg = outList.at(2);
         outputProg.replace ("\"", "");
         //qDebug() << __FUNCTION__ << "err: " << outputProg;
-        foundItem = m_ApplicationItemsList.findApplicationItem (outputProg);
+        foundItem = m_ProcessListEx.findApplicationItem (outputProg);
         if (foundItem)
         {
             //qDebug() << "foundItem->getAppName () " << foundItem->getAppName ();
@@ -1170,7 +1186,7 @@ void MainWindow::on_pushButtonRun_clicked()
     QString sStatusMessage;
     //m_bKillInternal = true;
     disconnectTimer ();
-    m_ApplicationItemsList.resetAllApplicationItems();
+    m_ProcessListEx.resetAllApplicationItems();
     sStatusMessage = "TerminateProcess";
     sStatusMessage.append (" started...");
     ui->statusBar->showMessage(sStatusMessage, 10000);
@@ -1178,9 +1194,9 @@ void MainWindow::on_pushButtonRun_clicked()
     if (m_bKillInternal)
     {
         //m_ProcessList.debugProcessesMemory ();
-        bool bKillOk=KillRunningProcesses();
-//        if (bKillOk) LOG_MSG("Internal TerminateProcess result= OK");
-//        else LOG_MSG("Internal TerminateProcess result= NOT all processes killed");
+        bool bKillOk = KillRunningProcesses();
+        // if (bKillOk) LOG_MSG("Internal TerminateProcess result= OK");
+        // else LOG_MSG("Internal TerminateProcess result= NOT all processes killed");
         sStatusMessage = "TerminateProcess";
         sStatusMessage.append (" executed.");
         ui->statusBar->showMessage(sStatusMessage, 10000);
@@ -1340,58 +1356,6 @@ void MainWindow::on_actionOpen_log_file_in_external_editor_triggered()
     qDebug() << "Opening log file " << arguments;
 }
 
-QStringList MainWindow::getRunningProcesses()
-{
-    QStringList processList;
-#ifdef Q_OS_WIN
-    DWORD aProcesses[1024], cbNeeded, cProcesses;
-    unsigned int i;
-    // Get the list of process identifiers.
-    if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded))
-    {
-        qWarning() << "EnumProcesses failed!";
-        return processList;
-    }
-    // Calculate how many process identifiers were returned.
-    cProcesses = cbNeeded / sizeof(DWORD);
-    // Iterate through each process to get its name.
-    for (i = 0; i < cProcesses; i++)
-    {
-        if (aProcesses[i] == 0)
-            continue;
-        // Open process with necessary access rights
-        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, aProcesses[i]);
-        if (NULL != hProcess)
-        {
-            HMODULE hMod;
-            DWORD cbNeededModule;
-            char szProcessName[MAX_PATH] = { 0 };
-            // Get a list of all modules in the process.
-            if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeededModule))
-            {
-                // Get the base name of the first module (usually the executable).
-                GetModuleBaseNameA(hProcess, hMod, szProcessName, sizeof(szProcessName) / sizeof(char));
-            }
-            // If we got a name, add it to our list
-            if (szProcessName[0] != '\0')
-            {
-                processList << QString::fromLocal8Bit(szProcessName);
-            }
-            // Release the handle to the process.
-            CloseHandle(hProcess);
-        }
-    }
-#else
-    // For non-Windows platforms, you would use different methods.
-    // For example, on Linux, you might read from /proc/<pid>/comm or use 'ps' command.
-    qDebug() << "This function is designed for Windows. Other OS not implemented.";
-    processList << "Not available on this OS.";
-#endif
-    // Sort the list for better readability
-    processList.sort();
-    return processList;
-}
-
 bool MainWindow::KillRunningProcesses()
 {
     bool bKilled = false;
@@ -1407,12 +1371,12 @@ bool MainWindow::KillRunningProcesses()
     //m_iTimerUpdatesCount += 1;
     //int iModulus = m_iTimerUpdatesCount % 10 ;
     QString sItemText;
-    ApplicationItem *foundItem ;
+    ProcessItem *foundItem ;
     for (int i = 0; i < iCount; i++)
     {
         sItemText = ui->listWidgetEnabled->item(i)->text();
-        bKilled = m_ProcessList.killProcessAndChildsByNameEx (sItemText);
-        foundItem = m_ApplicationItemsList.findApplicationItem (sItemText);
+        bKilled = m_ProcessListEx.killProcessAndChildsByNameEx (sItemText);
+        foundItem = m_ProcessListEx.findApplicationItem (sItemText);
         if (foundItem)
         {
             //LOG_MSG(sItemText);

@@ -46,6 +46,7 @@ private:
     void deleteOldBackups();
     QFont m_Font;
     QBrush m_TextBrush;
+    QBrush m_ServiceTextBrush;
     QTimer *timer;
     QProcess *process;
     Ui::MainWindow *ui;
@@ -58,9 +59,9 @@ private:
     // QString m_sAppName;
     // QString m_sAppCompany;
     //QList<ApplicationItem> m_ApplicationItemsList;
-    RunningProcessesListEx m_ProcessList;
-    ApplicationItemsList m_ApplicationItemsList;
-    QStringList getRunningProcesses();
+    ProcessItemsList m_ProcessListEx;
+    //RunningProcessesListEx m_ProcessList;
+    //ApplicationItemsList m_ApplicationItemsList;
     bool KillRunningProcesses();
     void readSettings();
     void writeSettings();
