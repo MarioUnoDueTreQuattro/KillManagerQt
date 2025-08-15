@@ -74,8 +74,14 @@ public:
     void resetAllApplicationItems();
     bool deleteApplicationItem(QString);
     bool moveApplicationItem(QString, bool );
+    // Struttura per passare i dati. Puoi usarla anche qui, se la dichiari globalmente o in un namespace.
+    struct WindowInfo {
+        DWORD processId;
+        QString* windowTitle; // Usiamo un puntatore per il titolo.
+        bool foundVisibleWindow = false;
+    };
     // Struttura per passare i dati alla callback di EnumWindows
-    struct WindowInfo
+    struct WindowInfoTitle
     {
         DWORD processId;
         QString windowTitle;
@@ -84,13 +90,19 @@ private:
     std::string WcharToString(const WCHAR* wstr);
     QList<ProcessItem> m_ProcessItemsList;
     //QStringList m_ProcessList;
-    QList<ProcessItem>  m_ProcessList;
+    QList<ProcessItem> m_ProcessList;
     bool processIsService(DWORD processId);
     bool isProcessWindowVisible(DWORD processId);
     QString getWindowTitle(DWORD processId);
+    static BOOL CALLBACK EnumWindowsCallbackVisible(HWND hwnd, LPARAM lParam);
+    static BOOL CALLBACK EnumWindowsCallbackTitle(HWND hwnd, LPARAM lParam);
+    static bool g_windowIsVisible;
+    // Un'unica callback per ottenere sia lo stato di visibilità che il titolo.
     static BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam);
-    static BOOL CALLBACK EnumWindowsCallback2(HWND hwnd, LPARAM lParam);
-static bool g_windowIsVisible;
+
+    // Funzione helper unificata.
+    bool getWindowInfo(DWORD processId, QString& windowTitle);
+
 };
 
 #endif // PROCESSITEMSLIST_H

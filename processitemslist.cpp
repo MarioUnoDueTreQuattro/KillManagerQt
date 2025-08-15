@@ -33,9 +33,9 @@ ProcessItemsList::ProcessItemsList(QObject *parent) : QObject(parent)
 bool ProcessItemsList::g_windowIsVisible = false;
 
 // La callback viene eseguita per ogni finestra
-BOOL CALLBACK ProcessItemsList::EnumWindowsCallback2(HWND hwnd, LPARAM lParam)
+BOOL CALLBACK ProcessItemsList::EnumWindowsCallbackTitle(HWND hwnd, LPARAM lParam)
 {
-    ProcessItemsList::WindowInfo* info = reinterpret_cast<ProcessItemsList::WindowInfo *>(lParam);
+    ProcessItemsList::WindowInfoTitle* info = reinterpret_cast<ProcessItemsList::WindowInfoTitle *>(lParam);
     DWORD windowProcessId;
     GetWindowThreadProcessId(hwnd, &windowProcessId);
     // Controlla se i PID corrispondono e se la finestra è visibile.
@@ -54,7 +54,7 @@ BOOL CALLBACK ProcessItemsList::EnumWindowsCallback2(HWND hwnd, LPARAM lParam)
 //static bool g_windowIsVisible = false;
 
 // Callback che viene eseguita per ogni finestra di primo livello.
-BOOL CALLBACK ProcessItemsList::EnumWindowsCallback(HWND hwnd, LPARAM lParam)
+BOOL CALLBACK ProcessItemsList::EnumWindowsCallbackVisible(HWND hwnd, LPARAM lParam)
 {
     DWORD currentProcessId = *reinterpret_cast<DWORD *>(lParam);
     DWORD windowProcessId;
@@ -72,11 +72,11 @@ BOOL CALLBACK ProcessItemsList::EnumWindowsCallback(HWND hwnd, LPARAM lParam)
 // Funzione helper che restituisce il titolo della finestra
 QString ProcessItemsList::getWindowTitle(DWORD processId)
 {
-    ProcessItemsList::WindowInfo info;
+    ProcessItemsList::WindowInfoTitle info;
     info.processId = processId;
     info.windowTitle = ""; // Inizializziamo il titolo a una stringa vuota.
     // Enumera le finestre e popola la nostra struttura
-    EnumWindows(EnumWindowsCallback2, reinterpret_cast<LPARAM>(&info));
+    EnumWindows(EnumWindowsCallbackTitle, reinterpret_cast<LPARAM>(&info));
     return info.windowTitle;
 }
 
@@ -84,8 +84,47 @@ QString ProcessItemsList::getWindowTitle(DWORD processId)
 bool ProcessItemsList::isProcessWindowVisible(DWORD processId)
 {
     g_windowIsVisible = false;
-    EnumWindows(EnumWindowsCallback, reinterpret_cast<LPARAM>(&processId));
+    EnumWindows(EnumWindowsCallbackVisible, reinterpret_cast<LPARAM>(&processId));
     return g_windowIsVisible;
+}
+
+//// Struttura per passare i dati. Puoi usarla anche qui, se la dichiari globalmente o in un namespace.
+//struct WindowInfo3 {
+//    DWORD processId;
+//    QString* windowTitle; // Usiamo un puntatore per il titolo.
+//    bool foundVisibleWindow = false;
+//};
+
+// Callback unificata per trovare la finestra.
+BOOL CALLBACK ProcessItemsList::EnumWindowsCallback(HWND hwnd, LPARAM lParam) {
+    WindowInfo* info = reinterpret_cast<WindowInfo*>(lParam);
+    DWORD windowProcessId;
+
+    GetWindowThreadProcessId(hwnd, &windowProcessId);
+
+    if (info->processId == windowProcessId && IsWindowVisible(hwnd)) {
+        info->foundVisibleWindow = true;
+
+        // Otteniamo il titolo solo se abbiamo trovato la finestra giusta.
+        TCHAR windowTitle[256];
+        GetWindowText(hwnd, windowTitle, sizeof(windowTitle) / sizeof(TCHAR));
+        *info->windowTitle = QString::fromWCharArray(windowTitle);
+
+        return FALSE; // Fermiamo l'enumerazione.
+    }
+
+    return TRUE; // Continuiamo la ricerca.
+}
+
+// Funzione unificata per ottenere le informazioni sulla finestra.
+bool ProcessItemsList::getWindowInfo(DWORD processId, QString& windowTitle) {
+    WindowInfo info;
+    info.processId = processId;
+    info.windowTitle = &windowTitle; // Passiamo un puntatore alla stringa di output.
+
+    EnumWindows(ProcessItemsList::EnumWindowsCallback, reinterpret_cast<LPARAM>(&info));
+
+    return info.foundVisibleWindow; // Restituisce true se ha trovato una finestra visibile.
 }
 
 void ProcessItemsList::populateProcessList()
@@ -117,20 +156,23 @@ void ProcessItemsList::populateProcessList()
             newItem.setParentProcessID (pe32.th32ParentProcessID);
             newItem.setPriority (pe32.pcPriClassBase);
             DWORD processId = pe32.th32ProcessID;
-            if (isProcessWindowVisible(processId))
+            QString windowTitleRef="";
+            bool hasVisibleWindow = getWindowInfo(processId, windowTitleRef);
+            //if (isProcessWindowVisible(processId))
+            if (hasVisibleWindow)
             {
                 // Il processo ha una finestra visibile.
                 newItem.setIsProcessWindowVisible (true);
                 //qDebug() << newItem.getAppName () << " VISIBLE";
                 // Otteniamo il titolo della finestra
-                QString windowTitle = getWindowTitle(processId);
+                //QString windowTitle = getWindowTitle(processId);
                 // Verifichiamo se abbiamo trovato un titolo
                 //QString windowStatus;
-                if (!windowTitle.isEmpty())
+                if (!windowTitleRef.isEmpty())
                 {
                     //windowStatus = "Visible Window Title: " + windowTitle;
-                    newItem.setWindowTitle (windowTitle);
-                    //qDebug() << windowTitle;
+                    newItem.setWindowTitle (windowTitleRef);
+                    //qDebug() << windowTitleRef;
                 }
                 else
                 {
