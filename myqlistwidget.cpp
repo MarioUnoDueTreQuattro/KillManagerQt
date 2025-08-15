@@ -4,6 +4,7 @@
 #include <QDropEvent>
 #include <QDragMoveEvent>
 #include <QMimeData>
+#include <QToolTip>
 
 MyQListWidget::MyQListWidget(QWidget *)
 {
@@ -139,4 +140,22 @@ bool MyQListWidget::containsItemText(const QString& text)
         }
     }
     return false;
+}
+
+bool MyQListWidget::event(QEvent *event)
+{
+    if (event->type() == QEvent::ToolTip)
+    {
+        QHelpEvent* helpEvent = static_cast<QHelpEvent *>(event);
+        QListWidgetItem* item = itemAt(helpEvent->pos());
+        if (item != nullptr)
+        {
+            if (item->toolTip ()!="") {
+            QString tooltipText = item->toolTip();
+            QToolTip::showText(helpEvent->globalPos(), tooltipText, this);
+            return true;
+            }
+        }
+    }
+    return QListWidget::event(event);
 }

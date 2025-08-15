@@ -14,6 +14,8 @@ public:
     void mouseMoveEvent(QMouseEvent *) override;
     bool containsItemText(const QString& );
     // void addItem(QListWidgetItem* ) ;
+protected:
+    bool event(QEvent* event) override;
 signals:
     void itemsReordered();
     void reordering();
