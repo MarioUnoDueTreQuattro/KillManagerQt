@@ -821,20 +821,31 @@ void ProcessItem::setPriority(const DWORD &value)
     m_Priority = value;
 }
 
+const std::map<DWORD, QString> ProcessItem::s_priorityMap =
+{
+    {4, "Idle (Low)"},
+    {6, "Below normal"},
+    {8, "Normal"},
+    {10, "Above normal"},
+    {13, "High"},
+    {15, "Realtime"}
+};
+
 QString ProcessItem::getPriorityClassName()
 {
     DWORD priorityClass = getPriority();
-    // Mappa i valori di pcPriClassBase alle descrizioni testuali
-    std::map<DWORD, QString> priorityMap;
-    priorityMap[4] = "Idle (Low)";       // IDLE_PRIORITY_CLASS
-    priorityMap[6] = "Below normal"; // BELOW_NORMAL_PRIORITY_CLASS
-    priorityMap[8] = "Normal";    // NORMAL_PRIORITY_CLASS
-    priorityMap[10] = "Above normal"; // ABOVE_NORMAL_PRIORITY_CLASS
-    priorityMap[13] = "High";      // HIGH_PRIORITY_CLASS
-    priorityMap[15] = "Realtime"; // REALTIME_PRIORITY_CLASS
+    //    // Mappa i valori di pcPriClassBase alle descrizioni testuali
+    // std::map<DWORD, QString> priorityMap;
+    // priorityMap[4] = "Idle (Low)";       // IDLE_PRIORITY_CLASS
+    // priorityMap[6] = "Below normal"; // BELOW_NORMAL_PRIORITY_CLASS
+    // priorityMap[8] = "Normal";    // NORMAL_PRIORITY_CLASS
+    // priorityMap[10] = "Above normal"; // ABOVE_NORMAL_PRIORITY_CLASS
+    // priorityMap[13] = "High";      // HIGH_PRIORITY_CLASS
+    // priorityMap[15] = "Realtime"; // REALTIME_PRIORITY_CLASS
     // auto it = priorityMap.find(priorityClass);
-    std::map<DWORD, QString>::iterator it = priorityMap.find(priorityClass);
-    if (it != priorityMap.end())
+    //std::map<DWORD, QString>::iterator it = priorityMap.find(priorityClass);
+    std::map<DWORD, QString>::const_iterator it = s_priorityMap.find(priorityClass);
+    if (it != s_priorityMap.end())
     {
         return it->second;
     }

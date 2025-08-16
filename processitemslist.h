@@ -9,6 +9,7 @@
 class ProcessItem
 {
 private:
+    static const std::map<DWORD, QString> s_priorityMap;
     QString appName;
     bool m_bAppKillEnabled;
     bool m_bFoundWhenKilling;
@@ -82,9 +83,10 @@ public:
     void debugProcessItemsList();
 
     // Struttura per passare i dati. Puoi usarla anche qui, se la dichiari globalmente o in un namespace.
-    struct WindowInfo {
+    struct WindowInfo
+    {
         DWORD processId;
-        QString* windowTitle; // Usiamo un puntatore per il titolo.
+        QString *windowTitle; // Usiamo un puntatore per il titolo.
         bool foundVisibleWindow = false;
     };
 
@@ -110,7 +112,7 @@ private:
 
     // Funzione helper unificata per EnumWindowsCallback
     bool getWindowInfo(DWORD processId, QString& windowTitle);
-QString getProcessFullPath(DWORD processId);
+    QString getProcessFullPath(DWORD processId);
 };
 
 #endif // PROCESSITEMSLIST_H
