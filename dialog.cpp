@@ -9,7 +9,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QStandardPaths>
-#include "utility.h"
+//#include "utility.h"
 
 Dialog::Dialog(QWidget* parent)
     : QDialog(parent)
@@ -273,7 +273,7 @@ void Dialog::on_pushButtonChooseExternaEditor_clicked()
         // fileNameLabel->setText("No file selected.");
         qDebug() << "File dialog cancelled or no file selected.";
     }
-    RunningProcessesListEx utility;
+    ProcessItemsList utility;
     QIcon icon = utility.getProcessIcon (ui->lineEditExternaEditor ->text ().toStdString (), true);
     ui->labelIcon->setPixmap (icon.pixmap (QSize(32, 32)));
 }
@@ -413,7 +413,7 @@ void Dialog::on_lineEditExternaEditor_textChanged(const QString &arg1)
     bool bIsFullPath = false;
     if (arg1.contains ("\\")) bIsFullPath = true;
     m_sExternalEditorInitialPath = arg1;
-    RunningProcessesListEx utility;
+    ProcessItemsList utility;
     QIcon icon;
     if (bIsFullPath)
         icon = utility.getProcessIcon (arg1.toStdString (), true);
