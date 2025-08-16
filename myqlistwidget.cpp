@@ -15,6 +15,7 @@ MyQListWidget::MyQListWidget(QWidget *)
     //this->setAcceptDrops(true);
     this->setDropIndicatorShown(true);
     this->setSelectionMode(QAbstractItemView::SingleSelection);
+    //setMouseTracking (true);
 }
 
 void MyQListWidget::dropEvent(QDropEvent *event)

@@ -8,13 +8,13 @@ class MyQListWidget : public QListWidget
 Q_OBJECT
 public:
     explicit MyQListWidget(QWidget* =nullptr);
-    void dropEvent(QDropEvent* ) override;
-    void dragMoveEvent(QDragMoveEvent* );
-    void dragEnterEvent(QDragEnterEvent* ) override;
-    void mouseMoveEvent(QMouseEvent *) override;
     bool containsItemText(const QString& );
     // void addItem(QListWidgetItem* ) ;
 protected:
+    void dropEvent(QDropEvent* ) override;
+    void dragMoveEvent(QDragMoveEvent* ) override;
+    void dragEnterEvent(QDragEnterEvent* ) override;
+    void mouseMoveEvent(QMouseEvent *) override;
     bool event(QEvent* event) override;
 signals:
     void itemsReordered();

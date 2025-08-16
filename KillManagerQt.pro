@@ -12,7 +12,20 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets winextras
 
 TARGET = KillManagerQt
 TEMPLATE = app
-win32:RC_ICONS = KillManager.ico
+
+# Show warnings and enable debugging symbols
+QMAKE_CXXFLAGS += -Wall -Wextra
+QMAKE_CXXFLAGS_DEBUG += -g
+
+# Optional: Enable logging macros
+#DEFINES += QT_MESSAGELOGCONTEXT
+
+# Optional: Use separate build folders for debug/release
+#CONFIG += debug_and_release
+#CONFIG += build_all
+
+# Enable debug output
+#CONFIG += debug
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -43,6 +56,8 @@ RC_FILE = app.rc
 
 RESOURCES += \
     icons.qrc
+
+win32:RC_ICONS = KillManager.ico
 
 VERSION = 1.0.0.8
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
