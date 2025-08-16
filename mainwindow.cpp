@@ -1022,21 +1022,20 @@ void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemTe
     }
     else
     {
+        QListWidgetItem* item = new QListWidgetItem(newItemText);
         bFound = m_ProcessListEx.isRunning (newItemText);
         //qDebug() << __FUNCTION__ << newItemText;
         if (bFound)
         {
-            QListWidgetItem* item = new QListWidgetItem(newItemText);
+            item->setFont(m_Font);
             bool bIsService = m_ProcessListEx.processIsService (newItemText);
             if (bIsService)
             {
-                item->setFont(m_Font);
                 item->setForeground (m_ServiceTextBrush);
                 item->setBackground (QColor(239, 191, 191));
             }
             else
             {
-                item->setFont(m_Font);
                 item->setForeground (m_TextBrush);
                 //item->setBackground (QColor(247,209,209));
                 item->setBackground (QColor(191, 191, 239));
@@ -1045,35 +1044,16 @@ void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemTe
             listWidget->addItem(item);
             // m_ProcessListEx.debugProcessItemsList();
             item->setToolTip (getListItemTooltip(newItemText));
-            if (newItemText == m_sSelectedEnabledItem)
-            {
-                item->setSelected (true);
-                //qDebug() << "selected" << newItemText;
-                listWidget->setCurrentItem(item);
-            }
-            if (newItemText == m_sSelectedDisabledItem)
-            {
-                item->setSelected (true);
-                //qDebug() << "selectedDis" << newItemText;
-                listWidget->setCurrentItem(item);
-            }
         }
         else
         {
-            QListWidgetItem* item = new QListWidgetItem(newItemText);
             listWidget->addItem(item);
-            if (newItemText == m_sSelectedEnabledItem)
-            {
-                item->setSelected (true);
-                //qDebug() << "selected" << newItemText;
-                listWidget->setCurrentItem(item);
-            }
-            if (newItemText == m_sSelectedDisabledItem)
-            {
-                item->setSelected (true);
-                //qDebug() << "selectedDis" << newItemText;
-                listWidget->setCurrentItem(item);
-            }
+        }
+        if ((newItemText == m_sSelectedEnabledItem) | (newItemText == m_sSelectedDisabledItem))
+        {
+            item->setSelected (true);
+            listWidget->setCurrentItem(item);
+            //qDebug() << "selected" << newItemText;
         }
         // ApplicationItem newAppItem(newItemText,true);
         // m_ApplicationItemsList.append(newAppItem);
