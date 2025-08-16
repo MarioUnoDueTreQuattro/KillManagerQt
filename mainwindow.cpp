@@ -210,7 +210,7 @@ void MainWindow::updateSettings()
     //return sKillFile;
 }
 
-compareByLastModified(const QFileInfo &a, const QFileInfo &b)
+bool MainWindow::compareByLastModified(const QFileInfo &a, const QFileInfo &b)
 {
     return a.lastModified() > b.lastModified(); // Newest first
 }
@@ -233,7 +233,7 @@ void MainWindow::deleteOldBackups()
         return;
     }
     files = dir.entryInfoList(nameFilters, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot); //, QDir::Time);
-    std::sort(files.begin(), files.end(), compareByLastModified);
+    std::sort(files.begin(), files.end(), MainWindow::compareByLastModified);
     iFilesCount = files.size();
     int filesToDelete = iFilesCount - iBackupsCount;
     LOG_MSG("filesToDelete (if older than iBackupsDays) = " + QString::number (filesToDelete));

@@ -35,7 +35,8 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget* parent = 0);
-    ~MainWindow();    
+    ~MainWindow();
+    static bool compareByLastModified(const QFileInfo &a, const QFileInfo &b);
 private:
     Scheduler m_scheduler;
     QLabel *m_StatusBarLabel;
