@@ -1015,6 +1015,24 @@ void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemTe
             }
             item->setIcon (m_ProcessListEx.getProcessIcon (newItemText.toStdString (), false));
             listWidget->addItem(item);
+            // m_ProcessListEx.debugProcessItemsList();
+            ProcessItem *appItem = m_ProcessListEx.findProcessItem (newItemText);
+            QString sItemTooltip = "<b>Process:</b> " + newItemText + "<br>";
+            sItemTooltip.append("<b>Path:</b> " + appItem->getProcessPath () + "<br>");
+            sItemTooltip.append("<b>PID:</b> " + QString::number(appItem->getProcessID ()) + "<br>");
+            sItemTooltip.append("<b>Parent PID:</b> " + QString::number(appItem->getParentProcessID ()) + "<br>");
+            if (appItem->getIsProcessWindowVisible ())
+            {
+                sItemTooltip.append("<b>Visible:</b> Yes<br>");
+                sItemTooltip.append("<b>Title:</b> " + appItem->getWindowTitle () + "<br>");
+            }
+            else
+                sItemTooltip.append("<b>Visible:</b> No<br>");
+            if (appItem->getIsService ())sItemTooltip.append("<b>Service:</b> Yes<br>");
+            else sItemTooltip.append("<b>Service:</b> No<br>");
+            sItemTooltip.append("<b>Thread count:</b> " + QString::number(appItem->getThreadCount ()) + "<br>");
+            sItemTooltip.append("<b>Priority:</b> " + appItem->getPriorityClassName () );
+            item->setToolTip (sItemTooltip);
             if (newItemText == m_sSelectedEnabledItem)
             {
                 item->setSelected (true);

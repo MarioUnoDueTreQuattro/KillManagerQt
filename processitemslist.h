@@ -74,15 +74,20 @@ public:
     void append( ProcessItem);
     int findApplicationItemIndex(QString );
     ProcessItem *findApplicationItem(QString );
+    ProcessItem *findProcessItem(QString );
     void resetAllApplicationItems();
     bool deleteApplicationItem(QString);
     bool moveApplicationItem(QString, bool );
+    void debugProcessList();
+    void debugProcessItemsList();
+
     // Struttura per passare i dati. Puoi usarla anche qui, se la dichiari globalmente o in un namespace.
     struct WindowInfo {
         DWORD processId;
         QString* windowTitle; // Usiamo un puntatore per il titolo.
         bool foundVisibleWindow = false;
     };
+
     // Struttura per passare i dati alla callback di EnumWindows
     struct WindowInfoTitle
     {
@@ -103,7 +108,7 @@ private:
     // Un'unica callback per ottenere sia lo stato di visibilità che il titolo.
     static BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam);
 
-    // Funzione helper unificata.
+    // Funzione helper unificata per EnumWindowsCallback
     bool getWindowInfo(DWORD processId, QString& windowTitle);
 QString getProcessFullPath(DWORD processId);
 };

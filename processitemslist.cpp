@@ -27,21 +27,22 @@ QString ProcessItemsList::getProcessFullPath(DWORD processId)
 {
     // Tentiamo di aprire il processo con i permessi necessari
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processId);
-
-    if (hProcess == nullptr) {
+    if (hProcess == nullptr)
+    {
         // Potrebbe fallire a causa di permessi insufficienti
         return QString("N/A (Could not open process)");
     }
-
     TCHAR processPath[MAX_PATH];
     DWORD pathSize = sizeof(processPath) / sizeof(TCHAR);
-
     // Usiamo GetModuleFileNameEx per ottenere il percorso completo dell'eseguibile principale
-    if (GetModuleFileNameEx(hProcess, nullptr, processPath, pathSize)) {
+    if (GetModuleFileNameEx(hProcess, nullptr, processPath, pathSize))
+    {
         // Se la funzione ha successo, convertiamo il percorso in una QString
         CloseHandle(hProcess);
         return QString::fromWCharArray(processPath);
-    } else {
+    }
+    else
+    {
         // Se la funzione fallisce, chiudiamo l'handle e restituiamo un errore
         CloseHandle(hProcess);
         return QString("N/A (Could not get process path)");
@@ -51,8 +52,8 @@ QString ProcessItemsList::getProcessFullPath(DWORD processId)
 //// Struttura per passare i dati alla callback di EnumWindows
 //struct WindowInfo
 //{
-//    DWORD processId;
-//    QString windowTitle;
+// DWORD processId;
+// QString windowTitle;
 //};
 
 bool ProcessItemsList::g_windowIsVisible = false;
@@ -115,40 +116,36 @@ bool ProcessItemsList::isProcessWindowVisible(DWORD processId)
 
 //// Struttura per passare i dati. Puoi usarla anche qui, se la dichiari globalmente o in un namespace.
 //struct WindowInfo3 {
-//    DWORD processId;
-//    QString* windowTitle; // Usiamo un puntatore per il titolo.
-//    bool foundVisibleWindow = false;
+// DWORD processId;
+// QString* windowTitle; // Usiamo un puntatore per il titolo.
+// bool foundVisibleWindow = false;
 //};
 
 // Callback unificata per trovare la finestra.
-BOOL CALLBACK ProcessItemsList::EnumWindowsCallback(HWND hwnd, LPARAM lParam) {
-    WindowInfo* info = reinterpret_cast<WindowInfo*>(lParam);
+BOOL CALLBACK ProcessItemsList::EnumWindowsCallback(HWND hwnd, LPARAM lParam)
+{
+    WindowInfo* info = reinterpret_cast<WindowInfo *>(lParam);
     DWORD windowProcessId;
-
     GetWindowThreadProcessId(hwnd, &windowProcessId);
-
-    if (info->processId == windowProcessId && IsWindowVisible(hwnd)) {
+    if (info->processId == windowProcessId && IsWindowVisible(hwnd))
+    {
         info->foundVisibleWindow = true;
-
         // Otteniamo il titolo solo se abbiamo trovato la finestra giusta.
         TCHAR windowTitle[256];
         GetWindowText(hwnd, windowTitle, sizeof(windowTitle) / sizeof(TCHAR));
         *info->windowTitle = QString::fromWCharArray(windowTitle);
-
         return FALSE; // Fermiamo l'enumerazione.
     }
-
     return TRUE; // Continuiamo la ricerca.
 }
 
 // Funzione unificata per ottenere le informazioni sulla finestra.
-bool ProcessItemsList::getWindowInfo(DWORD processId, QString& windowTitle) {
+bool ProcessItemsList::getWindowInfo(DWORD processId, QString& windowTitle)
+{
     WindowInfo info;
     info.processId = processId;
     info.windowTitle = &windowTitle; // Passiamo un puntatore alla stringa di output.
-
     EnumWindows(ProcessItemsList::EnumWindowsCallback, reinterpret_cast<LPARAM>(&info));
-
     return info.foundVisibleWindow; // Restituisce true se ha trovato una finestra visibile.
 }
 
@@ -181,9 +178,9 @@ void ProcessItemsList::populateProcessList()
             newItem.setThreadCount (pe32.cntThreads);
             newItem.setParentProcessID (pe32.th32ParentProcessID);
             newItem.setPriority (pe32.pcPriClassBase);
-            QString sProcessPath=getProcessFullPath (processId);
+            QString sProcessPath = getProcessFullPath (processId);
             newItem.setProcessPath (sProcessPath);
-            QString windowTitleRef="";
+            QString windowTitleRef = "";
             bool hasVisibleWindow = getWindowInfo(processId, windowTitleRef);
             //if (isProcessWindowVisible(processId))
             if (hasVisibleWindow)
@@ -635,6 +632,19 @@ ProcessItem *ProcessItemsList::findApplicationItem(QString sFound)
     return NULL;
 }
 
+ProcessItem *ProcessItemsList::findProcessItem(QString sFound)
+{
+    int i_AppItemCount = m_ProcessList.count ();
+    ProcessItem *foundItem;
+    // for (int iCount = i_AppItemCount - 1; iCount >= 0; --iCount)
+    for (int iCount = 0; iCount < i_AppItemCount; iCount++)
+    {
+        foundItem = &m_ProcessList[iCount];
+        if (foundItem->getAppName () == sFound) return foundItem;
+    }
+    return NULL;
+}
+
 int ProcessItemsList::findApplicationItemIndex(QString sFound)
 {
     int i_AppItemCount = this->count ();
@@ -733,6 +743,24 @@ bool ProcessItemsList::moveApplicationItem(QString deleteString, bool bState)
     return bFound;
 }
 
+void ProcessItemsList::debugProcessList()
+{
+    int iCount = m_ProcessList.count ();
+    for (int i = 0; i < iCount; i++)
+    {
+        qDebug() << i << " " << m_ProcessList.at(i).getAppName ();
+    }
+}
+
+void ProcessItemsList::debugProcessItemsList ()
+{
+    int iCount = m_ProcessItemsList.count ();
+    for (int i = 0; i < iCount; i++)
+    {
+        qDebug() << i << " " << m_ProcessItemsList.at(i).getAppName ();
+    }
+}
+
 bool ProcessItem::getFoundWhenKilling() const
 {
     return m_bFoundWhenKilling;
@@ -795,32 +823,47 @@ void ProcessItem::setPriority(const DWORD &value)
 
 QString ProcessItem::getPriorityClassName()
 {
-    DWORD priorityClass = getPriority ();
-    if (priorityClass == REALTIME_PRIORITY_CLASS)
+    DWORD priorityClass = getPriority();
+    // Mappa i valori di pcPriClassBase alle descrizioni testuali
+    std::map<DWORD, QString> priorityMap;
+    priorityMap[4] = "Idle (Low)";       // IDLE_PRIORITY_CLASS
+    priorityMap[6] = "Below normal"; // BELOW_NORMAL_PRIORITY_CLASS
+    priorityMap[8] = "Normal";    // NORMAL_PRIORITY_CLASS
+    priorityMap[10] = "Above normal"; // ABOVE_NORMAL_PRIORITY_CLASS
+    priorityMap[13] = "High";      // HIGH_PRIORITY_CLASS
+    priorityMap[15] = "Realtime"; // REALTIME_PRIORITY_CLASS
+    // auto it = priorityMap.find(priorityClass);
+    std::map<DWORD, QString>::iterator it = priorityMap.find(priorityClass);
+    if (it != priorityMap.end())
     {
-        return "Realtime";
+        return it->second;
     }
-    else if (priorityClass == HIGH_PRIORITY_CLASS)
-    {
-        return "High";
-    }
-    else if (priorityClass == ABOVE_NORMAL_PRIORITY_CLASS)
-    {
-        return "Above normal";
-    }
-    else if (priorityClass == NORMAL_PRIORITY_CLASS)
-    {
-        return "Normal";
-    }
-    else if (priorityClass == BELOW_NORMAL_PRIORITY_CLASS)
-    {
-        return "Below normal";
-    }
-    else if (priorityClass == IDLE_PRIORITY_CLASS)
-    {
-        return "Idle (Low)";
-    }
-    return "Unknown";
+    // DWORD priorityClass = getPriority ();
+    // if (priorityClass == REALTIME_PRIORITY_CLASS)
+    // {
+    // return "Realtime";
+    // }
+    // else if (priorityClass == HIGH_PRIORITY_CLASS)
+    // {
+    // return "High";
+    // }
+    // else if (priorityClass == ABOVE_NORMAL_PRIORITY_CLASS)
+    // {
+    // return "Above normal";
+    // }
+    // else if (priorityClass == NORMAL_PRIORITY_CLASS)
+    // {
+    // return "Normal";
+    // }
+    // else if (priorityClass == BELOW_NORMAL_PRIORITY_CLASS)
+    // {
+    // return "Below normal";
+    // }
+    // else if (priorityClass == IDLE_PRIORITY_CLASS)
+    // {
+    // return "Idle (Low)";
+    // }
+    // return "Unknown";
 }
 
 bool ProcessItem::getIsProcessWindowVisible() const
