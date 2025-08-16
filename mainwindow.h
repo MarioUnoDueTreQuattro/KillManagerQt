@@ -35,8 +35,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget* parent = 0);
-    ~MainWindow();
-
+    ~MainWindow();    
 private:
     Scheduler m_scheduler;
     QLabel *m_StatusBarLabel;
@@ -86,6 +85,7 @@ private:
     bool m_bKillInternal;
     int m_iTimerUpdatesCount;
     int m_iRefreshRate;
+    QString getListItemTooltip(QString );
 protected:
     void closeEvent(QCloseEvent* event) override;
     void showEvent(QShowEvent *event) override;

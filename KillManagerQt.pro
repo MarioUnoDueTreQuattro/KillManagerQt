@@ -17,6 +17,8 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += -Wall -Wextra
 QMAKE_CXXFLAGS_DEBUG += -g
 
+#DEFINES += QT_NO_DEBUG_OUTPUT
+
 # Optional: Enable logging macros
 #DEFINES += QT_MESSAGELOGCONTEXT
 
