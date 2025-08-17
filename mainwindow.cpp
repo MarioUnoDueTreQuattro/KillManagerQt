@@ -977,6 +977,7 @@ QString MainWindow::getListItemTooltip(QString newItemText)
         sItemTooltip.append("<b>Path:</b> " + appItem->getProcessPath () + "<br>");
         sItemTooltip.append("<b>PID:</b> " + QString::number(appItem->getProcessID ()) + "<br>");
         sItemTooltip.append("<b>Parent PID:</b> " + QString::number(appItem->getParentProcessID ()) + "<br>");
+        sItemTooltip.append("<b>Parent process:</b> " + m_ProcessListEx.getParentProcessName (appItem->getParentProcessID ()) + "<br>");
         if (appItem->getIsProcessWindowVisible ())
         {
             sItemTooltip.append("<b>Visible:</b> Yes<br>");

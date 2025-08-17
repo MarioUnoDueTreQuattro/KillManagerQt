@@ -17,6 +17,18 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += -Wall -Wextra
 QMAKE_CXXFLAGS_DEBUG += -g
 
+## Aggiungi le opzioni di ottimizzazione solo per le build di rilascio
+#CONFIG(release, debug|release) {
+#    QMAKE_CXXFLAGS_RELEASE -= -O2
+#    QMAKE_CXXFLAGS_RELEASE += -O3 -march=native
+#    # Usa -march=native solo se il programma sarà eseguito solo sulla tua macchina
+#    # Se devi distribuirlo, è meglio rimuoverlo.
+#    # QMAKE_CXXFLAGS_RELEASE += -march=native
+#}
+
+# Aggiungi un singolo set di flag per i warning per evitare duplicati
+QMAKE_CXXFLAGS += -Wall -Wextra
+
 #DEFINES += QT_NO_DEBUG_OUTPUT
 
 # Optional: Enable logging macros

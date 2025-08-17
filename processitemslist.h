@@ -55,6 +55,8 @@ class ProcessItemsList : public QObject
 public:
     explicit ProcessItemsList(QObject *parent = 0);
     QStringList getRunningProcesses();
+    std::string getProcessNameByPid(DWORD);
+    QString getParentProcessName(DWORD) ;
     void populateProcessList();
     bool killProcessAndChildsByNameEx(const std::string& processName);
     bool killProcessAndChildsByNameEx(QString);

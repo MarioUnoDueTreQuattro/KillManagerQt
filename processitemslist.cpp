@@ -23,6 +23,51 @@ ProcessItemsList::ProcessItemsList(QObject *parent) : QObject(parent)
     m_ProcessList.clear();
 }
 
+std::string ProcessItemsList::getProcessNameByPid(DWORD pid)
+{
+    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+    if (hProcess == NULL)
+    {
+        // La funzione non è riuscita a ottenere un handle del processo
+        return "";
+    }
+    char processName[MAX_PATH];
+    if (GetModuleBaseNameA(hProcess, NULL, processName, sizeof(processName)) == 0)
+    {
+        // La funzione non è riuscita a ottenere il nome del modulo
+        CloseHandle(hProcess);
+        return "";
+    }
+    CloseHandle(hProcess);
+    return std::string(processName);
+}
+
+QString ProcessItemsList::getParentProcessName(DWORD iPID)
+{
+    QString sParentName;
+    sParentName = QString::fromStdString (getProcessNameByPid(iPID));
+    if (sParentName=="") sParentName="N/A (parent process might not be running)";
+    return sParentName;
+}
+
+//QString ProcessItemsList::getParentProcessName(DWORD iPID)
+//{
+// QString sParentName;
+// int iParentPID;
+// int iCount = m_ProcessList.count ();
+// for (int i = 0; i < iCount; i++)
+// {
+// iParentPID = m_ProcessList[i].getProcessID ();
+// if (iParentPID == iPID)
+// {
+// sParentName = m_ProcessList[i].getAppName();
+//            //qDebug() << i << " " << m_ProcessList.at(i).getAppName ();
+// return sParentName;
+// }
+// }
+// return sParentName;
+//}
+
 QString ProcessItemsList::getProcessFullPath(DWORD processId)
 {
     // Tentiamo di aprire il processo con i permessi necessari
@@ -210,6 +255,7 @@ void ProcessItemsList::populateProcessList()
                 // Potrebbe essere un processo in background o un servizio.
                 newItem.setIsProcessWindowVisible (false);
             }
+            //newItem.setParentProcessName (getParentProcessName (pe32.th32ParentProcessID));
             m_ProcessList.append (newItem);
         }
         while (Process32Next(hProcessSnap, &pe32));
