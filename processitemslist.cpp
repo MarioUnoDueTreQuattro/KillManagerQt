@@ -45,7 +45,7 @@ QString ProcessItemsList::getParentProcessName(DWORD iPID)
 {
     QString sParentName;
     sParentName = QString::fromStdString (getProcessNameByPid(iPID));
-    if (sParentName=="") sParentName="N/A (parent process might not be running)";
+    if (sParentName == "") sParentName = "N/A (parent process might not be running)";
     return sParentName;
 }
 
@@ -685,7 +685,7 @@ ProcessItem *ProcessItemsList::findProcessItem(QString sFound)
     for (int iCount = 0; iCount < i_AppItemCount; iCount++)
     {
         foundItem = &m_ProcessList[iCount];
-        if (foundItem->getAppName () == sFound) return foundItem;
+        if (foundItem->getAppName ().toUpper () == sFound.toUpper ()) return foundItem;
     }
     return NULL;
 }
@@ -803,6 +803,31 @@ void ProcessItemsList::debugProcessItemsList ()
     for (int i = 0; i < iCount; i++)
     {
         qDebug() << i << " " << m_ProcessItemsList.at(i).getAppName ();
+    }
+}
+
+double ProcessItemsList::getFreeRAM()
+{
+ const double dBytesToMB = 1024.0 * 1024.0;
+ // Declare a MEMORYSTATUSEX structure
+    MEMORYSTATUSEX status;
+    // Set the dwLength member to the size of the structure
+    status.dwLength = sizeof(status);
+    // Call the function to populate the structure
+    if (GlobalMemoryStatusEx(&status))
+    {
+        // The function succeeded, now you can access the data
+        // ullAvailPhys is the free physical RAM in bytes
+        long long free_ram_bytes = status.ullAvailPhys;
+        //std::cout << "Available Physical RAM: " << free_ram_bytes / dBytesToMB << " MB" << std::endl;
+        double dFreeRam = free_ram_bytes / dBytesToMB;
+        return dFreeRam;
+    }
+    else
+    {
+        // The function failed, you can get the error code
+        std::cerr << "Failed to retrieve memory status. Error code: " << GetLastError() << std::endl;
+    return 0.0;
     }
 }
 

@@ -59,7 +59,9 @@ MainWindow::MainWindow(QWidget* parent)
     m_statusBarMovie->start();
     m_statusBarMovie->setPaused(true); // Fermiamo l'animazione automatica
     //connect(m_statusBarMovie, SIGNAL(frameChanged(int)), this, SLOT(onFrameChanged(int)));
-    m_StatusBarLabel = new QLabel("", this); // Il secondo parametro indica il genitore
+    m_StatusBarRam = new QLabel("", this);
+    ui->statusBar->addPermanentWidget (m_StatusBarRam);
+    m_StatusBarLabel = new QLabel("", this);
     m_StatusBarLabel->setMovie (m_statusBarMovie);
     ui->statusBar->addPermanentWidget (m_StatusBarLabel);
     // m_StatusBarLabel->setFrameShape (QFrame::NoFrame);
@@ -107,6 +109,7 @@ MainWindow::MainWindow(QWidget* parent)
         this, &MainWindow::showListWidgetDisabledContextMenu);
     //connect(ui->menuConfigure, SIGNAL(triggered(QAction*)), this, SLOT(menuConfigure()));
     //connect(ui->actionConfigure_app, SIGNAL(triggered(QAction*)), this, SLOT(menuConfigure()));
+    printFreeRAM();
     timer = new QTimer(this);
     connectTimer ();
     timer->start(m_iRefreshRate);
@@ -156,7 +159,8 @@ void MainWindow::firstTimeConfiguration()
 
 void MainWindow::timerUpdate()
 {
-// TODO Chech if is visible
+    printFreeRAM ();
+    // TODO Chech if is visible
     //m_statusBarMovie->start();
     //m_statusBarMovie->setPaused(true); // Fermiamo l'animazione automatica
     int frameCount = m_statusBarMovie->frameCount();
@@ -838,6 +842,14 @@ bool MainWindow::writeListToFile()
     ui->statusBar->showMessage("Batch file successfully written to: " + universalPath1, 10000);
     connectTimer ();
     return true;
+}
+
+void MainWindow::printFreeRAM()
+{
+    QString sRAM = "Free RAM: ";
+    sRAM.append(QString::number(m_ProcessListEx.getFreeRAM () / 1024.0, 'f', 2));
+    sRAM.append(" GB");
+    m_StatusBarRam->setText (sRAM);
 }
 
 void MainWindow::on_listWidgetEnabled_itemClicked(QListWidgetItem * item)

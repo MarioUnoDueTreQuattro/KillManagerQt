@@ -41,6 +41,7 @@ private:
     Scheduler m_scheduler;
     QLabel *m_StatusBarLabel;
     QMovie *m_statusBarMovie;
+    QLabel *m_StatusBarRam;
     bool listContainsItemText(MyQListWidget*, const QString & );
     void updateSettings();
     void deleteOldBackups();
@@ -99,6 +100,7 @@ public slots:
     void loadListFromFile();
     bool writeListToFile();
 private slots:
+    void printFreeRAM();
     void onLogCompressionExecuted();
     void onLogCompressionChecked();
     void readStdOutput();
