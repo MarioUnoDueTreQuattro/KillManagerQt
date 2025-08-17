@@ -15,7 +15,7 @@ MyQListWidget::MyQListWidget(QWidget *)
     //this->setAcceptDrops(true);
     this->setDropIndicatorShown(true);
     this->setSelectionMode(QAbstractItemView::SingleSelection);
-    //setMouseTracking (true);
+    setMouseTracking (true);
 }
 
 void MyQListWidget::dropEvent(QDropEvent *event)
@@ -108,10 +108,14 @@ void MyQListWidget::mouseMoveEvent(QMouseEvent *event)
     QListWidgetItem* item = itemAt(event->pos());
     if (!item)
     {
-        LOG_MSG("index.isValid=false!!!!!!!!!");
+       // LOG_MSG("index.isValid=false!!!!!!!!!");
+    }
+    else
+    {
+        emit requestTooltip (item);
     }
     QListWidget::mouseMoveEvent(event);
-    //LOG_MSG("");
+ //LOG_MSG("");
     // QModelIndex index = indexAt(event->pos());
     // if (!index.isValid())
     // {

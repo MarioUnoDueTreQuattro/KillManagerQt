@@ -19,6 +19,8 @@ protected:
 signals:
     void itemsReordered();
     void reordering();
+    void requestTooltip( QListWidgetItem* item);
+
 };
 
 #endif // MYQLISTWIDGET_H

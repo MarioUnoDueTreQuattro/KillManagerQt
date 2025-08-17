@@ -97,8 +97,10 @@ MainWindow::MainWindow(QWidget* parent)
     ui->listWidgetDisabled->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->listWidgetEnabled, &MyQListWidget::reordering, this, &MainWindow::disconnectTimer);
     connect(ui->listWidgetEnabled, &MyQListWidget::itemsReordered, this, &MainWindow::writeListToFile);
+    connect(ui->listWidgetEnabled, &MyQListWidget::requestTooltip, this, &MainWindow::setListItemTooltip);
     connect(ui->listWidgetDisabled, &MyQListWidget::reordering, this, &MainWindow::disconnectTimer);
     connect(ui->listWidgetDisabled, &MyQListWidget::itemsReordered, this, &MainWindow::writeListToFile);
+    connect(ui->listWidgetDisabled, &MyQListWidget::requestTooltip, this, &MainWindow::setListItemTooltip);
     connect(ui->listWidgetEnabled, &QListWidget::customContextMenuRequested,
         this, &MainWindow::showListWidgetEnabledContextMenu);
     connect(ui->listWidgetDisabled, &QListWidget::customContextMenuRequested,
@@ -154,6 +156,7 @@ void MainWindow::firstTimeConfiguration()
 
 void MainWindow::timerUpdate()
 {
+// TODO Chech if is visible
     //m_statusBarMovie->start();
     //m_statusBarMovie->setPaused(true); // Fermiamo l'animazione automatica
     int frameCount = m_statusBarMovie->frameCount();
@@ -995,6 +998,25 @@ QString MainWindow::getListItemTooltip(QString newItemText)
     return sItemTooltip;
 }
 
+void MainWindow::setListItemTooltip(QListWidgetItem * item)
+{
+    if (item->toolTip () != "") return;
+    QString sItemText = item->text ();
+    bool bRunning = m_ProcessListEx.isRunning (sItemText);
+    if (!bRunning) return;
+    QString sToolTip = getListItemTooltip (sItemText);
+    item->setToolTip (sToolTip);
+    // Otteniamo la posizione del mouse relativa alla finestra principale
+    QPoint globalPos = QCursor::pos(); // this->mapFromGlobal(QCursor::pos());
+    // globalPos.setX (globalPos.rx () + 10);
+    // globalPos.setY (globalPos.ry () + 10);
+    QRect tooltipRect(0, 0, this->width(), this->height());
+    QToolTip::showText (globalPos, sToolTip, this, tooltipRect, 30000);
+    //QToolTip::showText (globalPos, sToolTip);
+    //QToolTip::showText (QCursor::pos(), sToolTip);
+    LOG_MSG("");
+}
+
 void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemText)
 {
     bool bFound = false;
@@ -1044,7 +1066,7 @@ void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemTe
             item->setIcon (m_ProcessListEx.getProcessIcon (newItemText.toStdString (), false));
             listWidget->addItem(item);
             // m_ProcessListEx.debugProcessItemsList();
-            item->setToolTip (getListItemTooltip(newItemText));
+            //item->setToolTip (getListItemTooltip(newItemText));
         }
         else
         {

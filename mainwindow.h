@@ -87,6 +87,7 @@ private:
     int m_iTimerUpdatesCount;
     int m_iRefreshRate;
     QString getListItemTooltip(QString );
+    void setListItemTooltip(QListWidgetItem* );
 protected:
     void closeEvent(QCloseEvent* event) override;
     void showEvent(QShowEvent *event) override;
