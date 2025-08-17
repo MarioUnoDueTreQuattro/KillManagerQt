@@ -3,7 +3,6 @@
 #include <QDebug>
 #include <QMessageBox>
 
-// TODO Rename WcharToString2 to WcharToString
 // Funzione per convertire una stringa di caratteri wide (WCHAR) in una stringa standard (char)
 std::string ProcessItemsList::WcharToString(const WCHAR* wstr)
 {

@@ -1014,7 +1014,7 @@ void MainWindow::setListItemTooltip(QListWidgetItem * item)
     QToolTip::showText (globalPos, sToolTip, this, tooltipRect, 30000);
     //QToolTip::showText (globalPos, sToolTip);
     //QToolTip::showText (QCursor::pos(), sToolTip);
-    LOG_MSG("");
+    //LOG_MSG("");
 }
 
 void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemText)
