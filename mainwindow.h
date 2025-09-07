@@ -100,7 +100,7 @@ public slots:
     void loadListFromFile();
     bool writeListToFile();
 private slots:
-    void printFreeRAM();
+    void updateFreeRAM();
     void onLogCompressionExecuted();
     void onLogCompressionChecked();
     void readStdOutput();

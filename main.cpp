@@ -4,6 +4,8 @@
 #include <QDateTime>
 #include <QSettings>
 #include <QDir>
+#include <QStyleFactory>
+#include <QPalette>
 
 //QByteArray setupLog(){
 // QString sLogFilePath = QCoreApplication::applicationDirPath();
@@ -90,6 +92,39 @@ int main(int argc, char* argv[])
     QApplication a(argc, argv);
     a.setOrganizationName("andreag");
     a.setApplicationName("KillManagerQt");
+    //QApplication::setStyle(QStyleFactory::create("Windows"));
+    // QApplication::setStyle(QStyleFactory::create("WindowsXP"));
+    // QApplication::setStyle(QStyleFactory::create("WindowsVista"));
+    // Detect available styles
+    QStringList availableStyles = QStyleFactory::keys();
+    qDebug() << "Available styles:" << availableStyles;
+    // Prefer WindowsVista (default look on Windows 7 with Aero)
+    if (availableStyles.contains("WindowsVista", Qt::CaseInsensitive))
+    {
+        QApplication::setStyle(QStyleFactory::create("WindowsVista"));
+        qDebug() << "Setting WindowsVista style";
+    }
+    else
+    {
+        QApplication::setStyle(QStyleFactory::create("Windows")); // Fallback for Classic/Basic theme
+        qDebug() << "Setting Windows style";
+    }
+    // Create a dark palette
+    QPalette darkPalette;
+    darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
+    darkPalette.setColor(QPalette::WindowText, Qt::white);
+    darkPalette.setColor(QPalette::Base, QColor(25, 25, 25));
+    darkPalette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+    darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+    darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+    darkPalette.setColor(QPalette::Text, Qt::white);
+    darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
+    darkPalette.setColor(QPalette::ButtonText, Qt::white);
+    darkPalette.setColor(QPalette::BrightText, Qt::red);
+    darkPalette.setColor(QPalette::Highlight, QColor(142, 45, 197).lighter());
+    darkPalette.setColor(QPalette::HighlightedText, Qt::black);
+    // Apply palette
+    a.setPalette(darkPalette);
     QSettings settings;
     bool bLogToFile = settings.value("Dialog/UseLogFile", false).toBool ();
     if (bLogToFile)
@@ -142,7 +177,7 @@ int main(int argc, char* argv[])
         logFileName += "\\";
         logFileName += QDateTime::currentDateTime().toString("'KillManagerQt_'yyyy-MM-dd_hh-mm-ss'.log'");
         qDebug() << "New Log FileName " << logFileName;
-        settings.setValue ("LogFileName",logFileName);
+        settings.setValue ("LogFileName", logFileName);
         settings.sync ();
         // Inizializza il file di log
         logFile = new QFile(logFileName);

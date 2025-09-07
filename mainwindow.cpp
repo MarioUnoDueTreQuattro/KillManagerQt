@@ -109,7 +109,7 @@ MainWindow::MainWindow(QWidget* parent)
         this, &MainWindow::showListWidgetDisabledContextMenu);
     //connect(ui->menuConfigure, SIGNAL(triggered(QAction*)), this, SLOT(menuConfigure()));
     //connect(ui->actionConfigure_app, SIGNAL(triggered(QAction*)), this, SLOT(menuConfigure()));
-    printFreeRAM();
+    updateFreeRAM();
     timer = new QTimer(this);
     connectTimer ();
     timer->start(m_iRefreshRate);
@@ -159,7 +159,7 @@ void MainWindow::firstTimeConfiguration()
 
 void MainWindow::timerUpdate()
 {
-    printFreeRAM ();
+    updateFreeRAM ();
     // TODO Chech if is visible
     //m_statusBarMovie->start();
     //m_statusBarMovie->setPaused(true); // Fermiamo l'animazione automatica
@@ -844,7 +844,7 @@ bool MainWindow::writeListToFile()
     return true;
 }
 
-void MainWindow::printFreeRAM()
+void MainWindow::updateFreeRAM()
 {
     QString sRAM = "Free RAM: ";
     sRAM.append(QString::number(m_ProcessListEx.getFreeRAM () / 1024.0, 'f', 2));
