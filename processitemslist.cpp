@@ -213,9 +213,11 @@ void ProcessItemsList::populateProcessList()
             // Convert the wide-character string (wchar_t*) to QString
             QString processName = QString::fromWCharArray(pe32.szExeFile);
             // Add the process name to the QListWidget
-            //qDebug() << __FUNCTION__ << processName;
+            // qDebug() << __FUNCTION__ << processName;
             ProcessItem newItem(processName, true);
             DWORD processId = pe32.th32ProcessID;
+            // EmptyWorkingSet(HANDLE(processId));
+            //SetProcessWorkingSetSizeEx(HANDLE(processId), (SIZE_T) -1, (SIZE_T) -1, QUOTA_LIMITS_HARDWS_MIN_ENABLE | QUOTA_LIMITS_HARDWS_MAX_ENABLE);
             bool bIsService = processIsService(processId);
             newItem.setIsService (bIsService);
             newItem.setProcessID (processId);
@@ -808,8 +810,8 @@ void ProcessItemsList::debugProcessItemsList ()
 
 double ProcessItemsList::getFreeRAM()
 {
- const double dBytesToMB = 1024.0 * 1024.0;
- // Declare a MEMORYSTATUSEX structure
+    const double dBytesToMB = 1024.0 * 1024.0;
+    // Declare a MEMORYSTATUSEX structure
     MEMORYSTATUSEX status;
     // Set the dwLength member to the size of the structure
     status.dwLength = sizeof(status);
@@ -827,7 +829,7 @@ double ProcessItemsList::getFreeRAM()
     {
         // The function failed, you can get the error code
         std::cerr << "Failed to retrieve memory status. Error code: " << GetLastError() << std::endl;
-    return 0.0;
+        return 0.0;
     }
 }
 
