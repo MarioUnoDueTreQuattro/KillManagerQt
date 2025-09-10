@@ -22,6 +22,7 @@ public:
 
     // Start zipping files in background
     void startZip(const QStringList &files, const QString &zipFileName);
+    void startLogZip();
 
 signals:
     void zipFinished(bool success, const QString &zipFileName);

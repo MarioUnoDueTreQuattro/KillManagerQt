@@ -89,7 +89,8 @@ void Scheduler::zipLogFiles()
 {
     LOG_MSG("Executing zipLogFiles...");
     ZipFiles zipLogs(this);
-    bool bZipped = zipLogs.zipLogFiles ();
+    bool bZipped = true;
+    zipLogs.startLogZip ();
     if (bZipped)
     {
         LOG_MSG("zipLogFiles finished successfully.");

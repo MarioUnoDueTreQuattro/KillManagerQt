@@ -150,6 +150,12 @@ bool ZipFiles::zipMultipleLogFiles(const QStringList& files)
     return success;
 }
 
+void ZipFiles::startLogZip()
+{
+    QFuture<bool> future = QtConcurrent::run(this, &ZipFiles::zipLogFiles);
+    watcher.setFuture(future);
+}
+
 void ZipFiles::startZip(const QStringList &files, const QString &zipFileName)
 {
     pendingFiles = files;
