@@ -49,7 +49,10 @@ SOURCES += main.cpp\
     applicationitemslist.cpp \
     processitemslist.cpp \
     utility.cpp \
-    scheduler.cpp
+    scheduler.cpp \
+    SimpleZipper/src/SimpleZipper.cxx \
+    SimpleZipper/miniz/miniz.c \
+    zipfiles.cpp
 
 HEADERS  += mainwindow.h \
     dialog.h \
@@ -58,7 +61,13 @@ HEADERS  += mainwindow.h \
     applicationitemslist.h \
     processitemslist.h \
     utility.h \
-    scheduler.h
+    scheduler.h \
+    SimpleZipper/src/SimpleZipper.h \
+    SimpleZipper/miniz/miniz.h \
+    zipfiles.h
+
+INCLUDEPATH += src \
+               miniz
 
 FORMS    += mainwindow.ui \
     dialog.ui \

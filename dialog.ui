@@ -214,7 +214,7 @@ Select the backup folder or type (or paste) the long path to the folder.</string
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>Open backup folder to delete old backup files.</string>
+           <string>Open backup folder to manage old batch files.</string>
           </property>
          </widget>
         </item>
