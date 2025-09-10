@@ -11,6 +11,7 @@
 ZipFiles::ZipFiles()
 {
     connect(&logWatcher, SIGNAL(finished()), this, SLOT(onLogFinished()));
+    connect(&batchWatcher, SIGNAL(finished()), this, SLOT(onBatchFinished()));
     // QString testFile = "KillManagerQttest.txt";
     // QString zipFile = "KillManagerQttest.zip";
     // createTestFile(testFile);
@@ -201,4 +202,31 @@ void ZipFiles::onLogFinished()
     emit zipLogFinished(success);
     // emit zipFinished(success, targetZip);
     this->deleteLater ();
+}
+
+void ZipFiles::onBatchFinished()
+{
+    qDebug() << __PRETTY_FUNCTION__;
+    bool success = batchWatcher.result();
+    emit zipBatchFinished(success);
+    // emit zipFinished(success, targetZip);
+    this->deleteLater ();
+}
+
+bool ZipFiles::zipBatchFiles()
+{
+}
+
+QString ZipFiles::prepareTempBatchFolder(const QStringList& files)
+{
+}
+
+bool ZipFiles::zipMultipleBatchFiles(const QStringList& files)
+{
+}
+
+void ZipFiles::startBatchZip()
+{
+    QFuture<bool> future = QtConcurrent::run(this, &ZipFiles::zipBatchFiles);
+    batchWatcher.setFuture(future);
 }
