@@ -10,9 +10,9 @@ class ZipFiles : public QObject
 {
     Q_OBJECT
 public:
-    ZipFiles();
+    //ZipFiles();
 public:
-    explicit ZipFiles(QObject *parent = nullptr);
+    explicit ZipFiles();
   // old zip functions
     void createTestFile(const QString&);
     void zipTestFile(const QString& , const QString& );
@@ -26,6 +26,7 @@ public:
 
 signals:
     void zipFinished(bool success, const QString &zipFileName);
+    void zipFinished(bool success);
     void zipProgress(int current, int total);
 
 private slots:
@@ -36,8 +37,8 @@ private:
     bool doZip(const QStringList &files, const QString &zipFileName);
 
     QFutureWatcher<bool> watcher;
-    QStringList pendingFiles;
-    QString targetZip;
+//    QStringList pendingFiles;
+//    QString targetZip;
 };
 
 #endif // ZIPFILES_H

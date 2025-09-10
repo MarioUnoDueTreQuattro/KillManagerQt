@@ -8,8 +8,7 @@
 #include <QMessageBox>
 #include <QDateTime>
 
-ZipFiles::ZipFiles(QObject *parent)
-    : QObject(parent)
+ZipFiles::ZipFiles()
 {
     connect(&watcher, SIGNAL(finished()), this, SLOT(onFinished()));
     // QString testFile = "KillManagerQttest.txt";
@@ -158,10 +157,10 @@ void ZipFiles::startLogZip()
 
 void ZipFiles::startZip(const QStringList &files, const QString &zipFileName)
 {
-    pendingFiles = files;
-    targetZip = zipFileName;
-    QFuture<bool> future = QtConcurrent::run(this, &ZipFiles::doZip, files, zipFileName);
-    watcher.setFuture(future);
+    // pendingFiles = files;
+    // targetZip = zipFileName;
+    // QFuture<bool> future = QtConcurrent::run(this, &ZipFiles::doZip, files, zipFileName);
+    // watcher.setFuture(future);
 }
 
 bool ZipFiles::doZip(const QStringList &files, const QString &zipFileName)
@@ -197,6 +196,9 @@ bool ZipFiles::doZip(const QStringList &files, const QString &zipFileName)
 
 void ZipFiles::onFinished()
 {
+    qDebug() << __PRETTY_FUNCTION__;
     bool success = watcher.result();
-    emit zipFinished(success, targetZip);
+    emit zipFinished(success);
+    // emit zipFinished(success, targetZip);
+    this->deleteLater ();
 }

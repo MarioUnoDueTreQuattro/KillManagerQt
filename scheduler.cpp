@@ -88,9 +88,11 @@ void Scheduler::executeProgram()
 void Scheduler::zipLogFiles()
 {
     LOG_MSG("Executing zipLogFiles...");
-    ZipFiles zipLogs(this);
+    ZipFiles *zip = new ZipFiles(); // parent = MainWindow o un QWidget
+    zip->startLogZip();
+//    ZipFiles zipLogs(this->parent ());
     bool bZipped = true;
-    zipLogs.startLogZip ();
+//    zipLogs.startLogZip ();
     if (bZipped)
     {
         LOG_MSG("zipLogFiles finished successfully.");
