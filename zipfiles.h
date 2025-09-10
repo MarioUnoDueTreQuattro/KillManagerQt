@@ -16,9 +16,9 @@ public:
   // old zip functions
     void createTestFile(const QString&);
     void zipTestFile(const QString& , const QString& );
-    QString prepareTempFolder(const QStringList& );
-    bool zipMultipleFiles(const QStringList& );
-    bool zipBackups();
+    QString prepareTempLogFolder(const QStringList& );
+    bool zipMultipleLogFiles(const QStringList& );
+    bool zipLogFiles();
 
     // Start zipping files in background
     void startZip(const QStringList &files, const QString &zipFileName);

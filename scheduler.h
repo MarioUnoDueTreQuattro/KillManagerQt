@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QProcess>
 #include <QTimer>
+#include "zipfiles.h"
 
 class Scheduler : public QObject
 {
@@ -18,6 +19,7 @@ public slots:
     void checkForExecution();
 private:
     void executeProgram();
+    void zipLogFiles();
     bool shouldExecute();
     QProcess *m_ZipProcess;
     QDateTime m_LastExecutionTime;

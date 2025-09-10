@@ -19,7 +19,7 @@ ZipFiles::ZipFiles(QObject *parent)
     // bool bBackuped = zipBackups ();
 }
 
-bool ZipFiles::zipBackups()
+bool ZipFiles::zipLogFiles()
 {
     // prepare list of files to copy to "temp_zip_folder"
     QStringList nameFilters;
@@ -48,7 +48,7 @@ bool ZipFiles::zipBackups()
     }
     if (filePaths.count () > 0)
     {
-        bool bBackuped = zipMultipleFiles (filePaths );
+        bool bBackuped = zipMultipleLogFiles (filePaths );
         if (bBackuped)
         {
             bool allDeleted = true;
@@ -122,7 +122,7 @@ void ZipFiles::zipTestFile(const QString& inputPath, const QString& outputPath)
     }
 }
 
-QString ZipFiles::prepareTempFolder(const QStringList& files)
+QString ZipFiles::prepareTempLogFolder(const QStringList& files)
 {
     QString tempFolder = "temp_zip_folder/";
     QDir().mkpath(tempFolder);
@@ -135,7 +135,7 @@ QString ZipFiles::prepareTempFolder(const QStringList& files)
     return tempFolder;
 }
 
-bool ZipFiles::zipMultipleFiles(const QStringList& files)
+bool ZipFiles::zipMultipleLogFiles(const QStringList& files)
 {
     QString sAppPath = QCoreApplication::applicationDirPath();
     sAppPath = QDir::toNativeSeparators (sAppPath);
@@ -144,7 +144,7 @@ bool ZipFiles::zipMultipleFiles(const QStringList& files)
     zipFileName += "\\";
     zipFileName += QDateTime::currentDateTime().toString("'Old_Log_Files_Backup_'yyyy-MM-dd_hh-mm-ss'.zip'");
     qDebug() << "New Log FileName " << zipFileName;
-    QString tempFolder = prepareTempFolder(files);
+    QString tempFolder = prepareTempLogFolder(files);
     bool success = SimpleZipper::zipFolder(tempFolder, zipFileName);
     QDir(tempFolder).removeRecursively(); // Clean up
     return success;

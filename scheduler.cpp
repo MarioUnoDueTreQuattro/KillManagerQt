@@ -42,7 +42,8 @@ void Scheduler::checkForExecution()
     }
     if (shouldExecute())
     {
-        executeProgram();
+        //executeProgram();
+        zipLogFiles();
     }
     else
     {
@@ -81,5 +82,26 @@ void Scheduler::executeProgram()
     else
     {
         LOG_MSG("Failed to start program. Error:" << m_ZipProcess->errorString());
+    }
+}
+
+void Scheduler::zipLogFiles()
+{
+    LOG_MSG("Executing zipLogFiles...");
+    ZipFiles zipLogs(this);
+    bool bZipped = zipLogs.zipLogFiles ();
+    if (bZipped)
+    {
+        LOG_MSG("zipLogFiles finished successfully.");
+        // Save the current time as the last execution time.
+        QSettings settings;
+        m_LastExecutionTime = QDateTime::currentDateTime();
+        settings.setValue("LogCompressionLastExecutionTime", m_LastExecutionTime);
+        // Emit the signal
+        emit logCompressionExecuted();
+    }
+    else
+    {
+        LOG_MSG("Failed to execute zipLogFiles. Error." );
     }
 }
