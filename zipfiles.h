@@ -27,6 +27,9 @@ public:
     void startLogZip();
     void startBatchZip();
 
+    void deleteOldBackups();
+
+
 signals:
     void zipLogFinished(bool success, const QString &zipFileName);
     void zipLogFinished(bool success);
@@ -40,7 +43,7 @@ private slots:
 private:
     // Function executed in background
     bool doZip(const QStringList &files, const QString &zipFileName);
-
+   static bool compareByLastModified(const QFileInfo &a, const QFileInfo &b);
     QFutureWatcher<bool> logWatcher;
     QFutureWatcher<bool> batchWatcher;
 //    QStringList pendingFiles;

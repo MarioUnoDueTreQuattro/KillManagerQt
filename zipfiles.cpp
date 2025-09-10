@@ -1,12 +1,16 @@
 #include "zipfiles.h"
 #include "SimpleZipper/src/SimpleZipper.h"
-#include <QFile>
 #include <QTextStream>
 #include <QDebug>
 #include <QDir>
+#include <QFile>
 #include <QTimer>
 #include <QMessageBox>
 #include <QDateTime>
+#include "utility.h"
+#include <QStandardPaths>
+#include <QFileInfoList>
+#include <cstdlib>
 
 ZipFiles::ZipFiles()
 {
@@ -229,4 +233,57 @@ void ZipFiles::startBatchZip()
 {
     QFuture<bool> future = QtConcurrent::run(this, &ZipFiles::zipBatchFiles);
     batchWatcher.setFuture(future);
+}
+
+void ZipFiles::deleteOldBackups()
+{
+    QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QSettings settings;
+    QString sBackupPath= settings.value("Dialog/Backup path", documentsPath).toString();
+    bool bDeleteOldBackups = settings.value("Dialog/DeleteOldBackups", true).toBool ();
+    int iBackupsCount = settings.value("Dialog/BackupsCount", 100).toInt();
+    int iBackupsDays = settings.value("Dialog/BackupsDays", 30).toInt();
+    if (bDeleteOldBackups == false) return;
+    QStringList nameFilters;
+    nameFilters << "*.bat";
+    QDir dir(sBackupPath);
+    QFileInfoList files = dir.entryInfoList(nameFilters, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+    int iFilesCount = files.count();
+    if (iFilesCount < iBackupsCount)
+    {
+        LOG_MSG("iFilesCount < iBackupsCount = " + QString::number (iFilesCount));
+        return;
+    }
+    files = dir.entryInfoList(nameFilters, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot); //, QDir::Time);
+    std::sort(files.begin(), files.end(), ZipFiles::compareByLastModified);
+    iFilesCount = files.size();
+    int filesToDelete = iFilesCount - iBackupsCount;
+    LOG_MSG("filesToDelete (if older than iBackupsDays) = " + QString::number (filesToDelete));
+    // Delete the oldest files (those after the first files to retain)
+    QDateTime backupDaysAgo = QDateTime::currentDateTime().addDays(-iBackupsDays);
+    QDateTime lastModified;
+    QString filePath;
+    for (int i = iBackupsCount; i < iFilesCount; ++i)
+    {
+        filePath = files[i].absoluteFilePath();
+        lastModified = files[i].lastModified ();
+        if (lastModified < backupDaysAgo)
+        {
+            if (QFile::remove(filePath))
+            {
+                qDebug() << "Deleted:" << filePath;
+            }
+            else
+            {
+                qDebug() << "Failed to delete:" << filePath;
+            }
+        }
+        else
+            LOG_MSG(filePath + " is newer than " + QString::number(iBackupsDays) + " days" );
+    }
+}
+
+bool ZipFiles::compareByLastModified(const QFileInfo &a, const QFileInfo &b)
+{
+    return a.lastModified() > b.lastModified(); // Newest first
 }
