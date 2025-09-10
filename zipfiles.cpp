@@ -223,10 +223,32 @@ bool ZipFiles::zipBatchFiles()
 
 QString ZipFiles::prepareTempBatchFolder(const QStringList& files)
 {
+    QString tempFolder = "temp_batch_folder/";
+    QDir().mkpath(tempFolder);
+    for (const QString& filePath : files)
+    {
+        QFileInfo fi(filePath);
+        QString destPath = tempFolder + fi.fileName();
+        QFile::copy(filePath, destPath);
+    }
+    return tempFolder;
 }
 
 bool ZipFiles::zipMultipleBatchFiles(const QStringList& files)
 {
+    QSettings settings;
+    QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QString sAppPath = settings.value("Dialog/Backup path", documentsPath).toString();
+    sAppPath = QDir::toNativeSeparators (sAppPath);
+    QString backupDirName = sAppPath;
+    QString zipFileName = backupDirName;
+    zipFileName += "\\";
+    zipFileName += QDateTime::currentDateTime().toString("'Old_Batch_Files_Backup_'yyyy-MM-dd_hh-mm-ss'.zip'");
+    qDebug() << "New Batch FileName " << zipFileName;
+    QString tempFolder = prepareTempBatchFolder (files);
+    bool success = SimpleZipper::zipFolder(tempFolder, zipFileName);
+    QDir(tempFolder).removeRecursively(); // Clean up
+    return success;
 }
 
 void ZipFiles::startBatchZip()
@@ -239,7 +261,7 @@ void ZipFiles::deleteOldBackups()
 {
     QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     QSettings settings;
-    QString sBackupPath= settings.value("Dialog/Backup path", documentsPath).toString();
+    QString sBackupPath = settings.value("Dialog/Backup path", documentsPath).toString();
     bool bDeleteOldBackups = settings.value("Dialog/DeleteOldBackups", true).toBool ();
     int iBackupsCount = settings.value("Dialog/BackupsCount", 100).toInt();
     int iBackupsDays = settings.value("Dialog/BackupsDays", 30).toInt();
