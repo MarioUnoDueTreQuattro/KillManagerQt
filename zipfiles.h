@@ -25,18 +25,18 @@ public:
     void startLogZip();
 
 signals:
-    void zipFinished(bool success, const QString &zipFileName);
-    void zipFinished(bool success);
+    void zipLogFinished(bool success, const QString &zipFileName);
+    void zipLogFinished(bool success);
     void zipProgress(int current, int total);
 
 private slots:
-    void onFinished();
+    void onLogFinished();
 
 private:
     // Function executed in background
     bool doZip(const QStringList &files, const QString &zipFileName);
 
-    QFutureWatcher<bool> watcher;
+    QFutureWatcher<bool> logWatcher;
 //    QStringList pendingFiles;
 //    QString targetZip;
 };

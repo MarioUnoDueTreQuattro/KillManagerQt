@@ -10,7 +10,7 @@
 
 ZipFiles::ZipFiles()
 {
-    connect(&watcher, SIGNAL(finished()), this, SLOT(onFinished()));
+    connect(&logWatcher, SIGNAL(finished()), this, SLOT(onLogFinished()));
     // QString testFile = "KillManagerQttest.txt";
     // QString zipFile = "KillManagerQttest.zip";
     // createTestFile(testFile);
@@ -152,7 +152,7 @@ bool ZipFiles::zipMultipleLogFiles(const QStringList& files)
 void ZipFiles::startLogZip()
 {
     QFuture<bool> future = QtConcurrent::run(this, &ZipFiles::zipLogFiles);
-    watcher.setFuture(future);
+    logWatcher.setFuture(future);
 }
 
 void ZipFiles::startZip(const QStringList &files, const QString &zipFileName)
@@ -194,11 +194,11 @@ bool ZipFiles::doZip(const QStringList &files, const QString &zipFileName)
     return true;
 }
 
-void ZipFiles::onFinished()
+void ZipFiles::onLogFinished()
 {
     qDebug() << __PRETTY_FUNCTION__;
-    bool success = watcher.result();
-    emit zipFinished(success);
+    bool success = logWatcher.result();
+    emit zipLogFinished(success);
     // emit zipFinished(success, targetZip);
     this->deleteLater ();
 }
