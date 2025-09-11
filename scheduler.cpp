@@ -89,10 +89,11 @@ void Scheduler::zipLogFiles()
 {
     LOG_MSG("Executing zipLogFiles...");
     ZipFiles *zip = new ZipFiles(); // parent = MainWindow o un QWidget
+    connect(zip, SIGNAL(zipLogFinished(bool)), this, SLOT(onLogFinished()));
     zip->startLogZip();
-//    ZipFiles zipLogs(this->parent ());
+    // ZipFiles zipLogs(this->parent ());
     bool bZipped = true;
-//    zipLogs.startLogZip ();
+    // zipLogs.startLogZip ();
     if (bZipped)
     {
         LOG_MSG("zipLogFiles finished successfully.");
@@ -100,8 +101,8 @@ void Scheduler::zipLogFiles()
         QSettings settings;
         m_LastExecutionTime = QDateTime::currentDateTime();
         settings.setValue("LogCompressionLastExecutionTime", m_LastExecutionTime);
-        // Emit the signal
-        emit logCompressionExecuted();
+        //        // Emit the signal
+        // emit logCompressionExecuted();
     }
     else
     {
@@ -113,18 +114,29 @@ void Scheduler::zipBatchFiles()
 {
     LOG_MSG("Executing zipBatchFiles...");
     ZipFiles *zip = new ZipFiles(); // parent = MainWindow o un QWidget
+    connect(zip, SIGNAL(zipBatchFinished(bool)), this, SLOT(onBatchFinished()));
     zip->startBatchZip ();
-//    ZipFiles zipLogs(this->parent ());
+    // ZipFiles zipLogs(this->parent ());
     bool bZipped = true;
-//    zipLogs.startLogZip ();
+    // zipLogs.startLogZip ();
     if (bZipped)
     {
         LOG_MSG("zipBatchFiles finished successfully.");
-        // Save the current time as the last execution time.
-        emit batchCompressionExecuted();
+        // emit batchCompressionExecuted();
     }
     else
     {
         LOG_MSG("Failed to execute zipBatchFiles. Error." );
     }
+}
+
+void Scheduler::onLogFinished()
+{
+    //        // Emit the signal
+    emit logCompressionExecuted();
+}
+
+void Scheduler::onBatchFinished()
+{
+    emit batchCompressionExecuted();
 }

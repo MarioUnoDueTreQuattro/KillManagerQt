@@ -18,6 +18,8 @@ public:
     void zipBatchFiles();
 public slots:
     void checkForExecution();
+    void onLogFinished();
+    void onBatchFinished();
 private:
     void executeProgram();
     void zipLogFiles();
