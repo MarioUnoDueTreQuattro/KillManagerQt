@@ -90,6 +90,7 @@ void Scheduler::zipLogFiles()
     LOG_MSG("Executing zipLogFiles...");
     ZipFiles *zip = new ZipFiles(); // parent = MainWindow o un QWidget
     connect(zip, SIGNAL(zipLogFinished(bool)), this, SLOT(onLogFinished()));
+    connect(zip, SIGNAL(zipLogFinished(bool)), zip, SLOT(deleteLater())); // cleanup
     zip->startLogZip();
     // ZipFiles zipLogs(this->parent ());
     bool bZipped = true;
@@ -115,6 +116,7 @@ void Scheduler::zipBatchFiles()
     LOG_MSG("Executing zipBatchFiles...");
     ZipFiles *zip = new ZipFiles(); // parent = MainWindow o un QWidget
     connect(zip, SIGNAL(zipBatchFinished(bool)), this, SLOT(onBatchFinished()));
+    connect(zip, SIGNAL(zipBatchFinished(bool)), zip, SLOT(deleteLater())); // cleanup
     zip->startBatchZip ();
     // ZipFiles zipLogs(this->parent ());
     bool bZipped = true;
