@@ -23,6 +23,11 @@ ZipFiles::ZipFiles()
     // bool bBackuped = zipBackups ();
 }
 
+ZipFiles::~ZipFiles()
+{
+LOG_MSG("Destructor: object correctly destroyed.");
+}
+
 bool ZipFiles::zipLogFiles()
 {
     // prepare list of files to copy to "temp_zip_folder"
@@ -205,7 +210,7 @@ void ZipFiles::onLogFinished()
     bool success = logWatcher.result();
     emit zipLogFinished(success);
     // emit zipFinished(success, targetZip);
-    this->deleteLater ();
+    //this->deleteLater ();
 }
 
 void ZipFiles::onBatchFinished()
@@ -214,7 +219,7 @@ void ZipFiles::onBatchFinished()
     bool success = batchWatcher.result();
     emit zipBatchFinished(success);
     // emit zipFinished(success, targetZip);
-    this->deleteLater ();
+    //this->deleteLater ();
 }
 
 bool ZipFiles::zipBatchFiles()

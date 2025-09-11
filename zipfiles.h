@@ -13,6 +13,7 @@ public:
     //ZipFiles();
 public:
     explicit ZipFiles();
+    ~ZipFiles();
     void createTestFile(const QString&);
     void zipTestFile(const QString& , const QString& );
     QString prepareTempLogFolder(const QStringList& );
