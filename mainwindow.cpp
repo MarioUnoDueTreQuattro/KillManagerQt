@@ -116,6 +116,7 @@ MainWindow::MainWindow(QWidget* parent)
     // Connect the signal from the scheduler to our slot in MainApp.
     connect(&m_scheduler, &Scheduler::logCompressionExecuted, this, &MainWindow::onLogCompressionExecuted); //&MainWindow::handleProgramExecuted);
     connect(&m_scheduler, &Scheduler::logCompressionChecked, this, &MainWindow::onLogCompressionChecked); //&MainWindow::handleProgramExecuted);
+    connect(&m_scheduler, &Scheduler::batchCompressionExecuted, this, &MainWindow::onBatchCompressionExecuted); //&MainWindow::handleProgramExecuted);
 }
 
 MainWindow::~MainWindow()
@@ -143,6 +144,12 @@ void MainWindow::onLogCompressionExecuted()
 {
     //LOG_MSG("");
     ui->statusBar->showMessage ("Old log files compressed in ZIP format", 30000);
+}
+
+void MainWindow::onBatchCompressionExecuted()
+{
+    //LOG_MSG("");
+    ui->statusBar->showMessage ("Old batch files compressed in ZIP format", 30000);
 }
 
 void MainWindow::onLogCompressionChecked()
@@ -938,6 +945,8 @@ void MainWindow::on_pushButtonAdd_clicked()
 }
 bool MainWindow::backupBatchFile()
 {
+    m_scheduler.zipBatchFiles ();
+    return true;
     updateSettings();
     deleteOldBackups ();
     // m_sKillFile.replace("\\", "\\\\");

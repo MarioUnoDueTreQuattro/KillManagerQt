@@ -101,6 +101,7 @@ public slots:
     bool writeListToFile();
 private slots:
     void updateFreeRAM();
+    void onBatchCompressionExecuted();
     void onLogCompressionExecuted();
     void onLogCompressionChecked();
     void readStdOutput();

@@ -219,6 +219,77 @@ void ZipFiles::onBatchFinished()
 
 bool ZipFiles::zipBatchFiles()
 {
+   QStringList filePaths;
+    QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QSettings settings;
+    QString sBackupPath = settings.value("Dialog/Backup path", documentsPath).toString();
+    bool bDeleteOldBackups = settings.value("Dialog/DeleteOldBackups", true).toBool ();
+    int iBackupsCount = settings.value("Dialog/BackupsCount", 100).toInt();
+    int iBackupsDays = settings.value("Dialog/BackupsDays", 30).toInt();
+    if (bDeleteOldBackups == false) return false;
+    QStringList nameFilters;
+    nameFilters << "*.bat";
+    QDir dir(sBackupPath);
+    QFileInfoList files = dir.entryInfoList(nameFilters, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+    int iFilesCount = files.count();
+    if (iFilesCount < iBackupsCount)
+    {
+        LOG_MSG("iFilesCount < iBackupsCount = " + QString::number (iFilesCount));
+        return false;
+    }
+    files = dir.entryInfoList(nameFilters, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot); //, QDir::Time);
+    std::sort(files.begin(), files.end(), ZipFiles::compareByLastModified);
+    iFilesCount = files.size();
+    int filesToDelete = iFilesCount - iBackupsCount;
+    LOG_MSG("filesToDelete (if older than iBackupsDays) = " + QString::number (filesToDelete));
+    // Delete the oldest files (those after the first files to retain)
+    QDateTime backupDaysAgo = QDateTime::currentDateTime().addDays(-iBackupsDays);
+    QDateTime lastModified;
+    QString filePath;
+    for (int i = iBackupsCount; i < iFilesCount; ++i)
+    {
+        filePath = files[i].absoluteFilePath();
+        lastModified = files[i].lastModified ();
+        if (lastModified < backupDaysAgo)
+        {
+           filePaths.append (filePath);
+        }
+        else
+            LOG_MSG(filePath + " is newer than " + QString::number(iBackupsDays) + " days" );
+    }
+    if (filePaths.count () > 0)
+    {
+        bool bBackuped = zipMultipleBatchFiles (filePaths );
+        if (bBackuped)
+        {
+            bool allDeleted = true;
+            for (const QFileInfo& fileInfo : files)
+            {
+                if (fileInfo.isFile())
+                {
+                    QFile file(fileInfo.absoluteFilePath());
+                    if (!file.remove())
+                    {
+                        qDebug() << "Errore durante l'eliminazione del file:" << fileInfo.absoluteFilePath();
+                        allDeleted = false;
+                    }
+                    else
+                    {
+                        //qDebug() << "File eliminato con successo:" << fileInfo.absoluteFilePath();
+                    }
+                }
+            }
+            if (allDeleted == false)
+                QMessageBox::critical( nullptr, "", "Critical error.\n" "Batch files in temporary folder deletion unsuccessfull." );
+        }
+        else QMessageBox::critical( nullptr, "", "Critical error.\n" "Batch files not backupep." );
+    }
+    else
+    {
+        //QMessageBox::information (this, "", "There aren't log files to be compressed." );
+        qDebug() << "There aren't Batch files to be compressed.";
+    }
+    return true;
 }
 
 QString ZipFiles::prepareTempBatchFolder(const QStringList& files)

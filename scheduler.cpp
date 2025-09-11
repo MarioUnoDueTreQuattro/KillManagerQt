@@ -108,3 +108,23 @@ void Scheduler::zipLogFiles()
         LOG_MSG("Failed to execute zipLogFiles. Error." );
     }
 }
+
+void Scheduler::zipBatchFiles()
+{
+    LOG_MSG("Executing zipBatchFiles...");
+    ZipFiles *zip = new ZipFiles(); // parent = MainWindow o un QWidget
+    zip->startBatchZip ();
+//    ZipFiles zipLogs(this->parent ());
+    bool bZipped = true;
+//    zipLogs.startLogZip ();
+    if (bZipped)
+    {
+        LOG_MSG("zipBatchFiles finished successfully.");
+        // Save the current time as the last execution time.
+        emit batchCompressionExecuted();
+    }
+    else
+    {
+        LOG_MSG("Failed to execute zipBatchFiles. Error." );
+    }
+}

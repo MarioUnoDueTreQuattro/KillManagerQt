@@ -15,6 +15,7 @@ class Scheduler : public QObject
 public:
     explicit Scheduler(QObject *parent = nullptr);
     ~Scheduler();
+    void zipBatchFiles();
 public slots:
     void checkForExecution();
 private:
@@ -26,6 +27,7 @@ private:
     QTimer *m_ZipTimer;
     int m_iInitialDelay;
 signals:
+    void batchCompressionExecuted();
     void logCompressionExecuted();
     void logCompressionChecked();
 };
