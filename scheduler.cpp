@@ -96,7 +96,7 @@ void Scheduler::zipLogFiles()
     // zipLogs.startLogZip ();
     if (bZipped)
     {
-        LOG_MSG("zipLogFiles finished successfully.");
+        // LOG_MSG("zipLogFiles finished successfully.");
         // Save the current time as the last execution time.
         QSettings settings;
         m_LastExecutionTime = QDateTime::currentDateTime();
@@ -106,7 +106,7 @@ void Scheduler::zipLogFiles()
     }
     else
     {
-        LOG_MSG("Failed to execute zipLogFiles. Error." );
+        // LOG_MSG("Failed to execute zipLogFiles. Error." );
     }
 }
 
@@ -121,12 +121,12 @@ void Scheduler::zipBatchFiles()
     // zipLogs.startLogZip ();
     if (bZipped)
     {
-        LOG_MSG("zipBatchFiles finished successfully.");
+        // LOG_MSG("zipBatchFiles finished successfully.");
         // emit batchCompressionExecuted();
     }
     else
     {
-        LOG_MSG("Failed to execute zipBatchFiles. Error." );
+        // LOG_MSG("Failed to execute zipBatchFiles. Error." );
     }
 }
 
