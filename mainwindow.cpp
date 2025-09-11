@@ -231,6 +231,8 @@ bool MainWindow::compareByLastModified(const QFileInfo &a, const QFileInfo &b)
 
 void MainWindow::deleteOldBackups()
 {
+    m_scheduler.zipBatchFiles ();
+    return;
     QSettings settings;
     bool bDeleteOldBackups = settings.value("Dialog/DeleteOldBackups", true).toBool ();
     int iBackupsCount = settings.value("Dialog/BackupsCount", 100).toInt();
@@ -945,8 +947,6 @@ void MainWindow::on_pushButtonAdd_clicked()
 }
 bool MainWindow::backupBatchFile()
 {
-    m_scheduler.zipBatchFiles ();
-    return true;
     updateSettings();
     deleteOldBackups ();
     // m_sKillFile.replace("\\", "\\\\");

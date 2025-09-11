@@ -234,7 +234,7 @@ Select the backup folder or type (or paste) the long path to the folder.</string
       <item>
        <widget class="QCheckBox" name="checkBoxDeleteBackups">
         <property name="text">
-         <string>Delete old backups</string>
+         <string>Compress old backups in ZIP format</string>
         </property>
        </widget>
       </item>

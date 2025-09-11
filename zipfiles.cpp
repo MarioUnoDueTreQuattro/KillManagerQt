@@ -219,7 +219,7 @@ void ZipFiles::onBatchFinished()
 
 bool ZipFiles::zipBatchFiles()
 {
-   QStringList filePaths;
+    QStringList filePaths;
     QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     QSettings settings;
     QString sBackupPath = settings.value("Dialog/Backup path", documentsPath).toString();
@@ -252,7 +252,7 @@ bool ZipFiles::zipBatchFiles()
         lastModified = files[i].lastModified ();
         if (lastModified < backupDaysAgo)
         {
-           filePaths.append (filePath);
+            filePaths.append (filePath);
         }
         else
             LOG_MSG(filePath + " is newer than " + QString::number(iBackupsDays) + " days" );
@@ -263,7 +263,7 @@ bool ZipFiles::zipBatchFiles()
         if (bBackuped)
         {
             bool allDeleted = true;
-            for (const QFileInfo& fileInfo : files)
+            for (const QFileInfo& fileInfo : filePaths)
             {
                 if (fileInfo.isFile())
                 {
