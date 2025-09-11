@@ -55,6 +55,7 @@ class ProcessItemsList : public QObject
 public:
     explicit ProcessItemsList(QObject *parent = 0);
     double getFreeRAM() ;
+   void setAllProcessesWorkingSetSize();
     QStringList getRunningProcesses();
     std::string getProcessNameByPid(DWORD);
     QString getParentProcessName(DWORD) ;

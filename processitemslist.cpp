@@ -264,6 +264,52 @@ void ProcessItemsList::populateProcessList()
     CloseHandle(hProcessSnap);
 }
 
+void ProcessItemsList::setAllProcessesWorkingSetSize()
+{
+    HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hProcessSnap == INVALID_HANDLE_VALUE)
+    {
+        // Handle error, e.g., show a message box
+        LOG_MSG( "error: hProcessSnap == INVALID_HANDLE_VALUE");
+        return;
+    }
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+    if (Process32First(hProcessSnap, &pe32))
+    {
+        do
+        {
+            // Convert the wide-character string (wchar_t*) to QString
+            QString processName = QString::fromWCharArray(pe32.szExeFile);
+            // Add the process name to the QListWidget
+            // qDebug() << __FUNCTION__ << processName;
+            DWORD processId = pe32.th32ProcessID;
+            if (processId == 0 || processId == 4) // Skip Idle and System
+                continue;
+            HANDLE hProcess = OpenProcess(PROCESS_SET_QUOTA | PROCESS_QUERY_INFORMATION, FALSE, processId);
+            if (hProcess != nullptr)
+            {
+                // WINBOOL bSuccess = SetProcessWorkingSetSize(hProcess, (SIZE_T) -1, (SIZE_T) -1);
+                WINBOOL bSuccess = EmptyWorkingSet(hProcess);
+                if (bSuccess)
+                {
+                    // EmptyWorkingSet(hProcess);
+                    SetProcessWorkingSetSizeEx(hProcess, (SIZE_T) -1, (SIZE_T) -1, QUOTA_LIMITS_HARDWS_MIN_ENABLE | QUOTA_LIMITS_HARDWS_MAX_ENABLE);
+                    //SetProcessWorkingSetSize(HANDLE(processId), (SIZE_T) -1, (SIZE_T) -1);
+                    LOG_MSG(processName + " PID " + QString::number (processId) + " SetProcessWorkingSetSizeEx");
+                }
+                else
+                {
+                    std::cout << processName.toStdString () << " " << "FAILED to trim working set. Error: " << GetLastError() << "\n";
+                }
+                CloseHandle(hProcess);
+            }
+        }
+        while (Process32Next(hProcessSnap, &pe32));
+    }
+    CloseHandle(hProcessSnap);
+}
+
 bool ProcessItemsList::killProcessAndChildsByNameEx(const std::string &processName)
 {
     QString qsProcessName, qsCurrentProcessName;

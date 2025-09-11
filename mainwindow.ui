@@ -167,6 +167,7 @@
     <addaction name="actionOpen_in_external_editor"/>
     <addaction name="actionExecute_in_terminal_window"/>
     <addaction name="actionOpen_log_file_in_external_editor"/>
+    <addaction name="actionReduce_RAM_memory_usage"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
     <addaction name="actionAbout_Qt"/>
@@ -258,6 +259,17 @@
    </property>
    <property name="statusTip">
     <string>Exit application</string>
+   </property>
+  </action>
+  <action name="actionReduce_RAM_memory_usage">
+   <property name="text">
+    <string>Reduce RAM memory usage</string>
+   </property>
+   <property name="toolTip">
+    <string>Reduce RAM memory usage of all applications using SetProcessWorkingSetSizeEx</string>
+   </property>
+   <property name="statusTip">
+    <string>Reduce RAM memory usage of all applications using SetProcessWorkingSetSizeEx</string>
    </property>
   </action>
  </widget>

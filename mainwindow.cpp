@@ -1327,7 +1327,12 @@ void MainWindow::on_pushButtonRun_clicked()
         // });
     }
 }
-void MainWindow::on_actionConfigure_app_triggered()
+
+void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
+{
+    m_ProcessListEx.setAllProcessesWorkingSetSize ();
+}
+    void MainWindow::on_actionConfigure_app_triggered()
 {
     menuConfigure();
 }
