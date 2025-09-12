@@ -281,11 +281,9 @@ void ProcessItemsList::setAllProcessesWorkingSetSize()
         {
             // Convert the wide-character string (wchar_t*) to QString
             QString processName = QString::fromWCharArray(pe32.szExeFile);
-            // Add the process name to the QListWidget
             // qDebug() << __FUNCTION__ << processName;
             DWORD processId = pe32.th32ProcessID;
-            if (processId == 0 || processId == 4) // Skip Idle and System
-                continue;
+            if (processId == 0 || processId == 4) continue; // Skip Idle and System
             HANDLE hProcess = OpenProcess(PROCESS_SET_QUOTA | PROCESS_QUERY_INFORMATION, FALSE, processId);
             if (hProcess != nullptr)
             {
@@ -293,10 +291,8 @@ void ProcessItemsList::setAllProcessesWorkingSetSize()
                 WINBOOL bSuccess = EmptyWorkingSet(hProcess);
                 if (bSuccess)
                 {
-                    // EmptyWorkingSet(hProcess);
                     SetProcessWorkingSetSizeEx(hProcess, (SIZE_T) -1, (SIZE_T) -1, QUOTA_LIMITS_HARDWS_MIN_ENABLE | QUOTA_LIMITS_HARDWS_MAX_ENABLE);
-                    //SetProcessWorkingSetSize(HANDLE(processId), (SIZE_T) -1, (SIZE_T) -1);
-                    LOG_MSG(processName + " PID " + QString::number (processId) + " SetProcessWorkingSetSizeEx");
+                    //LOG_MSG(processName + " PID " + QString::number (processId) + " SetProcessWorkingSetSizeEx");
                 }
                 else
                 {
@@ -306,8 +302,116 @@ void ProcessItemsList::setAllProcessesWorkingSetSize()
             }
         }
         while (Process32Next(hProcessSnap, &pe32));
+        emptySystemWorkingSets();
     }
     CloseHandle(hProcessSnap);
+}
+
+typedef enum _SYSTEM_MEMORY_LIST_COMMAND
+{
+    MemoryFlushModifiedList = 0,
+    MemoryPurgeStandbyList = 1,
+    MemoryPurgeLowPriorityStandbyList = 2,
+    MemoryEmptyWorkingSets = 4,
+    MemoryFlushModifiedListByColor = 5
+} SYSTEM_MEMORY_LIST_COMMAND;
+
+typedef NTSTATUS (NTAPI *PFN_NtSetSystemInformation)(
+    ULONG SystemInformationClass,
+    PVOID SystemInformation,
+    ULONG SystemInformationLength
+);
+
+#define SystemMemoryListInformation 0x50  // undocumented
+
+ bool ProcessItemsList::enablePrivilege(LPCTSTR privilegeName)
+{
+
+         HANDLE token = NULL;
+         if (!OpenProcessToken(GetCurrentProcess(),
+                               TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
+                               &token))
+         {
+             qDebug() << "OpenProcessToken failed:" << GetLastError();
+             return false;
+         }
+
+         TOKEN_PRIVILEGES tp;
+         LUID luid;
+         if (!LookupPrivilegeValue(NULL, privilegeName, &luid))
+         {
+             qDebug() << "LookupPrivilegeValue failed:" << GetLastError();
+             CloseHandle(token);
+             return false;
+         }
+
+         tp.PrivilegeCount = 1;
+         tp.Privileges[0].Luid = luid;
+         tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+         if (!AdjustTokenPrivileges(token, FALSE, &tp, sizeof(tp), NULL, NULL))
+         {
+             qDebug() << "AdjustTokenPrivileges call failed:" << GetLastError();
+             CloseHandle(token);
+             return false;
+         }
+
+         DWORD err = GetLastError();
+         CloseHandle(token);
+
+         if (err == ERROR_NOT_ALL_ASSIGNED)
+         {
+             qDebug() << "Privilege" << privilegeName << "not held by this process token!";
+             return false;
+         }
+
+         qDebug() << "Privilege" << privilegeName << "enabled successfully.";
+         return true;
+}
+
+bool ProcessItemsList::emptySystemWorkingSets()
+{
+    // Must enable BOTH privileges
+       bool ok1 = enablePrivilege(SE_INCREASE_QUOTA_NAME);
+       bool ok2 = enablePrivilege(SE_PROF_SINGLE_PROCESS_NAME);
+
+       if (!ok1 || !ok2)
+       {
+           qDebug() << "Failed to enable required privileges. Run as Administrator?";
+           return false;
+       }
+
+    HMODULE ntdll = GetModuleHandle(TEXT("ntdll.dll"));
+    if (!ntdll)
+    {
+        qDebug() << "Cannot load ntdll.dll";
+        return false;
+    }
+
+    PFN_NtSetSystemInformation pNtSetSystemInformation =
+        (PFN_NtSetSystemInformation)GetProcAddress(ntdll, "NtSetSystemInformation");
+
+    if (!pNtSetSystemInformation)
+    {
+        qDebug() << "Cannot resolve NtSetSystemInformation";
+        return false;
+    }
+
+    SYSTEM_MEMORY_LIST_COMMAND command = MemoryEmptyWorkingSets;
+    NTSTATUS status = pNtSetSystemInformation(
+        SystemMemoryListInformation,
+        &command,
+        sizeof(command)
+    );
+
+    if (status != 0)
+    {
+        qDebug() << "NtSetSystemInformation failed. NTSTATUS:" << QString("0x%1").arg(status, 8, 16, QLatin1Char('0')).toUpper();
+        return false;
+    }
+
+    qDebug() << "System working sets emptied successfully.";
+    return true;
 }
 
 bool ProcessItemsList::killProcessAndChildsByNameEx(const std::string &processName)

@@ -56,7 +56,9 @@ public:
     explicit ProcessItemsList(QObject *parent = 0);
     double getFreeRAM() ;
    void setAllProcessesWorkingSetSize();
-    QStringList getRunningProcesses();
+   bool emptySystemWorkingSets();
+   static bool enablePrivilege(LPCTSTR privilegeName);
+   QStringList getRunningProcesses();
     std::string getProcessNameByPid(DWORD);
     QString getParentProcessName(DWORD) ;
     void populateProcessList();
