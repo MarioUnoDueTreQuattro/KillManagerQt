@@ -307,13 +307,23 @@ void ProcessItemsList::setAllProcessesWorkingSetSize()
     CloseHandle(hProcessSnap);
 }
 
-typedef enum _SYSTEM_MEMORY_LIST_COMMAND
-{
-    MemoryFlushModifiedList = 0,
-    MemoryPurgeStandbyList = 1,
-    MemoryPurgeLowPriorityStandbyList = 2,
-    MemoryEmptyWorkingSets = 4,
-    MemoryFlushModifiedListByColor = 5
+//typedef enum _SYSTEM_MEMORY_LIST_COMMAND
+//{
+//    MemoryFlushModifiedList = 0,
+//    MemoryPurgeStandbyList = 1,
+//    MemoryPurgeLowPriorityStandbyList = 2,
+//    MemoryEmptyWorkingSets = 4,
+//    MemoryFlushModifiedListByColor = 5
+//} SYSTEM_MEMORY_LIST_COMMAND;
+
+typedef enum _SYSTEM_MEMORY_LIST_COMMAND {
+    MemoryCaptureAccessedBits             = 0,
+    MemoryCaptureAndResetAccessedBits     = 1,
+    MemoryEmptyWorkingSets                = 2,
+    MemoryFlushModifiedList               = 3,
+    MemoryPurgeStandbyList                = 4,
+    MemoryPurgeLowPriorityStandbyList     = 5,
+    MemoryCommandMax                      // Not a command, just a count
 } SYSTEM_MEMORY_LIST_COMMAND;
 
 typedef NTSTATUS (NTAPI *PFN_NtSetSystemInformation)(
@@ -324,92 +334,108 @@ typedef NTSTATUS (NTAPI *PFN_NtSetSystemInformation)(
 
 #define SystemMemoryListInformation 0x50  // undocumented
 
- bool ProcessItemsList::enablePrivilege(LPCTSTR privilegeName)
+bool ProcessItemsList::enablePrivilege(LPCTSTR privilegeName)
 {
-
-         HANDLE token = NULL;
-         if (!OpenProcessToken(GetCurrentProcess(),
-                               TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
-                               &token))
-         {
-             qDebug() << "OpenProcessToken failed:" << GetLastError();
-             return false;
-         }
-
-         TOKEN_PRIVILEGES tp;
-         LUID luid;
-         if (!LookupPrivilegeValue(NULL, privilegeName, &luid))
-         {
-             qDebug() << "LookupPrivilegeValue failed:" << GetLastError();
-             CloseHandle(token);
-             return false;
-         }
-
-         tp.PrivilegeCount = 1;
-         tp.Privileges[0].Luid = luid;
-         tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-
-         if (!AdjustTokenPrivileges(token, FALSE, &tp, sizeof(tp), NULL, NULL))
-         {
-             qDebug() << "AdjustTokenPrivileges call failed:" << GetLastError();
-             CloseHandle(token);
-             return false;
-         }
-
-         DWORD err = GetLastError();
-         CloseHandle(token);
-
-         if (err == ERROR_NOT_ALL_ASSIGNED)
-         {
-             qDebug() << "Privilege" << privilegeName << "not held by this process token!";
-             return false;
-         }
-
-         qDebug() << "Privilege" << privilegeName << "enabled successfully.";
-         return true;
+    HANDLE token = NULL;
+    if (!OpenProcessToken(GetCurrentProcess(),
+        TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
+        &token))
+    {
+        qDebug() << "OpenProcessToken failed:" << GetLastError();
+        return false;
+    }
+    TOKEN_PRIVILEGES tp;
+    LUID luid;
+    if (!LookupPrivilegeValue(NULL, privilegeName, &luid))
+    {
+        qDebug() << "LookupPrivilegeValue failed:" << GetLastError();
+        CloseHandle(token);
+        return false;
+    }
+    tp.PrivilegeCount = 1;
+    tp.Privileges[0].Luid = luid;
+    tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+    if (!AdjustTokenPrivileges(token, FALSE, &tp, sizeof(tp), NULL, NULL))
+    {
+        qDebug() << "AdjustTokenPrivileges call failed:" << GetLastError();
+        CloseHandle(token);
+        return false;
+    }
+    DWORD err = GetLastError();
+    CloseHandle(token);
+    if (err == ERROR_NOT_ALL_ASSIGNED)
+    {
+        qDebug() << "Privilege" << privilegeName << "not held by this process token!";
+        return false;
+    }
+    qDebug() << "Privilege" << privilegeName << "enabled successfully.";
+    return true;
 }
 
 bool ProcessItemsList::emptySystemWorkingSets()
 {
     // Must enable BOTH privileges
-       bool ok1 = enablePrivilege(SE_INCREASE_QUOTA_NAME);
-       bool ok2 = enablePrivilege(SE_PROF_SINGLE_PROCESS_NAME);
-
-       if (!ok1 || !ok2)
-       {
-           qDebug() << "Failed to enable required privileges. Run as Administrator?";
-           return false;
-       }
-
+    bool ok1 = enablePrivilege(SE_INCREASE_QUOTA_NAME);
+    bool ok2 = enablePrivilege(SE_PROF_SINGLE_PROCESS_NAME);
+    if (!ok1 || !ok2)
+    {
+        qDebug() << "Failed to enable required privileges. Run as Administrator?";
+        return false;
+    }
     HMODULE ntdll = GetModuleHandle(TEXT("ntdll.dll"));
     if (!ntdll)
     {
         qDebug() << "Cannot load ntdll.dll";
         return false;
     }
-
     PFN_NtSetSystemInformation pNtSetSystemInformation =
         (PFN_NtSetSystemInformation)GetProcAddress(ntdll, "NtSetSystemInformation");
-
     if (!pNtSetSystemInformation)
     {
         qDebug() << "Cannot resolve NtSetSystemInformation";
         return false;
     }
-
     SYSTEM_MEMORY_LIST_COMMAND command = MemoryEmptyWorkingSets;
     NTSTATUS status = pNtSetSystemInformation(
-        SystemMemoryListInformation,
-        &command,
-        sizeof(command)
-    );
-
+            SystemMemoryListInformation,
+            &command,
+            sizeof(command)
+        );
+    command = MemoryFlushModifiedList;
+    status = pNtSetSystemInformation(
+            SystemMemoryListInformation,
+            &command,
+            sizeof(command)
+        );
+    command = MemoryPurgeStandbyList;
+    status = pNtSetSystemInformation(
+            SystemMemoryListInformation,
+            &command,
+            sizeof(command)
+        );
+    command = MemoryPurgeLowPriorityStandbyList;
+    status = pNtSetSystemInformation(
+            SystemMemoryListInformation,
+            &command,
+            sizeof(command)
+        );
+    command = MemoryPurgeStandbyList;
+    status = pNtSetSystemInformation(
+            SystemMemoryListInformation,
+            &command,
+            sizeof(command)
+        );
+//    command = MemoryCaptureAndResetAccessedBits;
+//    status = pNtSetSystemInformation(
+//            SystemMemoryListInformation,
+//            &command,
+//            sizeof(command)
+//        );
     if (status != 0)
     {
         qDebug() << "NtSetSystemInformation failed. NTSTATUS:" << QString("0x%1").arg(status, 8, 16, QLatin1Char('0')).toUpper();
         return false;
     }
-
     qDebug() << "System working sets emptied successfully.";
     return true;
 }
