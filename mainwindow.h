@@ -4,7 +4,7 @@
 #include "scheduler.h"
 #include "utility.h"
 #include "myqlistwidget.h"
-#include "applicationitemslist.h"
+//#include "applicationitemslist.h"
 #include "processitemslist.h"
 #include "addexedialog.h"
 #include "dialog.h"

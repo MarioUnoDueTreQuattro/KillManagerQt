@@ -123,39 +123,3 @@ inline void writeToLogFile(const QString& message, const char* fileName, const c
 
 //#endif // MYUTILITY_H
 
-#ifndef RUNNINGPROCESSESLISTEX_H
-#define RUNNINGPROCESSESLISTEX_H
-
-class RunningProcessesListEx : public QObject
-{
-    Q_OBJECT
-public:
-    explicit RunningProcessesListEx(QObject *parent = 0);
-    bool enableDebugPrivileges();
-   void populateProcessList();
-    QStringList getProcessList() const;
-    bool isRunning (QString);
-    bool killProcessByName(const std::wstring& targetName);
-    bool killProcessByName(QString);
-    bool killProcessAndChildsByNameEx(const std::string& processName);
-    bool killProcessAndChildsByNameEx(QString);
-    bool killProcessTree(DWORD parentPid);
-    bool killProcessAndChildsByName(const std::string& processName);
-    bool killProcessAndChildsByName(QString);
-    QString getProcessPath(HANDLE hProcess);
-    HANDLE getProcessHandle(const std::string& executablePath);
-    int debugProcessesMemory();
-    QIcon getProcessIcon(std::string, bool);
-    HICON getIconFromExecutable(const std::string& executablePath);
-    bool processIsService(DWORD processId);
-
-private:
-    QStringList processList;
-    std::string WcharToString(const WCHAR* wstr);
-    std::string wideCharToString(const WCHAR* wideString);
-signals:
-
-public slots:
-};
-
-#endif // RUNNINGPROCESSESLISTEX_H

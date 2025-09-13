@@ -90,6 +90,7 @@ public:
     bool moveApplicationItem(QString, bool );
     void debugProcessList();
     void debugProcessItemsList();
+    int debugProcessesMemory();
 
     // Struttura per passare i dati. Puoi usarla anche qui, se la dichiari globalmente o in un namespace.
     struct WindowInfo
@@ -107,6 +108,7 @@ public:
     };
 private:
     std::string WcharToString(const WCHAR* wstr);
+    std::string wideCharToString(const WCHAR* wideString);
     QList<ProcessItem> m_ProcessItemsList;
     //QStringList m_ProcessList;
     QList<ProcessItem> m_ProcessList;

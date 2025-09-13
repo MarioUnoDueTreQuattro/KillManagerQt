@@ -3,6 +3,23 @@
 #include <QDebug>
 #include <QMessageBox>
 
+// Function to convert WCHAR* to std::string
+std::string ProcessItemsList::wideCharToString(const WCHAR* wideString)
+{
+    if (wideString == nullptr)
+    {
+        return "";
+    }
+    int bufferSize = WideCharToMultiByte(CP_UTF8, 0, wideString, -1, NULL, 0, NULL, NULL);
+    if (bufferSize <= 0)
+    {
+        return "";
+    }
+    std::string convertedString(bufferSize - 1, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, wideString, -1, &convertedString[0], bufferSize, NULL, NULL);
+    return convertedString;
+}
+
 // Funzione per convertire una stringa di caratteri wide (WCHAR) in una stringa standard (char)
 std::string ProcessItemsList::WcharToString(const WCHAR* wstr)
 {
@@ -998,6 +1015,52 @@ void ProcessItemsList::debugProcessItemsList ()
     {
         qDebug() << i << " " << m_ProcessItemsList.at(i).getAppName ();
     }
+}
+
+int ProcessItemsList::debugProcessesMemory()
+{
+    DWORD processIds[1024];
+    DWORD bytesReturned;
+    // Ottiene i PID di tutti i processi attivi
+    if (!EnumProcesses(processIds, sizeof(processIds), &bytesReturned))
+    {
+        LOG_MSG("Errore in EnumProcesses.");
+        return 1;
+    }
+    int numProcesses = bytesReturned / sizeof(DWORD);
+    qDebug() << "Elenco dei processi attivi:" ;
+    qDebug() << "--------------------------------------------------------" ;
+    qDebug() << "PID\t\tNome\t\tMemoria (MB)" ;
+    qDebug() << "--------------------------------------------------------" ;
+    for (int i = 0; i < numProcesses; i++)
+    {
+        DWORD pid = processIds[i];
+        // Apri un handle per il processo con i diritti necessari
+        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+        if (hProcess != NULL)
+        {
+            // Ottieni il nome del processo
+            HMODULE hMod;
+            DWORD cbNeeded;
+            WCHAR processName[MAX_PATH] = L"Sconosciuto"; // Valore predefinito
+            if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeeded))
+            {
+                GetModuleBaseName(hProcess, hMod, processName, sizeof(processName) / sizeof(WCHAR));
+            }
+            // Ottieni l'utilizzo della memoria
+            PROCESS_MEMORY_COUNTERS pmc;
+            if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc)))
+            {
+                // Calcola la memoria di lavoro in megabyte
+                double memoryUsageMB = pmc.WorkingSetSize / (1024.0 * 1024.0);
+                // Stampa il PID, il nome e l'utilizzo della memoria
+                qDebug() << pid << "\t\t" << QString::fromWCharArray (processName) << "\t\t" << memoryUsageMB ;
+            }
+            // Chiudi l'handle del processo
+            CloseHandle(hProcess);
+        }
+    }
+    return 0;
 }
 
 double ProcessItemsList::getFreeRAM()
