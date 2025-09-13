@@ -386,7 +386,7 @@ bool ProcessItemsList::enablePrivilege(LPCTSTR privilegeName)
         qDebug() << "Privilege" << privilegeName << "not held by this process token!";
         return false;
     }
-    qDebug() << "Privilege" << privilegeName << "enabled successfully.";
+    //qDebug() << "Privilege" << privilegeName << "enabled successfully.";
     return true;
 }
 
@@ -461,7 +461,7 @@ bool ProcessItemsList::emptySystemWorkingSets()
         qDebug() << "NtSetSystemInformation failed. NTSTATUS:" << QString("0x%1").arg(status, 8, 16, QLatin1Char('0')).toUpper();
         return false;
     }
-    qDebug() << "System working sets emptied successfully.";
+    //LOG_MSG("Memory usage reduced successfully.");
     result = (status == 0); // NTSTATUS 0 = STATUS_SUCCESS
     emit emptySystemWorkingSetsFinished(result);
     return result;

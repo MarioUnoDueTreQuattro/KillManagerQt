@@ -60,7 +60,6 @@ public:
     static bool enablePrivilege(LPCTSTR privilegeName);
     // Static wrapper for QtConcurrent
     static void runEmptySystemWorkingSets(ProcessItemsList *self);
-
     QStringList getRunningProcesses();
     std::string getProcessNameByPid(DWORD);
     QString getParentProcessName(DWORD) ;

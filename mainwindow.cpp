@@ -1332,6 +1332,7 @@ void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
 {
     ui->actionReduce_RAM_memory_usage->setDisabled (true);
     ui->statusBar->showMessage ("Memory cleanup started in a background thread...", 10000);
+    LOG_MSG("Memory cleanup started in a background thread...");
     // m_ProcessListEx.setAllProcessesWorkingSetSize ();
     connect(&m_ProcessListEx, SIGNAL(emptySystemWorkingSetsFinished(bool)),
         this, SLOT(onEmptySystemWSFinished(bool)));
@@ -1341,11 +1342,17 @@ void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
 void MainWindow::onEmptySystemWSFinished(bool success)
 {
     if (success)
+    {
         //QMessageBox::information(this, "Done", "System working sets emptied successfully.");
         ui->statusBar->showMessage ("Memory usage reduced successfully.", 10000);
+        LOG_MSG("Memory usage reduced successfully.");
+    }
     else
+    {
         //QMessageBox::warning(this, "Error", "Failed to empty system working sets.");
         ui->statusBar->showMessage ("Failed to reduce memory usage.", 10000);
+        LOG_MSG("Failed to reduce memory usage.");
+   }
     ui->actionReduce_RAM_memory_usage->setDisabled (false);
 }
 
