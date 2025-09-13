@@ -55,10 +55,13 @@ class ProcessItemsList : public QObject
 public:
     explicit ProcessItemsList(QObject *parent = 0);
     double getFreeRAM() ;
-   void setAllProcessesWorkingSetSize();
-   bool emptySystemWorkingSets();
-   static bool enablePrivilege(LPCTSTR privilegeName);
-   QStringList getRunningProcesses();
+    void setAllProcessesWorkingSetSize();
+    bool emptySystemWorkingSets();
+    static bool enablePrivilege(LPCTSTR privilegeName);
+    // Static wrapper for QtConcurrent
+    static void runEmptySystemWorkingSets(ProcessItemsList *self);
+
+    QStringList getRunningProcesses();
     std::string getProcessNameByPid(DWORD);
     QString getParentProcessName(DWORD) ;
     void populateProcessList();
@@ -119,6 +122,8 @@ private:
     // Funzione helper unificata per EnumWindowsCallback
     bool getWindowInfo(DWORD processId, QString& windowTitle);
     QString getProcessFullPath(DWORD processId);
+signals:
+    void emptySystemWorkingSetsFinished(bool success);
 };
 
 #endif // PROCESSITEMSLIST_H

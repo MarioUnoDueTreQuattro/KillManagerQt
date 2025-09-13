@@ -262,14 +262,18 @@
    </property>
   </action>
   <action name="actionReduce_RAM_memory_usage">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/img/icons8-memory-slot-48.png</normaloff>:/icons/img/icons8-memory-slot-48.png</iconset>
+   </property>
    <property name="text">
     <string>Reduce RAM memory usage</string>
    </property>
    <property name="toolTip">
-    <string>Reduce RAM memory usage of all applications using SetProcessWorkingSetSizeEx</string>
+    <string>Reduce RAM memory usage of all applications and system</string>
    </property>
    <property name="statusTip">
-    <string>Reduce RAM memory usage of all applications using SetProcessWorkingSetSizeEx</string>
+    <string>Reduce RAM memory usage of all applications and system</string>
    </property>
   </action>
  </widget>

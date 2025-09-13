@@ -1330,12 +1330,30 @@ void MainWindow::on_pushButtonRun_clicked()
 
 void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
 {
-    m_ProcessListEx.setAllProcessesWorkingSetSize ();
+    ui->actionReduce_RAM_memory_usage->setDisabled (true);
+    ui->statusBar->showMessage ("Memory cleanup started in a background thread...", 10000);
+    // m_ProcessListEx.setAllProcessesWorkingSetSize ();
+    connect(&m_ProcessListEx, SIGNAL(emptySystemWorkingSetsFinished(bool)),
+        this, SLOT(onEmptySystemWSFinished(bool)));
+    QtConcurrent::run(&ProcessItemsList::runEmptySystemWorkingSets, &m_ProcessListEx);
 }
-    void MainWindow::on_actionConfigure_app_triggered()
+
+void MainWindow::onEmptySystemWSFinished(bool success)
+{
+    if (success)
+        //QMessageBox::information(this, "Done", "System working sets emptied successfully.");
+        ui->statusBar->showMessage ("Memory usage reduced successfully.", 10000);
+    else
+        //QMessageBox::warning(this, "Error", "Failed to empty system working sets.");
+        ui->statusBar->showMessage ("Failed to reduce memory usage.", 10000);
+    ui->actionReduce_RAM_memory_usage->setDisabled (false);
+}
+
+void MainWindow::on_actionConfigure_app_triggered()
 {
     menuConfigure();
 }
+
 void MainWindow::on_actionAbout_Qt_triggered()
 {
     QMessageBox::aboutQt(this);

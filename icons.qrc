@@ -21,5 +21,6 @@
         <file>img/AGau.gif</file>
         <file>img/icons8-log-48.png</file>
         <file>img/icons8-quit-48.png</file>
+        <file>img/icons8-memory-slot-48.png</file>
     </qresource>
 </RCC>

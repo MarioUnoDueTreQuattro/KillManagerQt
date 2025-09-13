@@ -121,6 +121,7 @@ private slots:
     void on_actionOpen_log_file_in_external_editor_triggered();
     void on_actionReduce_RAM_memory_usage_triggered();
     void on_actionExit_triggered();
+    void onEmptySystemWSFinished(bool success);
 };
 
 #endif // MAINWINDOW_H

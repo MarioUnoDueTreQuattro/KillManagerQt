@@ -283,7 +283,7 @@ void ProcessItemsList::setAllProcessesWorkingSetSize()
             QString processName = QString::fromWCharArray(pe32.szExeFile);
             // qDebug() << __FUNCTION__ << processName;
             DWORD processId = pe32.th32ProcessID;
-            if (processId == 0 || processId == 4) continue; // Skip Idle and System
+            if (processId == 0 );//|| processId == 4) continue; // Skip Idle and System
             HANDLE hProcess = OpenProcess(PROCESS_SET_QUOTA | PROCESS_QUERY_INFORMATION, FALSE, processId);
             if (hProcess != nullptr)
             {
@@ -309,20 +309,21 @@ void ProcessItemsList::setAllProcessesWorkingSetSize()
 
 //typedef enum _SYSTEM_MEMORY_LIST_COMMAND
 //{
-//    MemoryFlushModifiedList = 0,
-//    MemoryPurgeStandbyList = 1,
-//    MemoryPurgeLowPriorityStandbyList = 2,
-//    MemoryEmptyWorkingSets = 4,
-//    MemoryFlushModifiedListByColor = 5
+// MemoryFlushModifiedList = 0,
+// MemoryPurgeStandbyList = 1,
+// MemoryPurgeLowPriorityStandbyList = 2,
+// MemoryEmptyWorkingSets = 4,
+// MemoryFlushModifiedListByColor = 5
 //} SYSTEM_MEMORY_LIST_COMMAND;
 
-typedef enum _SYSTEM_MEMORY_LIST_COMMAND {
-    MemoryCaptureAccessedBits             = 0,
-    MemoryCaptureAndResetAccessedBits     = 1,
-    MemoryEmptyWorkingSets                = 2,
-    MemoryFlushModifiedList               = 3,
-    MemoryPurgeStandbyList                = 4,
-    MemoryPurgeLowPriorityStandbyList     = 5,
+typedef enum _SYSTEM_MEMORY_LIST_COMMAND
+{
+    MemoryCaptureAccessedBits = 0,
+    MemoryCaptureAndResetAccessedBits = 1,
+    MemoryEmptyWorkingSets = 2,
+    MemoryFlushModifiedList = 3,
+    MemoryPurgeStandbyList = 4,
+    MemoryPurgeLowPriorityStandbyList = 5,
     MemoryCommandMax                      // Not a command, just a count
 } SYSTEM_MEMORY_LIST_COMMAND;
 
@@ -374,18 +375,21 @@ bool ProcessItemsList::enablePrivilege(LPCTSTR privilegeName)
 
 bool ProcessItemsList::emptySystemWorkingSets()
 {
+    bool result = false;
     // Must enable BOTH privileges
     bool ok1 = enablePrivilege(SE_INCREASE_QUOTA_NAME);
     bool ok2 = enablePrivilege(SE_PROF_SINGLE_PROCESS_NAME);
     if (!ok1 || !ok2)
     {
         qDebug() << "Failed to enable required privileges. Run as Administrator?";
+        emit emptySystemWorkingSetsFinished(false);
         return false;
     }
     HMODULE ntdll = GetModuleHandle(TEXT("ntdll.dll"));
     if (!ntdll)
     {
         qDebug() << "Cannot load ntdll.dll";
+        emit emptySystemWorkingSetsFinished(false);
         return false;
     }
     PFN_NtSetSystemInformation pNtSetSystemInformation =
@@ -393,15 +397,16 @@ bool ProcessItemsList::emptySystemWorkingSets()
     if (!pNtSetSystemInformation)
     {
         qDebug() << "Cannot resolve NtSetSystemInformation";
+        emit emptySystemWorkingSetsFinished(false);
         return false;
     }
-    SYSTEM_MEMORY_LIST_COMMAND command = MemoryEmptyWorkingSets;
+    SYSTEM_MEMORY_LIST_COMMAND command = MemoryFlushModifiedList;
     NTSTATUS status = pNtSetSystemInformation(
             SystemMemoryListInformation,
             &command,
             sizeof(command)
         );
-    command = MemoryFlushModifiedList;
+    command = MemoryEmptyWorkingSets;
     status = pNtSetSystemInformation(
             SystemMemoryListInformation,
             &command,
@@ -419,25 +424,36 @@ bool ProcessItemsList::emptySystemWorkingSets()
             &command,
             sizeof(command)
         );
-    command = MemoryPurgeStandbyList;
+    command = MemoryCaptureAndResetAccessedBits;
     status = pNtSetSystemInformation(
             SystemMemoryListInformation,
             &command,
             sizeof(command)
         );
-//    command = MemoryCaptureAndResetAccessedBits;
-//    status = pNtSetSystemInformation(
-//            SystemMemoryListInformation,
-//            &command,
-//            sizeof(command)
-//        );
+    // Open the "System" process (PID 4 on most systems)
+    HANDLE hSystem = OpenProcess(PROCESS_SET_QUOTA | PROCESS_QUERY_INFORMATION,
+            FALSE, 4);
+    if (hSystem)
+    {
+        // Trim PID 4 working set (system WS)
+        SetProcessWorkingSetSize(hSystem, (SIZE_T) -1, (SIZE_T) -1);
+        CloseHandle(hSystem);
+    }
     if (status != 0)
     {
         qDebug() << "NtSetSystemInformation failed. NTSTATUS:" << QString("0x%1").arg(status, 8, 16, QLatin1Char('0')).toUpper();
         return false;
     }
     qDebug() << "System working sets emptied successfully.";
-    return true;
+    result = (status == 0); // NTSTATUS 0 = STATUS_SUCCESS
+    emit emptySystemWorkingSetsFinished(result);
+    return result;
+}
+
+void ProcessItemsList::runEmptySystemWorkingSets(ProcessItemsList *self)
+{
+    if (self)
+        self->emptySystemWorkingSets();
 }
 
 bool ProcessItemsList::killProcessAndChildsByNameEx(const std::string &processName)
