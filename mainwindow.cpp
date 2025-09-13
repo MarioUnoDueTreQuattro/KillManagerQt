@@ -147,11 +147,11 @@ void MainWindow::changeEvent(QEvent *event)
     {
         if (isMinimized())
         {
-            qDebug() << "MainWindow was minimized";
+            // qDebug() << "MainWindow was minimized";
         }
         else
         {
-            qDebug() << "MainWindow state changed (restored/maximized)";
+            // qDebug() << "MainWindow state changed (restored/maximized)";
             timerUpdate ();
         }
     }
@@ -159,12 +159,12 @@ void MainWindow::changeEvent(QEvent *event)
     {
         if (isActiveWindow())
         {
-            qDebug() << "MainWindow gained focus";
+            // qDebug() << "MainWindow gained focus";
             timerUpdate ();
         }
         else
         {
-            qDebug() << "MainWindow lost focus (another window is active)";
+            // qDebug() << "MainWindow lost focus (another window is active)";
         }
     }
 }
@@ -195,9 +195,9 @@ void MainWindow::firstTimeConfiguration()
 
 void MainWindow::timerUpdate()
 {
-    if (WindowVisibilityChecker::isWidgetFullyVisible(this) == false)
+    if (WindowVisibilityChecker::isWidgetFullyVisible (this) == false)
     {
-        qDebug() << "Main window is minimized, hidden, or behind another window.";
+        // qDebug() << "Main window is minimized, hidden, or behind another window.";
         return;
     }
     updateFreeRAM ();

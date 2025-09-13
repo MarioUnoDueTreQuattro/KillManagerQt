@@ -37,7 +37,6 @@
 // }
 //}
 
-
 //QStringList MyUtility::getRunningProcesses()
 //{
 // QStringList processList;
@@ -145,7 +144,7 @@
 // windowvisibilitychecker.cpp
 
 //WindowVisibilityChecker::WindowVisibilityChecker(QObject *parent)
-//    : QObject(parent)
+// : QObject(parent)
 //{
 //}
 
@@ -154,7 +153,15 @@ bool WindowVisibilityChecker::isWidgetFullyVisible(QWidget *widget)
 {
     if (!widget)
         return false;
+    // QWidget -> HWND
+    HWND hWnd = reinterpret_cast<HWND>(widget->winId());
+    return checkFullWindowVisibility(hWnd);
+}
 
+bool WindowVisibilityChecker::isWidgetVisible(QWidget *widget)
+{
+    if (!widget)
+        return false;
     // QWidget -> HWND
     HWND hWnd = reinterpret_cast<HWND>(widget->winId());
     return checkWindowVisibility(hWnd);
@@ -165,7 +172,14 @@ bool WindowVisibilityChecker::isQWindowFullyVisible(QWindow *window)
 {
     if (!window)
         return false;
+    HWND hWnd = reinterpret_cast<HWND>(window->winId());
+    return checkFullWindowVisibility(hWnd);
+}
 
+bool WindowVisibilityChecker::isQWindowVisible(QWindow *window)
+{
+    if (!window)
+        return false;
     HWND hWnd = reinterpret_cast<HWND>(window->winId());
     return checkWindowVisibility(hWnd);
 }
@@ -175,32 +189,68 @@ bool WindowVisibilityChecker::checkWindowVisibility(HWND hWnd)
 {
     if (!IsWindow(hWnd) || !IsWindowVisible(hWnd))
         return false;
-
     if (IsIconic(hWnd))  // minimized
         return false;
-
     RECT rect;
     if (!GetWindowRect(hWnd, &rect))
         return false;
-
+    DWORD mainProcessId = 0;
+    GetWindowThreadProcessId(hWnd, &mainProcessId); // PID of the main window
     // Points to check (4 corners + center)
-    POINT points[5] = {
+    POINT points[5] =
+    {
         {rect.left + 5, rect.top + 5},
         {rect.right - 5, rect.top + 5},
         {rect.left + 5, rect.bottom - 5},
         {rect.right - 5, rect.bottom - 5},
         {(rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2}
     };
-
     for (int i = 0; i < 5; ++i)
     {
         HWND hAtPoint = WindowFromPoint(points[i]);
-        if (hAtPoint != hWnd && !IsChild(hWnd, hAtPoint))
+        DWORD pointProcessId = 0;
+        GetWindowThreadProcessId(hAtPoint, &pointProcessId);
+        if (pointProcessId != mainProcessId)
         {
             // Another window is on top at this point
             return false;
         }
     }
-
     return true; // Window seems fully visible
+}
+
+bool WindowVisibilityChecker::checkFullWindowVisibility(HWND hWnd)
+{
+    if (!IsWindow(hWnd) || !IsWindowVisible(hWnd))
+        return false;
+    if (IsIconic(hWnd))  // minimized
+        return false;
+    RECT rect;
+    if (!GetWindowRect(hWnd, &rect))
+        return false;
+    DWORD mainProcessId = 0;
+    GetWindowThreadProcessId(hWnd, &mainProcessId); // PID of the main window
+    // Sample points: 4 corners + center
+    POINT points[5] =
+    {
+        {rect.left + 5, rect.top + 5},                     // top-left
+        {rect.right - 5, rect.top + 5},                    // top-right
+        {rect.left + 5, rect.bottom - 5},                  // bottom-left
+        {rect.right - 5, rect.bottom - 5},                 // bottom-right
+        {(rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2} // center
+    };
+    int coveredPoints = 0;
+    for (int i = 0; i < 5; ++i)
+    {
+        HWND hAtPoint = WindowFromPoint(points[i]);
+        DWORD pointProcessId = 0;
+        GetWindowThreadProcessId(hAtPoint, &pointProcessId);
+        // Count points that are covered by another window
+        if (pointProcessId != mainProcessId)
+        {
+            ++coveredPoints;
+        }
+    }
+    // Only consider window "not visible" if all points are covered
+    return (coveredPoints < 5);
 }

@@ -141,12 +141,15 @@ public:
 
     // Check if a QWidget is visible and not covered by other windows
     static bool isWidgetFullyVisible(QWidget *widget);
+    static bool isWidgetVisible(QWidget *widget);
 
     // Check if a QWindow is visible and not covered by other windows
     static bool isQWindowFullyVisible(QWindow *window);
+    static bool isQWindowVisible(QWindow *window);
 
 private:
     static bool checkWindowVisibility(HWND hWnd);
+    static bool checkFullWindowVisibility(HWND hWnd);
 };
 
 #endif // WINDOWVISIBILITYCHECKER_H
