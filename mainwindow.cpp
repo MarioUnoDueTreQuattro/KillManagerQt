@@ -1339,12 +1339,12 @@ void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
     sRAM.append (". Memory cleanup started in a background thread...");
     LOG_MSG(sRAM);
     // m_ProcessListEx.setAllProcessesWorkingSetSize ();
-    connect(&m_ProcessListEx, SIGNAL(emptySystemWorkingSetsFinished(bool)),
-        this, SLOT(onEmptySystemWSFinished(bool)));
+    connect(&m_ProcessListEx, SIGNAL(reduceMemoryUsageFinished(bool)),
+        this, SLOT(onReduceMemoryUsageFinished(bool)));
     QtConcurrent::run(&ProcessItemsList::runEmptySystemWorkingSets, &m_ProcessListEx);
 }
 
-void MainWindow::onEmptySystemWSFinished(bool success)
+void MainWindow::onReduceMemoryUsageFinished(bool success)
 {
     if (success)
     {

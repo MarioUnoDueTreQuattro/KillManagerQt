@@ -124,7 +124,7 @@ private:
     bool getWindowInfo(DWORD processId, QString& windowTitle);
     QString getProcessFullPath(DWORD processId);
 signals:
-    void emptySystemWorkingSetsFinished(bool success);
+    void reduceMemoryUsageFinished(bool success);
 };
 
 #endif // PROCESSITEMSLIST_H

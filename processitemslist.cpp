@@ -399,14 +399,14 @@ bool ProcessItemsList::emptySystemWorkingSets()
     if (!ok1 || !ok2)
     {
         qDebug() << "Failed to enable required privileges. Run as Administrator?";
-        emit emptySystemWorkingSetsFinished(false);
+        emit reduceMemoryUsageFinished(false);
         return false;
     }
     HMODULE ntdll = GetModuleHandle(TEXT("ntdll.dll"));
     if (!ntdll)
     {
         qDebug() << "Cannot load ntdll.dll";
-        emit emptySystemWorkingSetsFinished(false);
+        emit reduceMemoryUsageFinished(false);
         return false;
     }
     PFN_NtSetSystemInformation pNtSetSystemInformation =
@@ -414,7 +414,7 @@ bool ProcessItemsList::emptySystemWorkingSets()
     if (!pNtSetSystemInformation)
     {
         qDebug() << "Cannot resolve NtSetSystemInformation";
-        emit emptySystemWorkingSetsFinished(false);
+        emit reduceMemoryUsageFinished(false);
         return false;
     }
     SYSTEM_MEMORY_LIST_COMMAND command;
@@ -470,7 +470,7 @@ bool ProcessItemsList::emptySystemWorkingSets()
     }
     //LOG_MSG("Memory usage reduced successfully.");
     result = (status == 0); // NTSTATUS 0 = STATUS_SUCCESS
-    emit emptySystemWorkingSetsFinished(result);
+    emit reduceMemoryUsageFinished(result);
     return result;
 }
 
