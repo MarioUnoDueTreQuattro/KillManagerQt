@@ -44,21 +44,23 @@
 
 // Basic log with file, line, and function
 #define LOG() \
-    qDebug() << "File:" << __FILE__ \
-             << "Function:" << __FUNCTION__ \
-             << "Line:" << __LINE__
+    qDebug().noquote() \
+    << "File:" << __FILE__ \
+    << "Function:" << __FUNCTION__ \
+    << "Line:" << __LINE__
 
 // Log with custom message
 #define LOG_MSG(msg) \
-    qDebug() << "File:" << __FILE__ \
-             << "Function:" << __FUNCTION__ \
-             << "Line:" << __LINE__ \
-             << "Msg:" \
-             << msg
+    qDebug().noquote() \
+    << "File:" << __FILE__ \
+    << "Function:" << __FUNCTION__ \
+    << "Line:" << __LINE__ \
+    << "Msg:" \
+    << msg
 
 // IF Condition Log with custom message
 #define LOG_MSG_IF(cond, msg) \
-             if (cond) qDebug() \
+             if (cond) qDebug().noquote() \
              << "File:" << __FILE__ \
              << "Function:" << __FUNCTION__ \
              << "Line:" << __LINE__ \
@@ -67,7 +69,7 @@
 
 // IF Condition==false Log with custom message
 #define LOG_MSG_IF_FALSE(cond, msg) \
-             if (cond==false) qDebug() \
+             if (cond==false) qDebug().noquote() \
              << "File:" << __FILE__ \
              << "Function:" << __FUNCTION__ \
              << "Line:" << __LINE__ \
@@ -76,10 +78,11 @@
 
 // Log a variable name and value
 #define LOG_VAR(var) \
-    qDebug() << "File:" << __FILE__ \
-             << "Function:" << __FUNCTION__ \
-             << "Line:" << __LINE__ \
-             << "Var:" << #var << "=" << var
+    qDebug().noquote() \
+    << "File:" << __FILE__ \
+    << "Function:" << __FUNCTION__ \
+    << "Line:" << __LINE__ \
+    << "Var:" << #var << "=" << var
 
 // Log to file
 #define LOG_FILE(msg) \

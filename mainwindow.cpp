@@ -1332,7 +1332,12 @@ void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
 {
     ui->actionReduce_RAM_memory_usage->setDisabled (true);
     ui->statusBar->showMessage ("Memory cleanup started in a background thread...", 10000);
-    LOG_MSG("Memory cleanup started in a background thread...");
+    QString sRAM = "Free RAM: ";
+    sRAM.append(QString::number(m_ProcessListEx.getFreeRAM () / 1024.0, 'f', 2));
+    sRAM.append(" GB");
+    m_StatusBarRam->setText (sRAM);
+    sRAM.append (". Memory cleanup started in a background thread...");
+    LOG_MSG(sRAM);
     // m_ProcessListEx.setAllProcessesWorkingSetSize ();
     connect(&m_ProcessListEx, SIGNAL(emptySystemWorkingSetsFinished(bool)),
         this, SLOT(onEmptySystemWSFinished(bool)));
@@ -1345,7 +1350,12 @@ void MainWindow::onEmptySystemWSFinished(bool success)
     {
         //QMessageBox::information(this, "Done", "System working sets emptied successfully.");
         ui->statusBar->showMessage ("Memory usage reduced successfully.", 10000);
-        LOG_MSG("Memory usage reduced successfully.");
+        QString sRAM = "Free RAM: ";
+        sRAM.append(QString::number(m_ProcessListEx.getFreeRAM () / 1024.0, 'f', 2));
+        sRAM.append(" GB");
+        m_StatusBarRam->setText (sRAM);
+        sRAM.append (". Memory usage reduced successfully.");
+        LOG_MSG(sRAM);
     }
     else
     {
