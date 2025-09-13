@@ -142,3 +142,65 @@
 // return true;
 //}
 
+// windowvisibilitychecker.cpp
+
+//WindowVisibilityChecker::WindowVisibilityChecker(QObject *parent)
+//    : QObject(parent)
+//{
+//}
+
+// Public method for QWidget
+bool WindowVisibilityChecker::isWidgetFullyVisible(QWidget *widget)
+{
+    if (!widget)
+        return false;
+
+    // QWidget -> HWND
+    HWND hWnd = reinterpret_cast<HWND>(widget->winId());
+    return checkWindowVisibility(hWnd);
+}
+
+// Public method for QWindow
+bool WindowVisibilityChecker::isQWindowFullyVisible(QWindow *window)
+{
+    if (!window)
+        return false;
+
+    HWND hWnd = reinterpret_cast<HWND>(window->winId());
+    return checkWindowVisibility(hWnd);
+}
+
+// Core logic (Win32 API)
+bool WindowVisibilityChecker::checkWindowVisibility(HWND hWnd)
+{
+    if (!IsWindow(hWnd) || !IsWindowVisible(hWnd))
+        return false;
+
+    if (IsIconic(hWnd))  // minimized
+        return false;
+
+    RECT rect;
+    if (!GetWindowRect(hWnd, &rect))
+        return false;
+
+    // Points to check (4 corners + center)
+    POINT points[5] = {
+        {rect.left + 5, rect.top + 5},
+        {rect.right - 5, rect.top + 5},
+        {rect.left + 5, rect.bottom - 5},
+        {rect.right - 5, rect.bottom - 5},
+        {(rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2}
+    };
+
+    for (int i = 0; i < 5; ++i)
+    {
+        HWND hAtPoint = WindowFromPoint(points[i]);
+        if (hAtPoint != hWnd && !IsChild(hWnd, hAtPoint))
+        {
+            // Another window is on top at this point
+            return false;
+        }
+    }
+
+    return true; // Window seems fully visible
+}

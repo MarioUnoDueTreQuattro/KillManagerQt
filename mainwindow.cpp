@@ -140,6 +140,35 @@ void MainWindow::showEvent(QShowEvent *event)
     QMainWindow::showEvent(event);       // Call the base class's showEvent
 }
 
+void MainWindow::changeEvent(QEvent *event)
+{
+    QMainWindow::changeEvent(event);
+    if (event->type() == QEvent::WindowStateChange)
+    {
+        if (isMinimized())
+        {
+            qDebug() << "MainWindow was minimized";
+        }
+        else
+        {
+            qDebug() << "MainWindow state changed (restored/maximized)";
+            timerUpdate ();
+        }
+    }
+    else if (event->type() == QEvent::ActivationChange)
+    {
+        if (isActiveWindow())
+        {
+            qDebug() << "MainWindow gained focus";
+            timerUpdate ();
+        }
+        else
+        {
+            qDebug() << "MainWindow lost focus (another window is active)";
+        }
+    }
+}
+
 void MainWindow::onLogCompressionExecuted()
 {
     //LOG_MSG("");
@@ -166,6 +195,11 @@ void MainWindow::firstTimeConfiguration()
 
 void MainWindow::timerUpdate()
 {
+    if (WindowVisibilityChecker::isWidgetFullyVisible(this) == false)
+    {
+        qDebug() << "Main window is minimized, hidden, or behind another window.";
+        return;
+    }
     updateFreeRAM ();
     // TODO Chech if is visible
     //m_statusBarMovie->start();
@@ -1362,7 +1396,7 @@ void MainWindow::onReduceMemoryUsageFinished(bool success)
         //QMessageBox::warning(this, "Error", "Failed to empty system working sets.");
         ui->statusBar->showMessage ("Failed to reduce memory usage.", 10000);
         LOG_MSG("Failed to reduce memory usage.");
-   }
+    }
     ui->actionReduce_RAM_memory_usage->setDisabled (false);
 }
 

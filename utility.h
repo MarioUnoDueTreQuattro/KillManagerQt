@@ -126,3 +126,27 @@ inline void writeToLogFile(const QString& message, const char* fileName, const c
 
 //#endif // MYUTILITY_H
 
+#ifndef WINDOWVISIBILITYCHECKER_H
+#define WINDOWVISIBILITYCHECKER_H
+
+#include <QObject>
+#include <QWidget>
+#include <QWindow>
+#include <windows.h>
+
+class WindowVisibilityChecker
+{
+public:
+    explicit WindowVisibilityChecker(QObject *parent = nullptr);
+
+    // Check if a QWidget is visible and not covered by other windows
+    static bool isWidgetFullyVisible(QWidget *widget);
+
+    // Check if a QWindow is visible and not covered by other windows
+    static bool isQWindowFullyVisible(QWindow *window);
+
+private:
+    static bool checkWindowVisibility(HWND hWnd);
+};
+
+#endif // WINDOWVISIBILITYCHECKER_H

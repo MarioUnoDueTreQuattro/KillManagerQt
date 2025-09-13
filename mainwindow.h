@@ -92,6 +92,7 @@ private:
 protected:
     void closeEvent(QCloseEvent* event) override;
     void showEvent(QShowEvent *event) override;
+    void changeEvent(QEvent *event) override;
 public slots:
     void timerUpdate();
     void menuConfigure();
