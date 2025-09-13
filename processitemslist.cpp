@@ -417,36 +417,43 @@ bool ProcessItemsList::emptySystemWorkingSets()
         emit emptySystemWorkingSetsFinished(false);
         return false;
     }
-    SYSTEM_MEMORY_LIST_COMMAND command = MemoryFlushModifiedList;
-    NTSTATUS status = pNtSetSystemInformation(
+    SYSTEM_MEMORY_LIST_COMMAND command;
+    NTSTATUS status;
+    command = MemoryFlushModifiedList;
+    status = pNtSetSystemInformation(
             SystemMemoryListInformation,
             &command,
             sizeof(command)
         );
+    if (status != 0) qDebug() << "NtSetSystemInformation (MemoryFlushModifiedList) failed. NTSTATUS:" << hex << status;
     command = MemoryEmptyWorkingSets;
     status = pNtSetSystemInformation(
             SystemMemoryListInformation,
             &command,
             sizeof(command)
         );
+    if (status != 0) qDebug() << "NtSetSystemInformation (MemoryEmptyWorkingSets) failed. NTSTATUS:" << hex << status;
     command = MemoryPurgeStandbyList;
     status = pNtSetSystemInformation(
             SystemMemoryListInformation,
             &command,
             sizeof(command)
         );
+    if (status != 0) qDebug() << "NtSetSystemInformation (MemoryPurgeStandbyList) failed. NTSTATUS:" << hex << status;
     command = MemoryPurgeLowPriorityStandbyList;
     status = pNtSetSystemInformation(
             SystemMemoryListInformation,
             &command,
             sizeof(command)
         );
+    if (status != 0) qDebug() << "NtSetSystemInformation (MemoryPurgeLowPriorityStandbyList) failed. NTSTATUS:" << hex << status;
     command = MemoryCaptureAndResetAccessedBits;
     status = pNtSetSystemInformation(
             SystemMemoryListInformation,
             &command,
             sizeof(command)
         );
+    if (status != 0) qDebug() << "NtSetSystemInformation (MemoryCaptureAndResetAccessedBits) failed. NTSTATUS:" << hex << status;
     // Open the "System" process (PID 4 on most systems)
     HANDLE hSystem = OpenProcess(PROCESS_SET_QUOTA | PROCESS_QUERY_INFORMATION,
             FALSE, 4);
