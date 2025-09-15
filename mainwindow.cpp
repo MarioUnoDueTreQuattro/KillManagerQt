@@ -201,7 +201,6 @@ void MainWindow::timerUpdate()
         return;
     }
     updateFreeRAM ();
-    // TODO Chech if is visible
     //m_statusBarMovie->start();
     //m_statusBarMovie->setPaused(true); // Fermiamo l'animazione automatica
     int frameCount = m_statusBarMovie->frameCount();
@@ -1075,7 +1074,7 @@ void MainWindow::setListItemTooltip(QListWidgetItem * item)
 void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemText)
 {
     bool bFound = false;
-    QString itemString = "";
+    //QString itemString = "";
     // Iterate in reverse to safely remove items while modifying the list
     //qDebug()<< "m_ApplicationItemsList.size="<<m_ApplicationItemsList.size();
     int iFound = m_ProcessListEx.findApplicationItemIndex (newItemText);

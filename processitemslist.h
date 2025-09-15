@@ -23,7 +23,7 @@ private:
     QString m_ProcessPath;
 public:
     //ProcessItem();
-    ProcessItem(QString, bool);
+    ProcessItem(const QString&, bool);
     QString getAppName() const;
     void setAppName(const QString &value);
     bool getAppKillEnabled() const;
@@ -72,7 +72,7 @@ public:
     QString getProcessPath(HANDLE hProcess);
     HANDLE getProcessHandle(const std::string& executablePath);
     bool processIsService(int iPos);
-    bool processIsService(QString);
+    bool processIsService(const QString&);
     bool enableDebugPrivileges();
     bool isRunning (QString);
     void clear();
@@ -81,8 +81,8 @@ public:
     int count() const;
     ProcessItem *at(int i);
     void append( ProcessItem);
-    int findApplicationItemIndex(QString );
-    ProcessItem *findApplicationItem(QString );
+    int findApplicationItemIndex(const QString& );
+    ProcessItem *findApplicationItem(const QString& );
     ProcessItem *findProcessItem(QString );
     void resetAllApplicationItems();
     bool deleteApplicationItem(QString);

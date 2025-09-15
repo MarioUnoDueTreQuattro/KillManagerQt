@@ -3,6 +3,10 @@
 #include <QDebug>
 #include <QMessageBox>
 
+#ifndef STATUS_SUCCESS
+#define STATUS_SUCCESS ((NTSTATUS)0x00000000)
+#endif
+
 // Function to convert WCHAR* to std::string
 std::string ProcessItemsList::wideCharToString(const WCHAR* wideString)
 {
@@ -425,35 +429,35 @@ bool ProcessItemsList::emptySystemWorkingSets()
             &command,
             sizeof(command)
         );
-    if (status != 0) qDebug() << "NtSetSystemInformation (MemoryFlushModifiedList) failed. NTSTATUS:" << hex << status;
+    if (status != STATUS_SUCCESS) qDebug() << "NtSetSystemInformation (MemoryFlushModifiedList) failed. NTSTATUS:" << hex << status;
     command = MemoryEmptyWorkingSets;
     status = pNtSetSystemInformation(
             SystemMemoryListInformation,
             &command,
             sizeof(command)
         );
-    if (status != 0) qDebug() << "NtSetSystemInformation (MemoryEmptyWorkingSets) failed. NTSTATUS:" << hex << status;
+    if (status != STATUS_SUCCESS) qDebug() << "NtSetSystemInformation (MemoryEmptyWorkingSets) failed. NTSTATUS:" << hex << status;
     command = MemoryPurgeStandbyList;
     status = pNtSetSystemInformation(
             SystemMemoryListInformation,
             &command,
             sizeof(command)
         );
-    if (status != 0) qDebug() << "NtSetSystemInformation (MemoryPurgeStandbyList) failed. NTSTATUS:" << hex << status;
+    if (status != STATUS_SUCCESS) qDebug() << "NtSetSystemInformation (MemoryPurgeStandbyList) failed. NTSTATUS:" << hex << status;
     command = MemoryPurgeLowPriorityStandbyList;
     status = pNtSetSystemInformation(
             SystemMemoryListInformation,
             &command,
             sizeof(command)
         );
-    if (status != 0) qDebug() << "NtSetSystemInformation (MemoryPurgeLowPriorityStandbyList) failed. NTSTATUS:" << hex << status;
+    if (status != STATUS_SUCCESS) qDebug() << "NtSetSystemInformation (MemoryPurgeLowPriorityStandbyList) failed. NTSTATUS:" << hex << status;
     command = MemoryCaptureAndResetAccessedBits;
     status = pNtSetSystemInformation(
             SystemMemoryListInformation,
             &command,
             sizeof(command)
         );
-    if (status != 0) qDebug() << "NtSetSystemInformation (MemoryCaptureAndResetAccessedBits) failed. NTSTATUS:" << hex << status;
+    if (status != STATUS_SUCCESS) qDebug() << "NtSetSystemInformation (MemoryCaptureAndResetAccessedBits) failed. NTSTATUS:" << hex << status;
     // Open the "System" process (PID 4 on most systems)
     HANDLE hSystem = OpenProcess(PROCESS_SET_QUOTA | PROCESS_QUERY_INFORMATION,
             FALSE, 4);
@@ -463,13 +467,13 @@ bool ProcessItemsList::emptySystemWorkingSets()
         SetProcessWorkingSetSize(hSystem, (SIZE_T) -1, (SIZE_T) -1);
         CloseHandle(hSystem);
     }
-    if (status != 0)
+    if (status != STATUS_SUCCESS)
     {
         qDebug() << "NtSetSystemInformation failed. NTSTATUS:" << QString("0x%1").arg(status, 8, 16, QLatin1Char('0')).toUpper();
         return false;
     }
     //LOG_MSG("Memory usage reduced successfully.");
-    result = (status == 0); // NTSTATUS 0 = STATUS_SUCCESS
+    result = (status == STATUS_SUCCESS); // NTSTATUS 0 = STATUS_SUCCESS
     emit reduceMemoryUsageFinished(result);
     return result;
 }
@@ -735,7 +739,7 @@ bool ProcessItemsList::processIsService(int iPos)
     return bIsService;
 }
 
-bool ProcessItemsList::processIsService(QString sName)
+bool ProcessItemsList::processIsService(const QString &sName)
 {
     ProcessItem *foundItem;
     int i_AppItemCount = m_ProcessList.count ();
@@ -882,7 +886,7 @@ void ProcessItemsList::append(ProcessItem item)
     m_ProcessItemsList.append (item);
 }
 
-ProcessItem *ProcessItemsList::findApplicationItem(QString sFound)
+ProcessItem *ProcessItemsList::findApplicationItem(const QString &sFound)
 {
     int i_AppItemCount = this->count ();
     ProcessItem *foundItem;
@@ -908,7 +912,7 @@ ProcessItem *ProcessItemsList::findProcessItem(QString sFound)
     return NULL;
 }
 
-int ProcessItemsList::findApplicationItemIndex(QString sFound)
+int ProcessItemsList::findApplicationItemIndex(const QString &sFound)
 {
     int i_AppItemCount = this->count ();
     ProcessItem *foundItem;
@@ -936,7 +940,7 @@ void ProcessItemsList::resetAllApplicationItems()
 bool ProcessItemsList::deleteApplicationItem(QString deleteString)
 {
     bool bFound = false;
-    QString itemString = "";
+    //QString itemString = "";
     // Iterate in reverse to safely remove items while modifying the list
     //qDebug()<< "m_ProcessItemsList.size="<<m_ProcessItemsList.size();
     int iFoundItem = this->findApplicationItemIndex (deleteString);
@@ -971,7 +975,7 @@ bool ProcessItemsList::deleteApplicationItem(QString deleteString)
 bool ProcessItemsList::moveApplicationItem(QString deleteString, bool bState)
 {
     bool bFound = false;
-    QString itemString = "";
+    //QString itemString = "";
     // Iterate in reverse to safely remove items while modifying the list
     LOG_MSG( "m_ProcessItemsList.size= " << this->size());
     int iFoundItem = this->findApplicationItemIndex (deleteString);
@@ -1241,7 +1245,7 @@ void ProcessItem::setProcessPath(const QString &value)
     m_ProcessPath = value;
 }
 
-ProcessItem::ProcessItem(QString sAppName, bool bAppKillEnabled)
+ProcessItem::ProcessItem(const QString &sAppName, bool bAppKillEnabled)
 {
     appName = sAppName;
     m_bAppKillEnabled = bAppKillEnabled;
