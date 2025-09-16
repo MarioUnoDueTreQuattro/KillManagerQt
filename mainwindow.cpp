@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    m_bIsCleaningMemory=false;
+    m_bIsCleaningMemory = false;
     if (!m_ProcessListEx.enableDebugPrivileges())
     {
         LOG_MSG("Failed to enable debug privileges. Access to some processes might be denied.");
@@ -128,8 +128,18 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    writeSettings();
-    QMainWindow::closeEvent(event);       // Call the base class's closeEvent
+    if (m_bIsCleaningMemory)
+    {
+        // Optionally show a message
+        //QMessageBox::warning(this, "Exit Disabled", "You cannot close this window now.");
+        event->ignore(); // Prevent the window from closing
+    }
+    else
+    {
+        writeSettings();
+        event->accept(); // Allow the window to close
+    }
+    //QMainWindow::closeEvent(event);       // Call the base class's closeEvent
 }
 
 void MainWindow::showEvent(QShowEvent *event)
@@ -890,7 +900,7 @@ bool MainWindow::writeListToFile()
 void MainWindow::updateFreeRAM()
 {
     QString sRAM;
-    if (m_bIsCleaningMemory) sRAM.append ("<span style='color:rgb(0,96,0);line-height:100%;'><b>Free RAM: </span>");
+    if (m_bIsCleaningMemory) sRAM.append ("<span style='color:rgb(0,96,0);line-height:100%;'>Free RAM: </span>");
     else sRAM.append ("Free RAM: ");
     sRAM.append(QString::number(m_ProcessListEx.getFreeRAM () / 1024.0, 'f', 2));
     sRAM.append(" GB");
@@ -1367,7 +1377,7 @@ void MainWindow::on_pushButtonRun_clicked()
 void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
 {
     ui->actionReduce_RAM_memory_usage->setDisabled (true);
-    m_bIsCleaningMemory=true;
+    m_bIsCleaningMemory = true;
     ui->statusBar->showMessage ("Memory cleanup started in a background thread...", 10000);
     QString sRAM;
     if (m_bIsCleaningMemory) sRAM.append ("<span style='color:rgb(0,96,0);line-height:100%;'>Free RAM: </span>");
@@ -1386,9 +1396,9 @@ void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
 
 void MainWindow::onReduceMemoryUsageFinished(bool success)
 {
-    m_bIsCleaningMemory=false;
+    m_bIsCleaningMemory = false;
     ui->actionReduce_RAM_memory_usage->setDisabled (false);
-//    m_StatusBarRam->setStyleSheet("");  // Removes any custom color/style
+    // m_StatusBarRam->setStyleSheet("");  // Removes any custom color/style
     if (success)
     {
         //QMessageBox::information(this, "Done", "System working sets emptied successfully.");
