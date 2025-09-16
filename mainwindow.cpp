@@ -890,7 +890,7 @@ bool MainWindow::writeListToFile()
 void MainWindow::updateFreeRAM()
 {
     QString sRAM;
-    if (m_bIsCleaningMemory) sRAM.append ("<span style='color:rgb(0,96,0);'>Free RAM: </span>");
+    if (m_bIsCleaningMemory) sRAM.append ("<span style='color:rgb(0,96,0);line-height:100%;'><b>Free RAM: </span>");
     else sRAM.append ("Free RAM: ");
     sRAM.append(QString::number(m_ProcessListEx.getFreeRAM () / 1024.0, 'f', 2));
     sRAM.append(" GB");
@@ -1370,7 +1370,7 @@ void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
     m_bIsCleaningMemory=true;
     ui->statusBar->showMessage ("Memory cleanup started in a background thread...", 10000);
     QString sRAM;
-    if (m_bIsCleaningMemory) sRAM.append ("<span style='color:rgb(0,96,0);'>Free RAM: </span>");
+    if (m_bIsCleaningMemory) sRAM.append ("<span style='color:rgb(0,96,0);line-height:100%;'>Free RAM: </span>");
     else sRAM.append ("Free RAM: ");
     sRAM.append(QString::number(m_ProcessListEx.getFreeRAM () / 1024.0, 'f', 2));
     sRAM.append(" GB");
@@ -1394,7 +1394,7 @@ void MainWindow::onReduceMemoryUsageFinished(bool success)
         //QMessageBox::information(this, "Done", "System working sets emptied successfully.");
         ui->statusBar->showMessage ("Memory usage reduced successfully.", 10000);
         QString sRAM;
-        if (m_bIsCleaningMemory) sRAM.append ("<span style='color:rgb(0,96,0);'>Free RAM: </span>");
+        if (m_bIsCleaningMemory) sRAM.append ("<span style='color:rgb(0,96,0);line-height:100%;'>Free RAM: </span>");
         else sRAM.append ("Free RAM: ");
         sRAM.append(QString::number(m_ProcessListEx.getFreeRAM () / 1024.0, 'f', 2));
         sRAM.append(" GB");
