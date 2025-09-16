@@ -46,6 +46,11 @@ bool ZipFiles::zipLogFiles()
     QDir dir(filePath);
     QFileInfoList files = dir.entryInfoList(nameFilters, QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
     int iFilesCount = files.count();
+    if (iFilesCount < 10)
+    {
+        LOG_MSG("iFilesCount < 10 = " + QString::number (iFilesCount));
+        return false;
+    }
     qDebug() << "iFilesCount= " << QString::number(iFilesCount);
     //iFilesCount = files.size();
     //qDebug() << QString::number(iFilesCount);
