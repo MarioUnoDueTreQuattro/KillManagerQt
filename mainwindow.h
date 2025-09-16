@@ -38,6 +38,7 @@ public:
     ~MainWindow();
     static bool compareByLastModified(const QFileInfo &a, const QFileInfo &b);
 private:
+    bool m_bIsCleaningMemory;
     Scheduler m_scheduler;
     QLabel *m_StatusBarLabel;
     QMovie *m_statusBarMovie;
