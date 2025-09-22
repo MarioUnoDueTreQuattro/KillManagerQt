@@ -377,6 +377,7 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
 {
     // Get the item at the clicked position
     QListWidgetItem* clickedItem = ui->listWidgetEnabled->itemAt(pos);
+    if (clickedItem == nullptr) return;
     bool bIsRunning;
     bIsRunning = m_ProcessListEx.isRunning (clickedItem->text ());
     // Create the menu
@@ -418,6 +419,7 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
 {
     // Get the item at the clicked position
     QListWidgetItem* clickedItem = ui->listWidgetDisabled->itemAt(pos);
+    if (clickedItem == nullptr) return;
     bool bIsRunning;
     bIsRunning = m_ProcessListEx.isRunning (clickedItem->text ());
     // Create the menu
@@ -1376,17 +1378,21 @@ void MainWindow::on_pushButtonRun_clicked()
 
 void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
 {
+    double dFreeRAM = m_ProcessListEx.getFreeRAM () / 1024.0;
     ui->actionReduce_RAM_memory_usage->setDisabled (true);
     m_bIsCleaningMemory = true;
     ui->statusBar->showMessage ("Memory cleanup started in a background thread...", 10000);
     QString sRAM;
     if (m_bIsCleaningMemory) sRAM.append ("<span style='color:rgb(0,96,0);line-height:100%;'>Free RAM: </span>");
     else sRAM.append ("Free RAM: ");
-    sRAM.append(QString::number(m_ProcessListEx.getFreeRAM () / 1024.0, 'f', 2));
+    sRAM.append(QString::number(dFreeRAM, 'f', 2));
     sRAM.append(" GB");
     m_StatusBarRam->setText (sRAM);
     //m_StatusBarRam->setStyleSheet("QLabel { color : rgb(0, 80, 0); }");  // Darker green
-    sRAM.append (". Memory cleanup started in a background thread...");
+    sRAM = "Free RAM: ";
+    sRAM.append(QString::number(dFreeRAM, 'f', 2));
+    sRAM.append(" GB");
+    sRAM.append(". Memory cleanup started in a background thread...");
     LOG_MSG(sRAM);
     // m_ProcessListEx.setAllProcessesWorkingSetSize ();
     connect(&m_ProcessListEx, SIGNAL(reduceMemoryUsageFinished(bool)),
@@ -1396,6 +1402,7 @@ void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
 
 void MainWindow::onReduceMemoryUsageFinished(bool success)
 {
+    double dFreeRAM = m_ProcessListEx.getFreeRAM () / 1024.0;
     m_bIsCleaningMemory = false;
     ui->actionReduce_RAM_memory_usage->setDisabled (false);
     // m_StatusBarRam->setStyleSheet("");  // Removes any custom color/style
@@ -1406,7 +1413,7 @@ void MainWindow::onReduceMemoryUsageFinished(bool success)
         QString sRAM;
         if (m_bIsCleaningMemory) sRAM.append ("<span style='color:rgb(0,96,0);line-height:100%;'>Free RAM: </span>");
         else sRAM.append ("Free RAM: ");
-        sRAM.append(QString::number(m_ProcessListEx.getFreeRAM () / 1024.0, 'f', 2));
+        sRAM.append(QString::number(dFreeRAM, 'f', 2));
         sRAM.append(" GB");
         m_StatusBarRam->setText (sRAM);
         sRAM.append (". Memory usage reduced successfully.");
