@@ -118,6 +118,9 @@ MainWindow::MainWindow(QWidget* parent)
     connect(&m_scheduler, &Scheduler::logCompressionExecuted, this, &MainWindow::onLogCompressionExecuted); //&MainWindow::handleProgramExecuted);
     connect(&m_scheduler, &Scheduler::logCompressionChecked, this, &MainWindow::onLogCompressionChecked); //&MainWindow::handleProgramExecuted);
     connect(&m_scheduler, &Scheduler::batchCompressionExecuted, this, &MainWindow::onBatchCompressionExecuted); //&MainWindow::handleProgramExecuted);
+    connect(&m_ProcessListEx, SIGNAL(reduceMemoryUsageFinished(bool)),
+        this, SLOT(onReduceMemoryUsageFinished(bool)));
+
 }
 
 MainWindow::~MainWindow()
@@ -1395,8 +1398,6 @@ void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
     sRAM.append(". Memory cleanup started in a background thread...");
     LOG_MSG(sRAM);
     // m_ProcessListEx.setAllProcessesWorkingSetSize ();
-    connect(&m_ProcessListEx, SIGNAL(reduceMemoryUsageFinished(bool)),
-        this, SLOT(onReduceMemoryUsageFinished(bool)));
     QtConcurrent::run(&ProcessItemsList::runEmptySystemWorkingSets, &m_ProcessListEx);
 }
 
