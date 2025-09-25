@@ -70,7 +70,9 @@ private:
     void loadListFromFile(const QString &);
     void showListWidgetEnabledContextMenu(const QPoint& pos);
     void showListWidgetDisabledContextMenu(const QPoint& pos);
-    void killSelectedDisabledItem();
+    void searchSelectedEnabledItem();
+    void searchSelectedDisabledItem();
+   void killSelectedDisabledItem();
     void killSelectedEnabledItem();
     void copySelectedEnabledItem();
     void deleteSelectedEnabledItem();
@@ -95,7 +97,8 @@ protected:
     void showEvent(QShowEvent *event) override;
     void changeEvent(QEvent *event) override;
 public slots:
-    void timerUpdate();
+ void openGoogleSearch(const QString &text);
+ void timerUpdate();
     void menuConfigure();
     void firstTimeConfiguration();
     void showAddExeDialog();

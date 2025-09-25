@@ -120,7 +120,6 @@ MainWindow::MainWindow(QWidget* parent)
     connect(&m_scheduler, &Scheduler::batchCompressionExecuted, this, &MainWindow::onBatchCompressionExecuted); //&MainWindow::handleProgramExecuted);
     connect(&m_ProcessListEx, SIGNAL(reduceMemoryUsageFinished(bool)),
         this, SLOT(onReduceMemoryUsageFinished(bool)));
-
 }
 
 MainWindow::~MainWindow()
@@ -180,6 +179,20 @@ void MainWindow::changeEvent(QEvent *event)
         {
             // qDebug() << "MainWindow lost focus (another window is active)";
         }
+    }
+}
+
+void MainWindow::openGoogleSearch(const QString &text)
+{
+    // Percent-encode the query text
+    const QByteArray encodedQuery = QUrl::toPercentEncoding(text);
+    // Build google search URL (uses 'q' parameter)
+    const QUrl searchUrl(QStringLiteral("https://www.google.com/search?q=%1").arg(QString::fromUtf8(encodedQuery)));
+    // Open default browser
+    bool success = QDesktopServices::openUrl(searchUrl);
+    if (!success)
+    {
+        qWarning() << "Failed to open URL:" << searchUrl.toString();
     }
 }
 
@@ -389,6 +402,8 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
     QAction* deleteAction = contextMenu.addAction(tr("Delete"));
     //QAction* enableAction = contextMenu.addAction(tr("Enable"));
     QAction* copyAction = contextMenu.addAction(tr("Copy Text"));
+    QAction* searchAction = contextMenu.addAction(tr("Search on Google"));
+    searchAction->setIcon(QIcon(":/icons/img/icons8-google-48.png"));
     QAction* killAction = contextMenu.addAction(tr("Terminate"));
     killAction->setIcon(QIcon(":/icons/img/kill.png"));
     deleteAction->setIcon(QIcon(":/icons/img/icons8-delete-48.png"));
@@ -399,6 +414,7 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
     // QAction *globalAction = contextMenu.addAction(tr("Global Action")); // Always enabled
     // Connect actions to their slots
     // connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelectedItem);
+    connect(searchAction, &QAction::triggered, this, &MainWindow::searchSelectedEnabledItem);
     connect(disableAction, &QAction::triggered, this, &MainWindow::disableSelectedEnabledItem);
     connect(copyAction, &QAction::triggered, this, &MainWindow::copySelectedEnabledItem);
     connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelectedEnabledItem);
@@ -411,6 +427,7 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
     //enableAction->setEnabled(false);
     disableAction->setEnabled(itemClicked);
     copyAction->setEnabled(itemClicked);
+    searchAction->setEnabled(itemClicked);
     // Show the menu at the global position of the mouse click
     // mapToGlobal converts the local widget coordinate (pos) to a global screen coordinate
     disconnectTimer ();
@@ -431,6 +448,8 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
     QAction* deleteAction = contextMenu.addAction(tr("Delete"));
     //QAction* disableAction = contextMenu.addAction(tr("Disable"));
     QAction* copyAction = contextMenu.addAction(tr("Copy Text"));
+    QAction* searchAction = contextMenu.addAction(tr("Search on Google"));
+    searchAction->setIcon(QIcon(":/icons/img/icons8-google-48.png"));
     QAction* killAction = contextMenu.addAction(tr("Terminate"));
     killAction->setIcon(QIcon(":/icons/img/kill.png"));
     deleteAction->setIcon(QIcon(":/icons/img/icons8-delete-48.png"));
@@ -441,6 +460,7 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
     // QAction *globalAction = contextMenu.addAction(tr("Global Action")); // Always enabled
     // Connect actions to their slots
     // connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelectedItem);
+    connect(searchAction, &QAction::triggered, this, &MainWindow::searchSelectedDisabledItem);
     connect(enableAction, &QAction::triggered, this, &MainWindow::enableSelectedDisabledItem);
     connect(copyAction, &QAction::triggered, this, &MainWindow::copySelectedDisabledItem);
     connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelectedDisabledItem);
@@ -453,11 +473,40 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
     enableAction->setEnabled(itemClicked);
     //disableAction->setEnabled(false);
     copyAction->setEnabled(itemClicked);
+    searchAction->setEnabled(itemClicked);
     // Show the menu at the global position of the mouse click
     // mapToGlobal converts the local widget coordinate (pos) to a global screen coordinate
     disconnectTimer ();
     contextMenu.exec(ui->listWidgetDisabled->mapToGlobal(pos));
     connectTimer ();
+}
+
+void MainWindow::searchSelectedEnabledItem()
+{
+    QListWidgetItem* currentItem = ui->listWidgetEnabled->currentItem();
+    if (currentItem)
+    {
+        openGoogleSearch (currentItem->text());
+        ui->statusBar->showMessage("Searching on Google: " + currentItem->text(), 10000);
+    }
+    else
+    {
+        qDebug() << "No item selected";
+    }
+}
+
+void MainWindow::searchSelectedDisabledItem()
+{
+    QListWidgetItem* currentItem = ui->listWidgetDisabled->currentItem();
+    if (currentItem)
+    {
+        openGoogleSearch (currentItem->text());
+        ui->statusBar->showMessage("Searching on Google: " + currentItem->text(), 10000);
+    }
+    else
+    {
+        qDebug() << "No item selected";
+    }
 }
 
 void MainWindow::killSelectedDisabledItem()
