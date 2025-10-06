@@ -160,7 +160,7 @@
      <string>Menu</string>
     </property>
     <property name="title">
-     <string>Menu</string>
+     <string>&amp;Menu</string>
     </property>
     <addaction name="actionConfigure_app"/>
     <addaction name="separator"/>
@@ -182,7 +182,7 @@
      <enum>Qt::LeftToRight</enum>
     </property>
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionAbout"/>
     <addaction name="actionAbout_Qt"/>

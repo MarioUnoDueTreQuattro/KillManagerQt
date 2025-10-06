@@ -1430,9 +1430,9 @@ void MainWindow::on_pushButtonRun_clicked()
 
 void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
 {
-    double dFreeRAM = m_ProcessListEx.getFreeRAM () / 1024.0;
     ui->actionReduce_RAM_memory_usage->setDisabled (true);
     m_bIsCleaningMemory = true;
+    double dFreeRAM = m_ProcessListEx.getFreeRAM () / 1024.0;
     ui->statusBar->showMessage ("Memory cleanup started in a background thread...", 10000);
     QString sRAM;
     if (m_bIsCleaningMemory) sRAM.append ("<span style='color:rgb(0,96,0);line-height:100%;'>Free RAM: </span>");

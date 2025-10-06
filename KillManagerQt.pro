@@ -73,17 +73,21 @@ FORMS    += mainwindow.ui \
 
 #RC_FILE = KillManagerQt.manifest
 
-RC_FILE = app.rc
+#RC_FILE = app.rc
+RC_FILE = appicon.rc
 
 RESOURCES += \
     icons.qrc
 
+#CONFIG += embed_manifest
+
 win32:RC_ICONS = KillManager.ico
 
-VERSION = 1.0.1.0
-DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 win32:LIBS += -lpsapi
 
 DISTFILES += \
     KillManagerQt.manifest \
-    app.rc
+    appicon.rc
+
+VERSION = 1.0.1.1
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
