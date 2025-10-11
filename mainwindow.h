@@ -18,6 +18,7 @@
 #include <QLabel>
 #include <QMovie>
 #include <QToolTip>
+//#include <3rdparty/qhotkey/QHotkey/QHotkey>
 
 // Include Windows API headers
 #ifdef Q_OS_WIN
@@ -38,6 +39,7 @@ public:
     ~MainWindow();
     static bool compareByLastModified(const QFileInfo &a, const QFileInfo &b);
 private:
+    //QHotkey *m_hotkey;
     bool m_bIsCleaningMemory;
     Scheduler m_scheduler;
     QLabel *m_StatusBarLabel;
@@ -72,7 +74,7 @@ private:
     void showListWidgetDisabledContextMenu(const QPoint& pos);
     void searchSelectedEnabledItem();
     void searchSelectedDisabledItem();
-   void killSelectedDisabledItem();
+    void killSelectedDisabledItem();
     void killSelectedEnabledItem();
     void copySelectedEnabledItem();
     void deleteSelectedEnabledItem();
@@ -92,13 +94,17 @@ private:
     int m_iRefreshRate;
     QString getListItemTooltip(QString );
     void setListItemTooltip(QListWidgetItem* );
+    bool registerGlobalHotkey();
+    void unregisterGlobalHotkey();
+    static const int HOTKEY_ID = 1; // Identifier for our hotkey
 protected:
+    bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
     void closeEvent(QCloseEvent* event) override;
     void showEvent(QShowEvent *event) override;
     void changeEvent(QEvent *event) override;
 public slots:
- void openGoogleSearch(const QString &text);
- void timerUpdate();
+    void openGoogleSearch(const QString &text);
+    void timerUpdate();
     void menuConfigure();
     void firstTimeConfiguration();
     void showAddExeDialog();

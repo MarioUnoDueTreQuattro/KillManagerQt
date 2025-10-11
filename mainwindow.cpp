@@ -15,6 +15,7 @@
 #include <QDateTime>
 #include <QStandardPaths>
 #include <cstdlib>  // for system()
+//#include <windows.h>
 //#include "SimpleZipper/src/SimpleZipper.h"
 
 //void createTestFile(const QString& path) {
@@ -120,12 +121,30 @@ MainWindow::MainWindow(QWidget* parent)
     connect(&m_scheduler, &Scheduler::batchCompressionExecuted, this, &MainWindow::onBatchCompressionExecuted); //&MainWindow::handleProgramExecuted);
     connect(&m_ProcessListEx, SIGNAL(reduceMemoryUsageFinished(bool)),
         this, SLOT(onReduceMemoryUsageFinished(bool)));
+    // m_hotkey = new QHotkey(QKeySequence("Ctrl+Shift+R"), true, qApp);
+    // if (!m_hotkey->isRegistered())
+    // {
+    // qDebug() << "Hotkey not registered!";
+    // }
+    // else
+    // qDebug() << "Hotkey registered!";
+    // QObject::connect(m_hotkey, &QHotkey::activated, [&]()
+    // {
+    ////         QMessageBox::information(nullptr, "Hotkey Pressed", "You pressed Hotkey!");
+    // on_actionReduce_RAM_memory_usage_triggered();
+    // });
+    // Try to register the global hotkey (Ctrl + Alt + M)
+    if (registerGlobalHotkey())
+        qDebug() << "Global hotkey \"Alt-Win-F\" registered successfully.";
+    else
+        qDebug() << "Failed to register \"Alt-Win-F\" global hotkey.";
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
     delete timer;
+    unregisterGlobalHotkey();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -1136,6 +1155,40 @@ void MainWindow::setListItemTooltip(QListWidgetItem * item)
     //QToolTip::showText (globalPos, sToolTip);
     //QToolTip::showText (QCursor::pos(), sToolTip);
     //LOG_MSG("");
+}
+
+bool MainWindow::registerGlobalHotkey()
+{
+#define MOD_WIN 0x0008
+    HWND hwnd = reinterpret_cast<HWND>(this->winId());
+    // UINT modifiers = MOD_CONTROL | MOD_ALT;
+    // UINT vk = 0x4D; // 'M'
+    UINT modifiers = MOD_ALT | MOD_WIN;
+    UINT vk = 0x46;
+    BOOL ok = RegisterHotKey(hwnd, HOTKEY_ID, modifiers, vk);
+    return (ok != 0);
+}
+
+void MainWindow::unregisterGlobalHotkey()
+{
+    HWND hwnd = reinterpret_cast<HWND>(this->winId());
+    UnregisterHotKey(hwnd, HOTKEY_ID);
+}
+
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+{
+    MSG *msg = reinterpret_cast<MSG *>(message);
+    if (msg->message == WM_HOTKEY)
+    {
+        int id = (int)msg->wParam;
+        if (id == HOTKEY_ID)
+        {
+            qDebug() << "Global hotkey \"Alt-Win-F\" pressed!";
+            on_actionReduce_RAM_memory_usage_triggered ();
+            return true; // Event handled
+        }
+    }
+    return false; // Let Qt handle other events
 }
 
 void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemText)

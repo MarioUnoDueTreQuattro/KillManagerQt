@@ -10,7 +10,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets winextras
 
-TARGET = KillManagerQt
+TARGET = KillManager
 TEMPLATE = app
 
 # Show warnings and enable debugging symbols
@@ -42,7 +42,9 @@ QMAKE_CXXFLAGS += -Wall -Wextra
 #CONFIG += debug
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
+#      3rdparty/qhotkey/QHotkey/qhotkey.cpp \
+#    3rdparty/qhotkey/QHotkey/qhotkey_win.cpp \
+      mainwindow.cpp \
     dialog.cpp \
     addexedialog.cpp \
     myqlistwidget.cpp \
@@ -54,7 +56,9 @@ SOURCES += main.cpp\
     zipfiles.cpp
 
 HEADERS  += mainwindow.h \
-    dialog.h \
+#       3rdparty/qhotkey/QHotkey/qhotkey.h \
+#    3rdparty/qhotkey/QHotkey/qhotkey_p.h \
+ dialog.h \
     addexedialog.h \
     myqlistwidget.h \
     processitemslist.h \
