@@ -135,9 +135,9 @@ MainWindow::MainWindow(QWidget* parent)
     // });
     // Try to register the global hotkey (Ctrl + Alt + M)
     if (registerGlobalHotkey())
-        qDebug() << "Global hotkey \"Alt-Win-F\" registered successfully.";
+        qDebug() << "Global hotkey \"Alt-Win-R\" registered successfully.";
     else
-        qDebug() << "Failed to register \"Alt-Win-F\" global hotkey.";
+        qDebug() << "Failed to register \"Alt-Win-R\" global hotkey.";
 }
 
 MainWindow::~MainWindow()
@@ -1164,7 +1164,7 @@ bool MainWindow::registerGlobalHotkey()
     // UINT modifiers = MOD_CONTROL | MOD_ALT;
     // UINT vk = 0x4D; // 'M'
     UINT modifiers = MOD_ALT | MOD_WIN;
-    UINT vk = 0x46;
+    UINT vk = 0x52;
     BOOL ok = RegisterHotKey(hwnd, HOTKEY_ID, modifiers, vk);
     return (ok != 0);
 }

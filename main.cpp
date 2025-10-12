@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
     a.setOrganizationName("andreag");
-    a.setApplicationName("KillManagerQt");
+    a.setApplicationName("KillManager");
     //QApplication::setStyle(QStyleFactory::create("Windows"));
     // QApplication::setStyle(QStyleFactory::create("WindowsXP"));
     // QApplication::setStyle(QStyleFactory::create("WindowsVista"));
@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
         QDate today = QDate::currentDate();
         QTime currentTime = QTime::currentTime();
         QString repeatedChar;
-        QString sMsg = "Starting KillManagerQt " + today.toString () + " " + currentTime.toString () ;
+        QString sMsg = "Starting KillManager " + today.toString () + " " + currentTime.toString () ;
         repeatedChar = QString("*").repeated(80 );
         qDebug().noquote () << "\n\n" << repeatedChar << "\n" << sMsg << "\n" << repeatedChar << "\n\n";
         //QString allMessages = g_debugMessages.join("\n");
