@@ -5,6 +5,26 @@
     #include <QtGlobal>
     #include <QDebug>
     #include <QFile>
+    #include <QDebug>
+    #include <QFile>
+    #include <QTextStream>
+    #include <QDateTime>
+    #include <QApplication>
+    #include <QStringList>
+    #include <QString>
+    #include <windows.h>
+    #include <tlhelp32.h>
+    #include <psapi.h>
+    #include <iostream>
+    #include <QObject>
+    #include <shellapi.h>
+    #include <string>
+    #include <vector>
+    #include <QPixmap>
+    #include <QIcon>
+    //#include <QtWinExtras/QtWin>
+    #include <QtWinExtras/QtWinExtras>
+    #include <qt_windows.h>
 
     //extern QStringList g_debugMessages;
     //extern FILE *f;
@@ -20,27 +40,6 @@
 
 #ifndef LOG_MACROS_H
 #define LOG_MACROS_H
-
-#include <QDebug>
-#include <QFile>
-#include <QTextStream>
-#include <QDateTime>
-#include <QApplication>
-#include <QStringList>
-#include <QString>
-#include <windows.h>
-#include <tlhelp32.h>
-#include <psapi.h>
-#include <iostream>
-#include <QObject>
-#include <shellapi.h>
-#include <string>
-#include <vector>
-#include <QPixmap>
-#include <QIcon>
-//#include <QtWinExtras/QtWin>
-#include <QtWinExtras/QtWinExtras>
-#include <qt_windows.h>
 
 // Basic log with file, line, and function
 #define LOG() \
@@ -92,7 +91,7 @@
 inline void writeToLogFile(const QString& message, const char* fileName, const char* function, int line)
 {
     QString sFile = qApp->applicationName();
-    sFile.append (".log");
+    sFile.append(".log");
     QFile file(sFile);
     if (file.open(QIODevice::Append | QIODevice::Text))
     {

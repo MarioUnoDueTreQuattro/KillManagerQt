@@ -4,6 +4,7 @@
 #include "scheduler.h"
 #include "utility.h"
 #include "myqlistwidget.h"
+#include "clickable_label.h"
 //#include "applicationitemslist.h"
 #include "processitemslist.h"
 #include "addexedialog.h"
@@ -44,7 +45,7 @@ private:
     Scheduler m_scheduler;
     QLabel *m_StatusBarLabel;
     QMovie *m_statusBarMovie;
-    QLabel *m_StatusBarRam;
+    ClickableLabel *m_StatusBarRam;
     bool listContainsItemText(MyQListWidget*, const QString & );
     void updateSettings();
     void deleteOldBackups();
@@ -97,6 +98,7 @@ private:
     bool registerGlobalHotkey();
     void unregisterGlobalHotkey();
     static const int HOTKEY_ID = 1; // Identifier for our hotkey
+    void adjustLabelHeightToContent(QLabel *label);
 protected:
     bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
     void closeEvent(QCloseEvent* event) override;

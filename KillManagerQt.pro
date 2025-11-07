@@ -44,6 +44,7 @@ QMAKE_CXXFLAGS += -Wall -Wextra
 SOURCES += main.cpp\
 #      3rdparty/qhotkey/QHotkey/qhotkey.cpp \
 #    3rdparty/qhotkey/QHotkey/qhotkey_win.cpp \
+    clickable_label.cpp \
       mainwindow.cpp \
     dialog.cpp \
     addexedialog.cpp \
@@ -58,6 +59,7 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
 #       3rdparty/qhotkey/QHotkey/qhotkey.h \
 #    3rdparty/qhotkey/QHotkey/qhotkey_p.h \
+    clickable_label.h \
  dialog.h \
     addexedialog.h \
     myqlistwidget.h \
