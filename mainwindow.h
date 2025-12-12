@@ -1,30 +1,30 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "clickable_label.h"
+#include "myqlistwidget.h"
 #include "scheduler.h"
 #include "utility.h"
-#include "myqlistwidget.h"
-#include "clickable_label.h"
 //#include "applicationitemslist.h"
-#include "processitemslist.h"
 #include "addexedialog.h"
 #include "dialog.h"
+#include "processitemslist.h"
+#include <QFont>
+#include <QLabel>
 #include <QList>
 #include <QListWidgetItem>
 #include <QMainWindow>
-#include <QProcess>
-#include <QFont>
-#include <QPalette>
-#include <QTimer>
-#include <QLabel>
 #include <QMovie>
+#include <QPalette>
+#include <QProcess>
+#include <QTimer>
 #include <QToolTip>
 //#include <3rdparty/qhotkey/QHotkey/QHotkey>
 
 // Include Windows API headers
 #ifdef Q_OS_WIN
-    #include <windows.h>
     #include <psapi.h> // For EnumProcesses, EnumProcessModules, GetModuleBaseName
+    #include <windows.h>
 #endif
 namespace Ui
 {
@@ -36,9 +36,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget* parent = 0);
+    explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     static bool compareByLastModified(const QFileInfo &a, const QFileInfo &b);
+
 private:
     //QHotkey *m_hotkey;
     bool m_bIsCleaningMemory;
@@ -46,13 +47,14 @@ private:
     QLabel *m_StatusBarLabel;
     QMovie *m_statusBarMovie;
     ClickableLabel *m_StatusBarRam;
-    bool listContainsItemText(MyQListWidget*, const QString & );
+    bool listContainsItemText(MyQListWidget *, const QString &);
     void updateSettings();
     void deleteOldBackups();
     QFont m_Font;
     QBrush m_TextBrush;
     QBrush m_ServiceTextBrush;
     QTimer *timer;
+    QTimer *exitTimer;
     QProcess *process;
     Ui::MainWindow *ui;
     QString m_sLogFileName;
@@ -71,8 +73,8 @@ private:
     void readSettings();
     void writeSettings();
     void loadListFromFile(const QString &);
-    void showListWidgetEnabledContextMenu(const QPoint& pos);
-    void showListWidgetDisabledContextMenu(const QPoint& pos);
+    void showListWidgetEnabledContextMenu(const QPoint &pos);
+    void showListWidgetDisabledContextMenu(const QPoint &pos);
     void searchSelectedEnabledItem();
     void searchSelectedDisabledItem();
     void killSelectedDisabledItem();
@@ -84,7 +86,7 @@ private:
     void disableSelectedEnabledItem();
     void enableSelectedDisabledItem();
     bool backupBatchFile();
-    void addItemToListwidget(QListWidget*, QString);
+    void addItemToListwidget(QListWidget *, QString);
     void debugNotFoundWhenKilling();
     void debugFoundWhenKilling();
     void disconnectTimer();
@@ -93,15 +95,16 @@ private:
     bool m_bKillInternal;
     int m_iTimerUpdatesCount;
     int m_iRefreshRate;
-    QString getListItemTooltip(QString );
-    void setListItemTooltip(QListWidgetItem* );
+    QString getListItemTooltip(QString);
+    void setListItemTooltip(QListWidgetItem *);
     bool registerGlobalHotkey();
     void unregisterGlobalHotkey();
     static const int HOTKEY_ID = 1; // Identifier for our hotkey
     void adjustLabelHeightToContent(QLabel *label);
+
 protected:
     bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
-    void closeEvent(QCloseEvent* event) override;
+    void closeEvent(QCloseEvent *event) override;
     void showEvent(QShowEvent *event) override;
     void changeEvent(QEvent *event) override;
 public slots:
@@ -119,9 +122,9 @@ private slots:
     void onLogCompressionChecked();
     void readStdOutput();
     void readStdError();
-    void onProcessFinished(int, QProcess::ExitStatus );
-    void on_listWidgetEnabled_itemClicked(QListWidgetItem* item);
-    void on_listWidgetDisabled_itemClicked(QListWidgetItem* item);
+    void onProcessFinished(int, QProcess::ExitStatus);
+    void on_listWidgetEnabled_itemClicked(QListWidgetItem *item);
+    void on_listWidgetDisabled_itemClicked(QListWidgetItem *item);
     void on_pushButtonWrite_clicked();
     void on_pushButtonReload_clicked();
     void on_pushButtonAdd_clicked();
@@ -135,6 +138,7 @@ private slots:
     void on_actionReduce_RAM_memory_usage_triggered();
     void on_actionExit_triggered();
     void onReduceMemoryUsageFinished(bool success);
+    void exitTimerUpdate();
 };
 
 #endif // MAINWINDOW_H

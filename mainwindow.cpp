@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QApplication>
 #include <QClipboard>
+#include <QDateTime>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
@@ -10,11 +11,10 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QString>
 #include <QTextStream>
-#include <QDateTime>
-#include <QStandardPaths>
-#include <cstdlib>  // for system()
+#include <cstdlib> // for system()
 //#include <windows.h>
 //#include "SimpleZipper/src/SimpleZipper.h"
 
@@ -37,9 +37,8 @@
 // }
 //}
 
-MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     m_bIsCleaningMemory = false;
     if (!m_ProcessListEx.enableDebugPrivileges())
@@ -51,8 +50,8 @@ MainWindow::MainWindow(QWidget* parent)
     // createTestFile(testFile);
     // zipTestFile(testFile, zipFile);
     //unzipTestFile(zipFile, unzipFolder);
-    qApp->setStyleSheet("QStatusBar::item { border: 0px}") ;
-    this->setWindowIcon(QIcon(":/icons/img/KillManager.png"));       // Use the path defined in .qrc
+    qApp->setStyleSheet("QStatusBar::item { border: 0px}");
+    this->setWindowIcon(QIcon(":/icons/img/KillManager.png")); // Use the path defined in .qrc
     m_ProcessListEx.clear();
     ui->setupUi(this);
     m_statusBarMovie = new QMovie(":/icons/img/AGau.gif", QByteArray(), this);
@@ -92,7 +91,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui->labelKilled->setText("Killed: 0");
     readSettings();
     //setWindowTitle("Qt " +qtVersion + " Version"+ APP_VERSION);
-    this->setWindowTitle(qApp->applicationName());       // + " Version "+ APP_VERSION);
+    this->setWindowTitle(qApp->applicationName()); // + " Version "+ APP_VERSION);
     // QApplication* currentApp = qApp;
     // m_sAppCompany = currentApp->organizationName();
     // m_sAppName = currentApp->applicationName();
@@ -115,6 +114,10 @@ MainWindow::MainWindow(QWidget* parent)
     //connect(ui->menuConfigure, SIGNAL(triggered(QAction*)), this, SLOT(menuConfigure()));
     //connect(ui->actionConfigure_app, SIGNAL(triggered(QAction*)), this, SLOT(menuConfigure()));
     updateFreeRAM();
+    exitTimer = new QTimer(this);
+    exitTimer->setTimerType(Qt::CoarseTimer);
+    exitTimer->setInterval(1000);
+    connect(exitTimer, SIGNAL(timeout()), this, SLOT(exitTimerUpdate()));
     timer = new QTimer(this);
     connectTimer();
     timer->start(m_iRefreshRate);
@@ -150,16 +153,18 @@ MainWindow::~MainWindow()
     unregisterGlobalHotkey();
 }
 
-void MainWindow::closeEvent(QCloseEvent* event)
+void MainWindow::closeEvent(QCloseEvent *event)
 {
     if (m_bIsCleaningMemory)
     {
         // Optionally show a message
         //QMessageBox::warning(this, "Exit Disabled", "You cannot close this window now.");
+        exitTimer->start();
         event->ignore(); // Prevent the window from closing
     }
     else
     {
+        exitTimer->stop();
         writeSettings();
         event->accept(); // Allow the window to close
     }
@@ -172,7 +177,7 @@ void MainWindow::showEvent(QShowEvent *event)
     {
         QTimer::singleShot(200, this, SLOT(firstTimeConfiguration()));
     }
-    QMainWindow::showEvent(event);       // Call the base class's showEvent
+    QMainWindow::showEvent(event); // Call the base class's showEvent
 }
 
 void MainWindow::changeEvent(QEvent *event)
@@ -260,7 +265,7 @@ void MainWindow::timerUpdate()
     }
     // m_StatusBarLabel->setFixedSize(m_statusBarMovie->currentImage().size());
     m_iTimerUpdatesCount += 1;
-    int iModulus = m_iTimerUpdatesCount % 10 ;
+    int iModulus = m_iTimerUpdatesCount % 10;
     QString repeatedChar;
     repeatedChar = QString(".").repeated(iModulus);
     // repeatedChar.prepend ("<html><head/><body><span style=\" font-weight:600; color:#ff0000;\">");
@@ -361,7 +366,7 @@ void MainWindow::deleteOldBackups()
 
 void MainWindow::readSettings()
 {
-    QSettings settings;       // QSettings will use the organization and application names set in main()
+    QSettings settings; // QSettings will use the organization and application names set in main()
     // Restore window geometry (size and position) and state (maximized, fullscreen, etc.)
     // Use QWidget::saveGeometry() and QWidget::restoreGeometry() for this.
     // QMainWindow also has saveState() and restoreState() for dock widgets, toolbars, etc.
@@ -411,22 +416,22 @@ void MainWindow::writeSettings()
     // settings.setValue("MainWindow/maximized", isMaximized());
 }
 
-void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
+void MainWindow::showListWidgetEnabledContextMenu(const QPoint &pos)
 {
     // Get the item at the clicked position
-    QListWidgetItem* clickedItem = ui->listWidgetEnabled->itemAt(pos);
+    QListWidgetItem *clickedItem = ui->listWidgetEnabled->itemAt(pos);
     if (clickedItem == nullptr) return;
     bool bIsRunning;
     bIsRunning = m_ProcessListEx.isRunning(clickedItem->text());
     // Create the menu
     QMenu contextMenu(tr("Context Menu"), this);
-    QAction* disableAction = contextMenu.addAction(tr("Disable"));
-    QAction* deleteAction = contextMenu.addAction(tr("Delete"));
+    QAction *disableAction = contextMenu.addAction(tr("Disable"));
+    QAction *deleteAction = contextMenu.addAction(tr("Delete"));
     //QAction* enableAction = contextMenu.addAction(tr("Enable"));
-    QAction* copyAction = contextMenu.addAction(tr("Copy Text"));
-    QAction* searchAction = contextMenu.addAction(tr("Search on Google"));
+    QAction *copyAction = contextMenu.addAction(tr("Copy Text"));
+    QAction *searchAction = contextMenu.addAction(tr("Search on Google"));
     searchAction->setIcon(QIcon(":/icons/img/icons8-google-48.png"));
-    QAction* killAction = contextMenu.addAction(tr("Terminate"));
+    QAction *killAction = contextMenu.addAction(tr("Terminate"));
     killAction->setIcon(QIcon(":/icons/img/kill.png"));
     deleteAction->setIcon(QIcon(":/icons/img/icons8-delete-48.png"));
     //enableAction->setIcon(QIcon(":/icons/img/icons8-left-48.png"));
@@ -441,7 +446,7 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
     connect(copyAction, &QAction::triggered, this, &MainWindow::copySelectedEnabledItem);
     connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelectedEnabledItem);
     connect(killAction, &QAction::triggered, this, &MainWindow::killSelectedEnabledItem);
-    if (! bIsRunning) killAction->setVisible(false);
+    if (!bIsRunning) killAction->setVisible(false);
     // You could connect globalAction to another slot if needed
     // Enable/disable actions based on whether an item was clicked
     bool itemClicked = (clickedItem != NULL);
@@ -457,22 +462,22 @@ void MainWindow::showListWidgetEnabledContextMenu(const QPoint& pos)
     connectTimer();
 }
 
-void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
+void MainWindow::showListWidgetDisabledContextMenu(const QPoint &pos)
 {
     // Get the item at the clicked position
-    QListWidgetItem* clickedItem = ui->listWidgetDisabled->itemAt(pos);
+    QListWidgetItem *clickedItem = ui->listWidgetDisabled->itemAt(pos);
     if (clickedItem == nullptr) return;
     bool bIsRunning;
     bIsRunning = m_ProcessListEx.isRunning(clickedItem->text());
     // Create the menu
     QMenu contextMenu(tr("Context Menu"), this);
-    QAction* enableAction = contextMenu.addAction(tr("Enable"));
-    QAction* deleteAction = contextMenu.addAction(tr("Delete"));
+    QAction *enableAction = contextMenu.addAction(tr("Enable"));
+    QAction *deleteAction = contextMenu.addAction(tr("Delete"));
     //QAction* disableAction = contextMenu.addAction(tr("Disable"));
-    QAction* copyAction = contextMenu.addAction(tr("Copy Text"));
-    QAction* searchAction = contextMenu.addAction(tr("Search on Google"));
+    QAction *copyAction = contextMenu.addAction(tr("Copy Text"));
+    QAction *searchAction = contextMenu.addAction(tr("Search on Google"));
     searchAction->setIcon(QIcon(":/icons/img/icons8-google-48.png"));
-    QAction* killAction = contextMenu.addAction(tr("Terminate"));
+    QAction *killAction = contextMenu.addAction(tr("Terminate"));
     killAction->setIcon(QIcon(":/icons/img/kill.png"));
     deleteAction->setIcon(QIcon(":/icons/img/icons8-delete-48.png"));
     enableAction->setIcon(QIcon(":/icons/img/icons8-left-48.png"));
@@ -487,7 +492,7 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
     connect(copyAction, &QAction::triggered, this, &MainWindow::copySelectedDisabledItem);
     connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelectedDisabledItem);
     connect(killAction, &QAction::triggered, this, &MainWindow::killSelectedDisabledItem);
-    if (! bIsRunning) killAction->setVisible(false);
+    if (!bIsRunning) killAction->setVisible(false);
     // You could connect globalAction to another slot if needed
     // Enable/disable actions based on whether an item was clicked
     bool itemClicked = (clickedItem != NULL);
@@ -505,7 +510,7 @@ void MainWindow::showListWidgetDisabledContextMenu(const QPoint& pos)
 
 void MainWindow::searchSelectedEnabledItem()
 {
-    QListWidgetItem* currentItem = ui->listWidgetEnabled->currentItem();
+    QListWidgetItem *currentItem = ui->listWidgetEnabled->currentItem();
     if (currentItem)
     {
         openGoogleSearch(currentItem->text());
@@ -519,7 +524,7 @@ void MainWindow::searchSelectedEnabledItem()
 
 void MainWindow::searchSelectedDisabledItem()
 {
-    QListWidgetItem* currentItem = ui->listWidgetDisabled->currentItem();
+    QListWidgetItem *currentItem = ui->listWidgetDisabled->currentItem();
     if (currentItem)
     {
         openGoogleSearch(currentItem->text());
@@ -534,7 +539,7 @@ void MainWindow::searchSelectedDisabledItem()
 void MainWindow::killSelectedDisabledItem()
 {
     bool bKilled = false;
-    QListWidgetItem* currentItem = ui->listWidgetDisabled->currentItem();
+    QListWidgetItem *currentItem = ui->listWidgetDisabled->currentItem();
     if (currentItem)
     {
         bKilled = m_ProcessListEx.killProcessAndChildsByNameEx(currentItem->text());
@@ -549,7 +554,7 @@ void MainWindow::killSelectedDisabledItem()
 void MainWindow::killSelectedEnabledItem()
 {
     bool bKilled = false;
-    QListWidgetItem* currentItem = ui->listWidgetEnabled->currentItem();
+    QListWidgetItem *currentItem = ui->listWidgetEnabled->currentItem();
     if (currentItem)
     {
         bKilled = m_ProcessListEx.killProcessAndChildsByNameEx(currentItem->text());
@@ -563,7 +568,7 @@ void MainWindow::killSelectedEnabledItem()
 
 void MainWindow::copySelectedDisabledItem()
 {
-    QListWidgetItem* currentItem = ui->listWidgetDisabled->currentItem();
+    QListWidgetItem *currentItem = ui->listWidgetDisabled->currentItem();
     if (currentItem)
     {
         QApplication::clipboard()->setText(currentItem->text());
@@ -577,7 +582,7 @@ void MainWindow::copySelectedDisabledItem()
 
 void MainWindow::copySelectedEnabledItem()
 {
-    QListWidgetItem* currentItem = ui->listWidgetEnabled->currentItem();
+    QListWidgetItem *currentItem = ui->listWidgetEnabled->currentItem();
     if (currentItem)
     {
         QApplication::clipboard()->setText(currentItem->text());
@@ -591,7 +596,7 @@ void MainWindow::copySelectedEnabledItem()
 
 void MainWindow::deleteSelectedEnabledItem()
 {
-    QListWidgetItem* currentItem = ui->listWidgetEnabled->currentItem();
+    QListWidgetItem *currentItem = ui->listWidgetEnabled->currentItem();
     if (currentItem)
     {
         disconnectTimer();
@@ -614,7 +619,7 @@ void MainWindow::deleteSelectedEnabledItem()
 
 void MainWindow::deleteSelectedDisabledItem()
 {
-    QListWidgetItem* currentItem = ui->listWidgetDisabled->currentItem();
+    QListWidgetItem *currentItem = ui->listWidgetDisabled->currentItem();
     if (currentItem)
     {
         disconnectTimer();
@@ -637,11 +642,11 @@ void MainWindow::deleteSelectedDisabledItem()
 
 void MainWindow::enableSelectedDisabledItem()
 {
-    QListWidgetItem* currentItem = ui->listWidgetDisabled->currentItem();
+    QListWidgetItem *currentItem = ui->listWidgetDisabled->currentItem();
     if (currentItem)
     {
         disconnectTimer();
-        QListWidgetItem* temp = new QListWidgetItem(*currentItem);
+        QListWidgetItem *temp = new QListWidgetItem(*currentItem);
         ui->listWidgetEnabled->addItem(temp);
         ui->listWidgetDisabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Enabled: " + currentItem->text(), 10000);
@@ -661,11 +666,11 @@ void MainWindow::enableSelectedDisabledItem()
 
 void MainWindow::disableSelectedEnabledItem()
 {
-    QListWidgetItem* currentItem = ui->listWidgetEnabled->currentItem();
+    QListWidgetItem *currentItem = ui->listWidgetEnabled->currentItem();
     if (currentItem)
     {
         disconnectTimer();
-        QListWidgetItem* temp = new QListWidgetItem(*currentItem);
+        QListWidgetItem *temp = new QListWidgetItem(*currentItem);
         ui->listWidgetDisabled->addItem(temp);
         ui->listWidgetEnabled->removeItemWidget(currentItem);
         ui->statusBar->showMessage("Disabled: " + currentItem->text(), 10000);
@@ -686,7 +691,7 @@ void MainWindow::disableSelectedEnabledItem()
 void MainWindow::menuConfigure()
 {
     LOG_MSG("menuConfigure");
-    Dialog cd;       //=new configureDialog(this);
+    Dialog cd; //=new configureDialog(this);
     connect(&cd, SIGNAL(accepted()), this, SLOT(loadListFromFile()));
     // cd.setParent (this);
     cd.setWindowTitle("Configure");
@@ -709,14 +714,14 @@ void MainWindow::menuConfigure()
 void MainWindow::showAddExeDialog()
 {
     LOG_MSG("showAddExeDialog");
-    AddExeDialog addExe;       //=new configureDialog(this);
+    AddExeDialog addExe; //=new configureDialog(this);
     //connect(&addExe, SIGNAL(accepted()), this, SLOT(loadListFromFile()));
     addExe.setWindowTitle("Add executable");
     addExe.exec();
     int result = addExe.result();
     if (result == QDialog::Accepted)
     {
-        QString receivedText = addExe.getText();           // Retrieve the text
+        QString receivedText = addExe.getText(); // Retrieve the text
         if (receivedText != "")
         {
             disconnectTimer();
@@ -761,7 +766,7 @@ void MainWindow::showAddExeDialog()
     connectTimer();
 }
 
-void MainWindow::loadListFromFile(const QString& fileName)
+void MainWindow::loadListFromFile(const QString &fileName)
 {
     if (fileName == "")
     {
@@ -770,8 +775,8 @@ void MainWindow::loadListFromFile(const QString& fileName)
     }
     m_ProcessListEx.clear();
     m_ProcessListEx.populateProcessList();
-    QListWidgetItem* selectedEnabledItem;
-    QListWidgetItem* selectedDisabledItem;
+    QListWidgetItem *selectedEnabledItem;
+    QListWidgetItem *selectedDisabledItem;
     m_sSelectedEnabledItem = "";
     m_sSelectedDisabledItem = "";
     bool bSelectedEnabledIsEmpty = ui->listWidgetEnabled->selectedItems().isEmpty();
@@ -808,7 +813,7 @@ void MainWindow::loadListFromFile(const QString& fileName)
         if (file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
             QTextStream out(&file);
-            out << "";  // Write empty content or initial data
+            out << ""; // Write empty content or initial data
             file.close();
         }
         else
@@ -851,7 +856,7 @@ void MainWindow::loadListFromFile(const QString& fileName)
         // m_statusBarMovie->jumpToFrame(frameIndex);
         file_line = in.readLine();
         // String with more than 3 characters
-        firstThreeChars = file_line.left(3);           // Get the first 3 characters
+        firstThreeChars = file_line.left(3); // Get the first 3 characters
         if (firstThreeChars.toUpper() == "REM")
         {
             //qDebug() << "REM:" << file_line;
@@ -879,7 +884,7 @@ void MainWindow::loadListFromFile(const QString& fileName)
     //qDebug() << "ItemCount= " << m_ApplicationItemsList.count();
     ui->labelEnabled->setText("Enabled: " + QString::number(ui->listWidgetEnabled->count()));
     ui->labelDisabled->setText("Disabled: " + QString::number(ui->listWidgetDisabled->count()));
-    file.close();       // Not strictly necessary due to RAII, but good practice
+    file.close(); // Not strictly necessary due to RAII, but good practice
     //qDebug() << "m_ApplicationItemsList.size=" << m_ApplicationItemsList.size();
 }
 void MainWindow::loadListFromFile()
@@ -892,11 +897,11 @@ void MainWindow::loadListFromFile()
     //qDebug() << "loadListFromFile() finished.";
 }
 
-bool MainWindow::listContainsItemText(MyQListWidget* listWidget, const QString& text)
+bool MainWindow::listContainsItemText(MyQListWidget *listWidget, const QString &text)
 {
     for (int i = 0; i < listWidget->count(); ++i)
     {
-        QListWidgetItem* item = listWidget->item(i);
+        QListWidgetItem *item = listWidget->item(i);
         if (item && item->text() == text)
         {
             return true;
@@ -937,7 +942,7 @@ bool MainWindow::writeListToFile()
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         qCritical() << "Could not open file for writing:" << file.errorString();
-        return false;           // Indicate error
+        return false; // Indicate error
     }
     // 4. Create a QTextStream object for writing text
     QTextStream out(&file);
@@ -976,25 +981,27 @@ bool MainWindow::writeListToFile()
 void MainWindow::updateFreeRAM()
 {
     QString sRAM;
-    if (m_bIsCleaningMemory) sRAM.append("<span style='color:rgb(0,96,0);line-height:100%;'>Free RAM: </span>");
-    else sRAM.append("Free RAM: ");
+    if (m_bIsCleaningMemory)
+        sRAM.append("<span style='color:rgb(0,96,0);line-height:100%;'>Free RAM: </span>");
+    else
+        sRAM.append("Free RAM: ");
     sRAM.append(QString::number(m_ProcessListEx.getFreeRAM() / 1024.0, 'f', 2));
     sRAM.append(" GB");
     m_StatusBarRam->setText(sRAM);
 }
 
-void MainWindow::on_listWidgetEnabled_itemClicked(QListWidgetItem * item)
+void MainWindow::on_listWidgetEnabled_itemClicked(QListWidgetItem *item)
 {
-    if (item)         // Always check if the item pointer is valid
+    if (item) // Always check if the item pointer is valid
     {
         ui->listWidgetEnabled->setCurrentItem(item);
         // QString clickedText = item->text();
         // ui->statusBar->showMessage(clickedText);
     }
 }
-void MainWindow::on_listWidgetDisabled_itemClicked(QListWidgetItem * item)
+void MainWindow::on_listWidgetDisabled_itemClicked(QListWidgetItem *item)
 {
-    if (item)         // Always check if the item pointer is valid
+    if (item) // Always check if the item pointer is valid
     {
         ui->listWidgetDisabled->setCurrentItem(item);
         // QString clickedText = item->text();
@@ -1008,15 +1015,15 @@ void MainWindow::on_pushButtonWrite_clicked()
     QMessageBox::StandardButton reply;
     // Use the static question() method for a confirmation dialog
     reply = QMessageBox::question(this,
-            "Confirm",       // Dialog title
-            "Are you sure you want to proceed writing the file to disk?",       // Main text
-            QMessageBox::Yes | QMessageBox::Cancel);       // Buttons
+            "Confirm", // Dialog title
+            "Are you sure you want to proceed writing the file to disk?", // Main text
+            QMessageBox::Yes | QMessageBox::Cancel); // Buttons
     if (reply == QMessageBox::Yes)
     {
         qDebug() << "User clicked Yes";
         writeListToFile();
     }
-    else         // QMessageBox::Cancel or closing the dialog
+    else // QMessageBox::Cancel or closing the dialog
     {
         qDebug() << "User clicked Cancel or closed the dialog";
         // Do nothing or abort
@@ -1131,8 +1138,10 @@ QString MainWindow::getListItemTooltip(QString newItemText)
         }
         else
             sItemTooltip.append("<b>Visible:</b> No<br>");
-        if (appItem->getIsService())sItemTooltip.append("<b>Service:</b> Yes<br>");
-        else sItemTooltip.append("<b>Service:</b> No<br>");
+        if (appItem->getIsService())
+            sItemTooltip.append("<b>Service:</b> Yes<br>");
+        else
+            sItemTooltip.append("<b>Service:</b> No<br>");
         sItemTooltip.append("<b>Thread count:</b> " + QString::number(appItem->getThreadCount()) + "<br>");
         sItemTooltip.append("<b>Priority:</b> " + appItem->getPriorityClassName());
         return sItemTooltip;
@@ -1141,7 +1150,7 @@ QString MainWindow::getListItemTooltip(QString newItemText)
     return sItemTooltip;
 }
 
-void MainWindow::setListItemTooltip(QListWidgetItem * item)
+void MainWindow::setListItemTooltip(QListWidgetItem *item)
 {
     if (item->toolTip() != "") return;
     QString sItemText = item->text();
@@ -1194,7 +1203,7 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
     return false; // Let Qt handle other events
 }
 
-void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemText)
+void MainWindow::addItemToListwidget(QListWidget *listWidget, QString newItemText)
 {
     bool bFound = false;
     //QString itemString = "";
@@ -1222,7 +1231,7 @@ void MainWindow::addItemToListwidget(QListWidget * listWidget, QString newItemTe
     }
     else
     {
-        QListWidgetItem* item = new QListWidgetItem(newItemText);
+        QListWidgetItem *item = new QListWidgetItem(newItemText);
         bFound = m_ProcessListEx.isRunning(newItemText);
         //qDebug() << __FUNCTION__ << newItemText;
         if (bFound)
@@ -1301,6 +1310,21 @@ void MainWindow::disconnectTimer()
         m_bTimerIsConnected = false;
     }
 }
+
+void MainWindow::exitTimerUpdate()
+{
+    // Controlla se l'operazione di pulizia è terminata
+    if (m_bIsCleaningMemory == false)
+    {
+        // 1. FERMA immediatamente il timer
+        exitTimer->stop();
+        // 2. Tenta di chiudere la finestra.
+        // Questo richiamerà nuovamente closeEvent(),
+        // ma questa volta m_bIsCleaningMemory sarà false e la chiusura avverrà.
+        this->close();
+    }
+}
+
 void MainWindow::connectTimer()
 {
     if (m_bTimerIsConnected == false)
@@ -1312,6 +1336,7 @@ void MainWindow::connectTimer()
         m_bTimerIsConnected = true;
     }
 }
+
 void MainWindow::readStdOutput()
 {
     qApp->processEvents();
@@ -1354,7 +1379,7 @@ void MainWindow::readStdError()
     }
     QStringList outList;
     QString outputProg;
-    ProcessItem *foundItem ;
+    ProcessItem *foundItem;
     for (int iRepeat = 0; iRepeat < iLines - 1; iRepeat++)
     {
         // QString outputProg = output;
@@ -1372,7 +1397,8 @@ void MainWindow::readStdError()
             //qDebug() << "foundItem->getAppName () " << foundItem->getAppName ();
             foundItem->setFoundWhenKilling(false);
         }
-        else qDebug() << "foundItem->getAppName () NOT FOUND";
+        else
+            qDebug() << "foundItem->getAppName () NOT FOUND";
         //ui->listWidgetDisabled->addItem (output);
     }
 }
@@ -1434,7 +1460,7 @@ void MainWindow::on_pushButtonRun_clicked()
             this, SLOT(onProcessFinished(int, QProcess::ExitStatus)));
         QString program = "cmd.exe";
         QStringList arguments;
-        arguments << "/c" << m_sKillFile;       // Use forward slashes for paths in Qt
+        arguments << "/c" << m_sKillFile; // Use forward slashes for paths in Qt
         // process.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments * args)
         // {
         //        // Questa flag dice a Windows di creare una NUOVA finestra console.
@@ -1462,7 +1488,7 @@ void MainWindow::on_pushButtonRun_clicked()
         // process->start("cmd.exe", QStringList() << "/c" << m_sKillFile);   //process.startDetached (program, QStringList() << "/C" << m_sKillFile);
         // Optional: Wait for the process to finish
         process->waitForStarted(-1);
-        process->waitForFinished(-1);       // -1 means wait indefinitely
+        process->waitForFinished(-1); // -1 means wait indefinitely
         process->deleteLater();
         delete process;
         //ui->statusBar->showMessage(m_sKillFile + " executed.");
@@ -1484,7 +1510,7 @@ void MainWindow::on_pushButtonRun_clicked()
     }
 }
 
-void MainWindow::adjustLabelHeightToContent(QLabel* label)
+void MainWindow::adjustLabelHeightToContent(QLabel *label)
 {
     if (!label)
         return;
@@ -1504,8 +1530,10 @@ void MainWindow::on_actionReduce_RAM_memory_usage_triggered()
     double dFreeRAM = m_ProcessListEx.getFreeRAM() / 1024.0;
     ui->statusBar->showMessage("Memory cleanup started in a background thread...", 10000);
     QString sRAM;
-    if (m_bIsCleaningMemory) sRAM.append("<span style='color:rgb(0,96,0);line-height:100%;'>Free RAM: </span>");
-    else sRAM.append("Free RAM: ");
+    if (m_bIsCleaningMemory)
+        sRAM.append("<span style='color:rgb(0,96,0);line-height:100%;'>Free RAM: </span>");
+    else
+        sRAM.append("Free RAM: ");
     sRAM.append(QString::number(dFreeRAM, 'f', 2));
     sRAM.append(" GB");
     // int iHeight = m_StatusBarRam->height();
@@ -1533,8 +1561,10 @@ void MainWindow::onReduceMemoryUsageFinished(bool success)
         //QMessageBox::information(this, "Done", "System working sets emptied successfully.");
         ui->statusBar->showMessage("Memory usage reduced successfully.", 10000);
         QString sRAM;
-        if (m_bIsCleaningMemory) sRAM.append("<span style='color:rgb(0,96,0);line-height:100%;'>Free RAM: </span>");
-        else sRAM.append("Free RAM: ");
+        if (m_bIsCleaningMemory)
+            sRAM.append("<span style='color:rgb(0,96,0);line-height:100%;'>Free RAM: </span>");
+        else
+            sRAM.append("Free RAM: ");
         sRAM.append(QString::number(dFreeRAM, 'f', 2));
         sRAM.append(" GB");
         m_StatusBarRam->setText(sRAM);
@@ -1575,15 +1605,13 @@ void MainWindow::on_actionAbout_triggered()
     sVersion = sVersion + sIsDebug + "</p></h3>";
     QString sApp = qApp->applicationName();
     QMessageBox::about(this, "About " + qApp->applicationName(),
-        "<h1><p style=\"font-weight: bold; color: rgb(0, 0, 128);\">"
-        + sApp + "</p></h1>"
-        + sVersion +
-    "<p>Build date and time: " + __DATE__ + " at " + __TIME__ + "</p>"
-    "<br>"
-    "<p>This application manages a 'KILL' batch file.</p>"
-    "<br>"
-    "<p>Copyright &copy; 2025 Andrea G.</p>"
-    "<p>All rights reserved.</p>"
+        "<h1><p style=\"font-weight: bold; color: rgb(0, 0, 128);\">" + sApp + "</p></h1>" + sVersion +
+        "<p>Build date and time: " + __DATE__ + " at " + __TIME__ + "</p>"
+        "<br>"
+        "<p>This application manages a 'KILL' batch file.</p>"
+        "<br>"
+        "<p>Copyright &copy; 2025 Andrea G.</p>"
+        "<p>All rights reserved.</p>"
         /* "<p>Visit our website: <a href='https://www.example.com'>www.example.com</a></p>"*/);
 }
 void MainWindow::on_actionOpen_in_external_editor_triggered()
@@ -1593,7 +1621,7 @@ void MainWindow::on_actionOpen_in_external_editor_triggered()
     QString program = "notepad.exe";
     program = settings.value("Dialog/External editor", "notepad.exe").toString();
     QStringList arguments;
-    arguments << m_sKillFile;       // Use forward slashes for paths in Qt
+    arguments << m_sKillFile; // Use forward slashes for paths in Qt
     process.startDetached(program, arguments);
     ui->statusBar->showMessage(m_sKillFile + " opened in external editor.", 10000);
     LOG_MSG("External editor started " + arguments.join(' '));
@@ -1644,7 +1672,7 @@ bool MainWindow::KillRunningProcesses()
     //m_iTimerUpdatesCount += 1;
     //int iModulus = m_iTimerUpdatesCount % 10 ;
     QString sItemText;
-    ProcessItem *foundItem ;
+    ProcessItem *foundItem;
     for (int i = 0; i < iCount; i++)
     {
         sItemText = ui->listWidgetEnabled->item(i)->text();
